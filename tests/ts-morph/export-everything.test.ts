@@ -11,7 +11,7 @@ describe('exportEverything flag', () => {
   })
 
   describe('export everything is true', () => {
-    it('should export all declarations', () => {
+    it('should export all declarations', async () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
@@ -29,11 +29,14 @@ describe('exportEverything flag', () => {
 
       export type MyEnum = Static<typeof MyEnum>;
     `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
+      const result = formatWithPrettier(
+        await generateCode(sourceFile, { exportEverything: true }),
+        false,
+      )
       expect(result).toBe(expected)
     })
 
-    it('should export imported types', () => {
+    it('should export imported types', async () => {
       const input = `
       import { ImportedType } from './utils';
       type MyType = ImportedType;
@@ -54,11 +57,14 @@ describe('exportEverything flag', () => {
 
       export type LocalType = Static<typeof LocalType>;
     `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
+      const result = formatWithPrettier(
+        await generateCode(sourceFile, { exportEverything: true }),
+        false,
+      )
       expect(result).toBe(expected)
     })
 
-    it('should export unused imported types', () => {
+    it('should export unused imported types', async () => {
       const input = `
       import { UnusedImportedType } from './unused-utils';
       type MyType = string;
@@ -74,13 +80,16 @@ describe('exportEverything flag', () => {
 
       export type MyType = Static<typeof MyType>;
     `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
+      const result = formatWithPrettier(
+        await generateCode(sourceFile, { exportEverything: true }),
+        false,
+      )
       expect(result).toBe(expected)
     })
   })
 
   describe('export everything is false', () => {
-    it('should only export processed declarations', () => {
+    it('should only export processed declarations', async () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
@@ -108,13 +117,13 @@ describe('exportEverything flag', () => {
       type MyEnum = Static<typeof MyEnum>;
     `)
       const result = formatWithPrettier(
-        generateCode(sourceFile, { exportEverything: false }),
+        await generateCode(sourceFile, { exportEverything: false }),
         false,
       )
       expect(result).toBe(expected)
     })
 
-    it('should not export imported types', () => {
+    it('should not export imported types', async () => {
       const input = `
       import { ImportedType } from './utils';
       type MyType = ImportedType;
@@ -136,13 +145,13 @@ describe('exportEverything flag', () => {
       type LocalType = Static<typeof LocalType>;
     `)
       const result = formatWithPrettier(
-        generateCode(sourceFile, { exportEverything: false }),
+        await generateCode(sourceFile, { exportEverything: false }),
         false,
       )
       expect(result).toBe(expected)
     })
 
-    it('should not export unused imported types', () => {
+    it('should not export unused imported types', async () => {
       const input = `
       import { UnusedImportedType } from './unused-utils';
       export type MyType = string;
@@ -154,7 +163,7 @@ describe('exportEverything flag', () => {
 
       export type MyType = Static<typeof MyType>;
     `)
-      const result = formatWithPrettier(generateCode(sourceFile), false)
+      const result = formatWithPrettier(await generateCode(sourceFile), false)
       expect(result).toBe(expected)
     })
   })

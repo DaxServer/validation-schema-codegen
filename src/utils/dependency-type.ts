@@ -8,7 +8,6 @@ export interface TypeReferenceExtractor {
 export class DefaultTypeReferenceExtractor implements TypeReferenceExtractor {
   private static cache = new Map<string, string[]>()
 
-
   extractTypeReferences(typeNode: Node, dependencies: Map<string, TypeDependency>): string[] {
     // Simple cache key using content only
     const cacheKey = typeNode.getText()
@@ -48,6 +47,4 @@ export class DefaultTypeReferenceExtractor implements TypeReferenceExtractor {
   clear(): void {
     DefaultTypeReferenceExtractor.cache.clear()
   }
-
-
 }

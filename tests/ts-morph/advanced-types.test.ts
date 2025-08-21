@@ -11,10 +11,10 @@ describe('Advanced types', () => {
   })
 
   describe('Template literal types', () => {
-    test('simple template literal', () => {
+    test('simple template literal', async () => {
       const sourceFile = createSourceFile(project, 'type A = `Q${number}`')
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.TemplateLiteral("\`Q\${number}\`");
 
@@ -23,10 +23,10 @@ describe('Advanced types', () => {
       )
     })
 
-    test('complex template literal', () => {
+    test('complex template literal', async () => {
       const sourceFile = createSourceFile(project, 'type A = `prefix-${string}-suffix`')
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.TemplateLiteral("\`prefix-\${string}-suffix\`");
 
@@ -37,7 +37,7 @@ describe('Advanced types', () => {
   })
 
   describe('Typeof expressions', () => {
-    test('typeof variable', () => {
+    test('typeof variable', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -46,7 +46,7 @@ describe('Advanced types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = myVar;
 
@@ -55,7 +55,7 @@ describe('Advanced types', () => {
       )
     })
 
-    test('typeof with qualified name', () => {
+    test('typeof with qualified name', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -66,7 +66,7 @@ describe('Advanced types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = MyNamespace_config;
 

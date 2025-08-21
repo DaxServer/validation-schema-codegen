@@ -11,7 +11,7 @@ describe('Utility', () => {
   })
 
   describe('without export', () => {
-    test('keyof', () => {
+    test('keyof', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -22,7 +22,7 @@ describe('Utility', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const T = Type.KeyOf(
         Type.Object({
@@ -36,10 +36,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Record', () => {
+    test('Record', async () => {
       const sourceFile = createSourceFile(project, `type T = Record<string, number>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const T = Type.Record(Type.String(), Type.Number());
 
@@ -48,10 +48,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Partial', () => {
+    test('Partial', async () => {
       const sourceFile = createSourceFile(project, `type T = Partial<{ a: 1; b: 2 }>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const T = Type.Partial(
       Type.Object({
@@ -65,10 +65,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Pick', () => {
+    test('Pick', async () => {
       const sourceFile = createSourceFile(project, `type T = Pick<{ a: 1; b: 2 }, "a">;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const T = Type.Pick(
       Type.Object({
@@ -83,10 +83,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Omit', () => {
+    test('Omit', async () => {
       const sourceFile = createSourceFile(project, `type T = Omit<{ a: 1; b: 2 }, "a">;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const T = Type.Omit(
       Type.Object({
@@ -101,10 +101,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Required', () => {
+    test('Required', async () => {
       const sourceFile = createSourceFile(project, `type T = Required<{ a?: 1; b?: 2 }>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const T = Type.Required(
       Type.Object({
@@ -118,7 +118,7 @@ describe('Utility', () => {
       )
     })
 
-    test('Indexed Access', () => {
+    test('Indexed Access', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -130,7 +130,7 @@ describe('Utility', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     const A = Type.Object({
       a: Type.Number(),
@@ -147,7 +147,7 @@ describe('Utility', () => {
   })
 
   describe('with export', () => {
-    test('keyof', () => {
+    test('keyof', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -158,7 +158,7 @@ describe('Utility', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.KeyOf(
       Type.Object({
@@ -172,10 +172,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Record', () => {
+    test('Record', async () => {
       const sourceFile = createSourceFile(project, `export type T = Record<string, number>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.Record(Type.String(), Type.Number());
 
@@ -184,10 +184,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Partial', () => {
+    test('Partial', async () => {
       const sourceFile = createSourceFile(project, `export type T = Partial<{ a: 1; b: 2 }>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.Partial(
       Type.Object({
@@ -201,10 +201,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Pick', () => {
+    test('Pick', async () => {
       const sourceFile = createSourceFile(project, `export type T = Pick<{ a: 1; b: 2 }, "a">;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.Pick(
       Type.Object({
@@ -219,10 +219,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Omit', () => {
+    test('Omit', async () => {
       const sourceFile = createSourceFile(project, `export type T = Omit<{ a: 1; b: 2 }, "a">;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.Omit(
       Type.Object({
@@ -237,10 +237,10 @@ describe('Utility', () => {
       )
     })
 
-    test('Required', () => {
+    test('Required', async () => {
       const sourceFile = createSourceFile(project, `export type T = Required<{ a?: 1; b?: 2 }>;`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const T = Type.Required(
       Type.Object({
@@ -254,7 +254,7 @@ describe('Utility', () => {
       )
     })
 
-    test('Indexed Access', () => {
+    test('Indexed Access', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -266,7 +266,7 @@ describe('Utility', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
     export const A = Type.Object({
       a: Type.Number(),

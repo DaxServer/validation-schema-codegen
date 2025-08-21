@@ -11,7 +11,7 @@ describe('Enum types', () => {
   })
 
   describe('without export', () => {
-    test('only enum', () => {
+    test('only enum', async () => {
       const sourceFile = createSourceFile(
         project,
         `enum A {
@@ -21,7 +21,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`enum A {
         B,
         C,
@@ -34,7 +34,7 @@ describe('Enum types', () => {
       )
     })
 
-    test('enum with values', () => {
+    test('enum with values', async () => {
       const sourceFile = createSourceFile(
         project,
         `enum A {
@@ -44,7 +44,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`enum A {
         B = 'b',
         C = 'c',
@@ -59,7 +59,7 @@ describe('Enum types', () => {
   })
 
   describe('with export', () => {
-    test('only enum', () => {
+    test('only enum', async () => {
       const sourceFile = createSourceFile(
         project,
         `export enum A {
@@ -69,7 +69,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`export enum A {
         B,
         C,
@@ -82,7 +82,7 @@ describe('Enum types', () => {
       )
     })
 
-    test('enum with values', () => {
+    test('enum with values', async () => {
       const sourceFile = createSourceFile(
         project,
         `export enum A {
@@ -92,7 +92,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`export enum A {
         B = 'b',
         C = 'c',

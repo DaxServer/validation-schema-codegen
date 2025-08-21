@@ -4,24 +4,45 @@ import { EnumParser } from './parsers/parse-enums'
 import { InterfaceParser } from './parsers/parse-interfaces'
 import { FunctionDeclarationParser } from './parsers/parse-function-declarations'
 import { DependencyCollector, type TypeDependency } from './utils/dependency-collector'
+import { loadTSConfig, type TSConfigInput } from './utils/tsconfig-loader'
 
 const sharedPrinter = ts.createPrinter()
 
-export const generateCode = (
+export const generateCode = async (
   sourceFile: SourceFile,
   options: {
     exportEverything: boolean
+    tsConfig?: TSConfigInput
   } = { exportEverything: false },
-): string => {
+): Promise<string> => {
   const processedTypes = new Set<string>()
   const newSourceFile = sourceFile.getProject().createSourceFile('temp.ts', '', {
     overwrite: true,
   })
 
-  newSourceFile.addImportDeclaration({
-    moduleSpecifier: '@sinclair/typebox',
-    namedImports: ['Type', 'Static'],
-  })
+  // Load TSConfig and determine verbatimModuleSyntax setting
+  let verbatimModuleSyntax = false
+  if (options.tsConfig) {
+    const tsConfigResult = await loadTSConfig(options.tsConfig)
+    verbatimModuleSyntax = tsConfigResult.verbatimModuleSyntax
+  }
+
+  // Add imports based on verbatimModuleSyntax setting
+  if (verbatimModuleSyntax) {
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: ['Type'],
+    })
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: [{ name: 'Static', isTypeOnly: true }],
+    })
+  } else {
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: ['Type', 'Static'],
+    })
+  }
 
   const parserOptions = {
     newSourceFile,

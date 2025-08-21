@@ -11,10 +11,10 @@ describe('Primitive types', () => {
   })
 
   describe('without exports', () => {
-    test('string', () => {
+    test('string', async () => {
       const sourceFile = createSourceFile(project, `type A = string`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.String();
 
@@ -23,10 +23,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('number', () => {
+    test('number', async () => {
       const sourceFile = createSourceFile(project, `type A = number`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Number();
 
@@ -35,10 +35,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('boolean', () => {
+    test('boolean', async () => {
       const sourceFile = createSourceFile(project, `type A = boolean`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Boolean();
 
@@ -47,10 +47,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('any', () => {
+    test('any', async () => {
       const sourceFile = createSourceFile(project, `type A = any`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Any();
 
@@ -59,10 +59,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('unknown', () => {
+    test('unknown', async () => {
       const sourceFile = createSourceFile(project, `type A = unknown`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Unknown();
 
@@ -71,10 +71,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('never', () => {
+    test('never', async () => {
       const sourceFile = createSourceFile(project, `type A = never`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Never();
 
@@ -83,10 +83,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('null', () => {
+    test('null', async () => {
       const sourceFile = createSourceFile(project, `type A = null`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Null();
 
@@ -97,10 +97,10 @@ describe('Primitive types', () => {
   })
 
   describe('with exports', () => {
-    test('string', () => {
+    test('string', async () => {
       const sourceFile = createSourceFile(project, `export type A = string`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.String();
 
@@ -109,10 +109,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('number', () => {
+    test('number', async () => {
       const sourceFile = createSourceFile(project, `export type A = number`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Number();
 
@@ -121,10 +121,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('boolean', () => {
+    test('boolean', async () => {
       const sourceFile = createSourceFile(project, `export type A = boolean`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Boolean();
 
@@ -133,10 +133,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('any', () => {
+    test('any', async () => {
       const sourceFile = createSourceFile(project, `export type A = any`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Any();
 
@@ -145,10 +145,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('unknown', () => {
+    test('unknown', async () => {
       const sourceFile = createSourceFile(project, `export type A = unknown`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Unknown();
 
@@ -157,10 +157,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('never', () => {
+    test('never', async () => {
       const sourceFile = createSourceFile(project, `export type A = never`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Never();
 
@@ -169,10 +169,10 @@ describe('Primitive types', () => {
       )
     })
 
-    test('null', () => {
+    test('null', async () => {
       const sourceFile = createSourceFile(project, `export type A = null`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Null();
 

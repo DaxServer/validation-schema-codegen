@@ -11,10 +11,10 @@ describe('Array types', () => {
   })
 
   describe('without export', () => {
-    test('Array<string>', () => {
+    test('Array<string>', async () => {
       const sourceFile = createSourceFile(project, `type A = string[]`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Array(Type.String());
 
@@ -23,10 +23,10 @@ describe('Array types', () => {
       )
     })
 
-    test('string[]', () => {
+    test('string[]', async () => {
       const sourceFile = createSourceFile(project, `type A = string[]`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Array(Type.String());
 
@@ -35,7 +35,7 @@ describe('Array types', () => {
       )
     })
 
-    test('Union', () => {
+    test('Union', async () => {
       const sourceFile = createSourceFile(
         project,
         `type A = number;
@@ -43,7 +43,7 @@ describe('Array types', () => {
       type T = A | B;`,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const A = Type.Number();
 
@@ -60,7 +60,7 @@ describe('Array types', () => {
       )
     })
 
-    test('Intersect', () => {
+    test('Intersect', async () => {
       const sourceFile = createSourceFile(
         project,
         `type T = {
@@ -70,7 +70,7 @@ describe('Array types', () => {
       };`,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const T = Type.Intersect([
         Type.Object({
@@ -86,10 +86,10 @@ describe('Array types', () => {
       )
     })
 
-    test('Literal', () => {
+    test('Literal', async () => {
       const sourceFile = createSourceFile(project, `type T = "a" | "b";`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       const T = Type.Union([Type.Literal("a"), Type.Literal("b")]);
 
@@ -100,10 +100,10 @@ describe('Array types', () => {
   })
 
   describe('with export', () => {
-    test('Array<string>', () => {
+    test('Array<string>', async () => {
       const sourceFile = createSourceFile(project, `export type A = string[]`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Array(Type.String());
 
@@ -112,10 +112,10 @@ describe('Array types', () => {
       )
     })
 
-    test('string[]', () => {
+    test('string[]', async () => {
       const sourceFile = createSourceFile(project, `export type A = string[]`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Array(Type.String());
 
@@ -124,7 +124,7 @@ describe('Array types', () => {
       )
     })
 
-    test('Union', () => {
+    test('Union', async () => {
       const sourceFile = createSourceFile(
         project,
         `export type A = number;
@@ -132,7 +132,7 @@ describe('Array types', () => {
       export type T = A | B;`,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Number();
 
@@ -149,7 +149,7 @@ describe('Array types', () => {
       )
     })
 
-    test('Intersect', () => {
+    test('Intersect', async () => {
       const sourceFile = createSourceFile(
         project,
         `export type T = {
@@ -159,7 +159,7 @@ describe('Array types', () => {
       };`,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const T = Type.Intersect([
         Type.Object({
@@ -175,7 +175,7 @@ describe('Array types', () => {
       )
     })
 
-    test('Literal', () => {
+    test('Literal', async () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -183,7 +183,7 @@ describe('Array types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const T = Type.Union([Type.Literal("a"), Type.Literal("b")]);
 

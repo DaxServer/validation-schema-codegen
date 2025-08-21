@@ -13,7 +13,7 @@ describe('ts-morph codegen with imports', () => {
   })
 
   describe('without exports', () => {
-    test('should resolve imported types', () => {
+    test('should resolve imported types', async () => {
       createSourceFile(
         project,
         `
@@ -38,7 +38,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
       const ExternalType = Type.Object({
         value: Type.String(),
@@ -58,7 +58,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve imported types from a package', () => {
+    test('should resolve imported types from a package', async () => {
       createSourceFile(
         project,
         `
@@ -83,7 +83,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
       const ExternalType = Type.Object({
         value: Type.String(),
@@ -103,7 +103,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve types from an imported file that imports another file', () => {
+    test('should resolve types from an imported file that imports another file', async () => {
       createSourceFile(
         project,
         `
@@ -139,7 +139,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
         const DeeplyNestedType = Type.Object({
           value: Type.Boolean(),
@@ -164,7 +164,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve types from a four-level nested import chain', () => {
+    test('should resolve types from a four-level nested import chain', async () => {
       createSourceFile(
         project,
         `
@@ -213,7 +213,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
           const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),
@@ -247,7 +247,7 @@ describe('ts-morph codegen with imports', () => {
   })
 
   describe('with exports', () => {
-    test('should resolve imported types', () => {
+    test('should resolve imported types', async () => {
       createSourceFile(
         project,
         `
@@ -272,7 +272,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
       const ExternalType = Type.Object({
         value: Type.String(),
@@ -292,7 +292,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve imported types from a package', () => {
+    test('should resolve imported types from a package', async () => {
       createSourceFile(
         project,
         `
@@ -317,7 +317,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
       const ExternalType = Type.Object({
         value: Type.String(),
@@ -337,7 +337,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve types from an imported file that imports another file', () => {
+    test('should resolve types from an imported file that imports another file', async () => {
       createSourceFile(
         project,
         `
@@ -373,7 +373,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
         const DeeplyNestedType = Type.Object({
           value: Type.Boolean(),
@@ -398,7 +398,7 @@ describe('ts-morph codegen with imports', () => {
       )
     })
 
-    test('should resolve types from a four-level nested import chain', () => {
+    test('should resolve types from a four-level nested import chain', async () => {
       createSourceFile(
         project,
         `
@@ -447,7 +447,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(userFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
         formatWithPrettier(`
         const VeryDeeplyNestedType = Type.Object({
           core: Type.String(),

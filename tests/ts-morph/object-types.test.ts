@@ -11,10 +11,10 @@ describe('Object types', () => {
   })
 
   describe('without export', () => {
-    test('object', () => {
+    test('object', async () => {
       const sourceFile = createSourceFile(project, `type A = { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
         const A = Type.Object({
           a: Type.String(),
@@ -25,10 +25,10 @@ describe('Object types', () => {
       )
     })
 
-    test('Tuple', () => {
+    test('Tuple', async () => {
       const sourceFile = createSourceFile(project, `type T = [number, null];`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
         const T = Type.Tuple([Type.Number(), Type.Null()]);
 
@@ -37,10 +37,10 @@ describe('Object types', () => {
       )
     })
 
-    test('interface', () => {
+    test('interface', async () => {
       const sourceFile = createSourceFile(project, `interface A { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
         const A = Type.Object({
           a: Type.String(),
@@ -53,10 +53,10 @@ describe('Object types', () => {
   })
 
   describe('with export', () => {
-    test('object', () => {
+    test('object', async () => {
       const sourceFile = createSourceFile(project, `export type A = { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Object({
         a: Type.String(),
@@ -67,10 +67,10 @@ describe('Object types', () => {
       )
     })
 
-    test('Tuple', () => {
+    test('Tuple', async () => {
       const sourceFile = createSourceFile(project, `export type T = [number, null];`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
@@ -79,10 +79,10 @@ describe('Object types', () => {
       )
     })
 
-    test('interface', () => {
+    test('interface', async () => {
       const sourceFile = createSourceFile(project, `export interface A { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
         formatWithPrettier(`
       export const A = Type.Object({
         a: Type.String(),
