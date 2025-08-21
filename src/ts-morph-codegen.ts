@@ -1,10 +1,13 @@
-import { ts, SourceFile } from 'ts-morph'
+import { EnumParser } from '@daxserver/validation-schema-codegen/parsers/parse-enums'
+import { FunctionDeclarationParser } from '@daxserver/validation-schema-codegen/parsers/parse-function-declarations'
+import { InterfaceParser } from '@daxserver/validation-schema-codegen/parsers/parse-interfaces'
+import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
+import {
+  DependencyCollector,
+  type TypeDependency,
+} from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import { SourceFile, ts } from 'ts-morph'
 import { parseNative } from 'tsconfck'
-import { TypeAliasParser } from './parsers/parse-type-aliases'
-import { EnumParser } from './parsers/parse-enums'
-import { InterfaceParser } from './parsers/parse-interfaces'
-import { FunctionDeclarationParser } from './parsers/parse-function-declarations'
-import { DependencyCollector, type TypeDependency } from './utils/dependency-collector'
 
 const sharedPrinter = ts.createPrinter()
 

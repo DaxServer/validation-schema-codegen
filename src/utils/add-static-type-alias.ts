@@ -1,5 +1,5 @@
+import { TypeBoxStatic } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { SourceFile, ts } from 'ts-morph'
-import { TypeBoxStatic } from './typebox-call'
 
 export const addStaticTypeAlias = (
   newSourceFile: SourceFile,

@@ -1,6 +1,6 @@
+import { TypeBoxTypeHandlers } from '@daxserver/validation-schema-codegen/handlers/typebox/typebox-type-handlers'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, ts } from 'ts-morph'
-import { makeTypeCall } from './typebox-codegen-utils'
-import { TypeBoxTypeHandlers } from '../handlers/typebox/typebox-type-handlers'
 
 export const TypeBoxStatic = 'Static'
 

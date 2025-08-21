@@ -1,6 +1,12 @@
-import { ImportDeclaration, TypeAliasDeclaration, SourceFile } from 'ts-morph'
-import { DefaultTypeReferenceExtractor, type TypeReferenceExtractor } from './dependency-type'
-import { type FileResolver, DefaultFileResolver } from './dependency-file-resolver'
+import {
+  DefaultFileResolver,
+  type FileResolver,
+} from '@daxserver/validation-schema-codegen/utils/dependency-file-resolver'
+import {
+  DefaultTypeReferenceExtractor,
+  type TypeReferenceExtractor,
+} from '@daxserver/validation-schema-codegen/utils/dependency-type'
+import { ImportDeclaration, SourceFile, TypeAliasDeclaration } from 'ts-morph'
 
 export interface TypeDependency {
   typeAlias: TypeAliasDeclaration

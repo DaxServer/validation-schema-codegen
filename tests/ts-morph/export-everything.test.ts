@@ -1,6 +1,6 @@
+import { formatWithPrettier, generateFormattedCode } from '@test-fixtures/ts-morph/utils'
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Project } from 'ts-morph'
-import { formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('exportEverything flag', () => {
   let project: Project
@@ -21,15 +21,15 @@ describe('exportEverything flag', () => {
 
       expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-        export const MyType = Type.String();
+          export const MyType = Type.String();
 
-        export type MyType = Static<typeof MyType>;
-        export enum MyEnum { A, B, C = 'c' }
+          export type MyType = Static<typeof MyType>;
+          export enum MyEnum { A, B, C = 'c' }
 
-        export const MyEnum = Type.Enum(MyEnum);
+          export const MyEnum = Type.Enum(MyEnum);
 
-        export type MyEnum = Static<typeof MyEnum>;
-      `),
+          export type MyEnum = Static<typeof MyEnum>;
+        `),
       )
     })
 
@@ -38,26 +38,26 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-        import { ImportedType } from './utils';
-        type MyType = ImportedType;
-        type LocalType = string;
-      `,
+          import { ImportedType } from './utils';
+          type MyType = ImportedType;
+          type LocalType = string;
+        `,
       )
 
       expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-        export const ImportedType = Type.String();
+          export const ImportedType = Type.String();
 
-        export type ImportedType = Static<typeof ImportedType>;
+          export type ImportedType = Static<typeof ImportedType>;
 
-        export const MyType = ImportedType;
+          export const MyType = ImportedType;
 
-        export type MyType = Static<typeof MyType>;
+          export type MyType = Static<typeof MyType>;
 
-        export const LocalType = Type.String();
+          export const LocalType = Type.String();
 
-        export type LocalType = Static<typeof LocalType>;
-      `),
+          export type LocalType = Static<typeof LocalType>;
+        `),
       )
     })
 
@@ -66,21 +66,21 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-        import { UnusedImportedType } from './unused-utils';
-        type MyType = string;
-      `,
+          import { UnusedImportedType } from './unused-utils';
+          type MyType = string;
+        `,
       )
 
       expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-        export const UnusedImportedType = Type.Number();
+          export const UnusedImportedType = Type.Number();
 
-        export type UnusedImportedType = Static<typeof UnusedImportedType>;
+          export type UnusedImportedType = Static<typeof UnusedImportedType>;
 
-        export const MyType = Type.String();
+          export const MyType = Type.String();
 
-        export type MyType = Static<typeof MyType>;
-      `),
+          export type MyType = Static<typeof MyType>;
+        `),
       )
     })
   })
@@ -102,19 +102,19 @@ describe('exportEverything flag', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        const MyType = Type.String();
+          const MyType = Type.String();
 
-        type MyType = Static<typeof MyType>;
-        enum MyEnum {
-          A,
-          B,
-          C = 'c',
-        }
+          type MyType = Static<typeof MyType>;
+          enum MyEnum {
+            A,
+            B,
+            C = 'c',
+          }
 
-        const MyEnum = Type.Enum(MyEnum);
+          const MyEnum = Type.Enum(MyEnum);
 
-        type MyEnum = Static<typeof MyEnum>;
-      `),
+          type MyEnum = Static<typeof MyEnum>;
+        `),
       )
     })
 
@@ -123,26 +123,26 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-        import { ImportedType } from './utils';
-        type MyType = ImportedType;
-        type LocalType = string;
-      `,
+          import { ImportedType } from './utils';
+          type MyType = ImportedType;
+          type LocalType = string;
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        const ImportedType = Type.String();
+          const ImportedType = Type.String();
 
-        type ImportedType = Static<typeof ImportedType>;
+          type ImportedType = Static<typeof ImportedType>;
 
-        const MyType = ImportedType;
+          const MyType = ImportedType;
 
-        type MyType = Static<typeof MyType>;
+          type MyType = Static<typeof MyType>;
 
-        const LocalType = Type.String();
+          const LocalType = Type.String();
 
-        type LocalType = Static<typeof LocalType>;
-      `),
+          type LocalType = Static<typeof LocalType>;
+        `),
       )
     })
 
@@ -151,17 +151,17 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-        import { UnusedImportedType } from './unused-utils';
-        export type MyType = string;
-      `,
+          import { UnusedImportedType } from './unused-utils';
+          export type MyType = string;
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        export const MyType = Type.String();
+          export const MyType = Type.String();
 
-        export type MyType = Static<typeof MyType>;
-      `),
+          export type MyType = Static<typeof MyType>;
+        `),
       )
     })
   })

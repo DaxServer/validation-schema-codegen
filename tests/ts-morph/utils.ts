@@ -1,6 +1,6 @@
-import { Project, SourceFile } from 'ts-morph'
+import { generateCode } from '@daxserver/validation-schema-codegen/ts-morph-codegen'
 import synchronizedPrettier from '@prettier/sync'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { Project, SourceFile } from 'ts-morph'
 
 const prettierOptions = { parser: 'typescript' as const }
 const typeboxImport = `import { Type } from "@sinclair/typebox";

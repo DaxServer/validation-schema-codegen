@@ -1,7 +1,10 @@
+import {
+  createSourceFile,
+  formatWithPrettier,
+  generateFormattedCode,
+} from '@test-fixtures/ts-morph/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
 
 describe('Function types', () => {
   let project: Project
@@ -12,89 +15,83 @@ describe('Function types', () => {
 
   describe('Arrow functions', () => {
     describe('without exports', () => {
-      test('simple function type', async () => {
+      test('simple function type', () => {
         const sourceFile = createSourceFile(project, `type A = () => string`)
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([], Type.String());
+            const A = Type.Function([], Type.String());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function type with parameters', async () => {
+      test('function type with parameters', () => {
         const sourceFile = createSourceFile(project, `type A = (x: number, y: string) => boolean`)
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
+            const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function type with optional parameters', async () => {
+      test('function type with optional parameters', () => {
         const sourceFile = createSourceFile(project, `type A = (x: number, y?: string) => void`)
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
+            const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
     })
 
     describe('with exports', () => {
-      test('simple function type', async () => {
+      test('simple function type', () => {
         const sourceFile = createSourceFile(project, `export type A = () => string`)
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([], Type.String());
+            export const A = Type.Function([], Type.String());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function type with parameters', async () => {
+      test('function type with parameters', () => {
         const sourceFile = createSourceFile(
           project,
           `export type A = (x: number, y: string) => boolean`,
         )
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
+            export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function type with optional parameters', async () => {
+      test('function type with optional parameters', () => {
         const sourceFile = createSourceFile(
           project,
           `export type A = (x: number, y?: string) => void`,
         )
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
+            export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
     })
@@ -102,92 +99,86 @@ describe('Function types', () => {
 
   describe('Function declarations', () => {
     describe('without exports', () => {
-      test('simple function declaration', async () => {
+      test('simple function declaration', () => {
         const sourceFile = createSourceFile(project, `function A(): string { return '' }`)
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([], Type.String());
+            const A = Type.Function([], Type.String());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function declaration with parameters', async () => {
+      test('function declaration with parameters', () => {
         const sourceFile = createSourceFile(
           project,
           `function A(x: number, y: string): boolean { return true }`,
         )
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
+            const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function declaration with optional parameters', async () => {
+      test('function declaration with optional parameters', () => {
         const sourceFile = createSourceFile(project, `function A(x: number, y?: string): void { }`)
 
-        expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
           formatWithPrettier(`
-        const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
+            const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
-        type A = Static<typeof A>;
-      `),
+            type A = Static<typeof A>;
+          `),
         )
       })
     })
 
     describe('with exports', () => {
-      test('simple function declaration', async () => {
+      test('simple function declaration', () => {
         const sourceFile = createSourceFile(project, `export function A(): string { return '' }`)
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([], Type.String());
+            export const A = Type.Function([], Type.String());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function declaration with parameters', async () => {
+      test('function declaration with parameters', () => {
         const sourceFile = createSourceFile(
           project,
           `export function A(x: number, y: string): boolean { return true }`,
         )
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
+            export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
 
-      test('function declaration with optional parameters', async () => {
+      test('function declaration with optional parameters', () => {
         const sourceFile = createSourceFile(
           project,
           `export function A(x: number, y?: string): void { }`,
         )
 
-        expect(
-          formatWithPrettier(await generateCode(sourceFile, { exportEverything: true }), false),
-        ).toBe(
+        expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
           formatWithPrettier(`
-        export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
+            export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
-        export type A = Static<typeof A>;
-      `),
+            export type A = Static<typeof A>;
+          `),
         )
       })
     })

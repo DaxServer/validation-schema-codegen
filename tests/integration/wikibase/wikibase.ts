@@ -1,5 +1,5 @@
+import { generateCode } from '@daxserver/validation-schema-codegen/ts-morph-codegen'
 import { Project } from 'ts-morph'
-import { generateCode } from '../../../src/ts-morph-codegen'
 
 // Read the Wikibase SDK entity type definitions
 const project = new Project()

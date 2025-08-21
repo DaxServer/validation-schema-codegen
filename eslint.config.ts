@@ -1,7 +1,8 @@
-import globals from 'globals'
 import pluginJs from '@eslint/js'
-import tseslint from 'typescript-eslint'
+import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import { defineConfig } from 'eslint/config'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default defineConfig([
   {
@@ -11,4 +12,12 @@ export default defineConfig([
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    plugins: {
+      'no-relative-import-paths': noRelativeImportPaths,
+    },
+    rules: {
+      'no-relative-import-paths/no-relative-import-paths': ['error', { allowSameFolder: false }],
+    },
+  },
 ])

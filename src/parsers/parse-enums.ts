@@ -1,6 +1,6 @@
-import { VariableDeclarationKind, EnumDeclaration } from 'ts-morph'
-import { addStaticTypeAlias } from '../utils/add-static-type-alias'
-import { BaseParser } from './base-parser'
+import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
+import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { EnumDeclaration, VariableDeclarationKind } from 'ts-morph'
 
 export class EnumParser extends BaseParser {
   parse(enumDeclaration: EnumDeclaration): void {

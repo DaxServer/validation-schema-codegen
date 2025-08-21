@@ -1,6 +1,9 @@
+import {
+  BaseParser,
+  type BaseParserOptions,
+} from '@daxserver/validation-schema-codegen/parsers/base-parser'
+import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
 import type { ImportDeclaration, TypeAliasDeclaration } from 'ts-morph'
-import { TypeAliasParser } from './parse-type-aliases'
-import { BaseParser, type BaseParserOptions } from './base-parser'
 
 export interface ImportParserOptions extends BaseParserOptions {
   typeAliasParser: TypeAliasParser

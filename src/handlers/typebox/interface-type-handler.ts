@@ -1,6 +1,6 @@
-import { Node, ts, InterfaceDeclaration } from 'ts-morph'
-import { makeTypeCall } from '../../utils/typebox-codegen-utils'
-import { BaseTypeHandler } from './base-type-handler'
+import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { InterfaceDeclaration, Node, ts } from 'ts-morph'
 
 export class InterfaceTypeHandler extends BaseTypeHandler {
   constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {

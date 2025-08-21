@@ -1,7 +1,7 @@
-import { ts, InterfaceDeclaration, VariableDeclarationKind } from 'ts-morph'
-import { addStaticTypeAlias } from '../utils/add-static-type-alias'
-import { getTypeBoxType } from '../utils/typebox-call'
-import { BaseParser } from './base-parser'
+import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
+import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
+import { InterfaceDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class InterfaceParser extends BaseParser {
   parse(interfaceDecl: InterfaceDeclaration): void {

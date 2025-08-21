@@ -1,6 +1,6 @@
+import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, ts } from 'ts-morph'
-import { makeTypeCall } from '../../utils/typebox-codegen-utils'
-import { BaseTypeHandler } from './base-type-handler'
 
 export class TupleTypeHandler extends BaseTypeHandler {
   constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {

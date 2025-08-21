@@ -1,7 +1,7 @@
-import { ts, FunctionDeclaration, VariableDeclarationKind } from 'ts-morph'
-import { addStaticTypeAlias } from '../utils/add-static-type-alias'
-import { getTypeBoxType } from '../utils/typebox-call'
-import { BaseParser } from './base-parser'
+import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
+import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
+import { FunctionDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class FunctionDeclarationParser extends BaseParser {
   parse(functionDecl: FunctionDeclaration): void {
