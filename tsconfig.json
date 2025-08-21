@@ -21,6 +21,11 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@daxserver/validation-schema-codegen/*": ["./src/*"],
+      "@test-fixtures/*": ["./tests/*"]
+    }
   }
 }

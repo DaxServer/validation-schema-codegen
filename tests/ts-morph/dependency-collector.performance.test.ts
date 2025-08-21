@@ -1,7 +1,7 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { createSourceFile } from '@test-fixtures/ts-morph/utils'
+import { beforeEach, describe, expect, test } from 'bun:test'
+import { DependencyCollector } from 'src/utils/dependency-collector'
 import { Project } from 'ts-morph'
-import { DependencyCollector } from '../../src/utils/dependency-collector'
-import { createSourceFile } from './utils'
 
 describe('DependencyCollector Performance Tests', () => {
   let project: Project

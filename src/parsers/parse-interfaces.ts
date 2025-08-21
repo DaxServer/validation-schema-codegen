@@ -1,7 +1,7 @@
-import { ts, InterfaceDeclaration, VariableDeclarationKind } from 'ts-morph'
-import { addStaticTypeAlias } from '../utils/add-static-type-alias'
-import { getTypeBoxType } from '../utils/typebox-call'
-import { BaseParser } from './base-parser'
+import { BaseParser } from 'src/parsers/base-parser'
+import { addStaticTypeAlias } from 'src/utils/add-static-type-alias'
+import { getTypeBoxType } from 'src/utils/typebox-call'
+import { InterfaceDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class InterfaceParser extends BaseParser {
   parse(interfaceDecl: InterfaceDeclaration): void {

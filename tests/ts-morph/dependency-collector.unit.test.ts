@@ -1,11 +1,14 @@
-import { describe, test, expect, mock } from 'bun:test'
-import type { ImportDeclaration, TypeAliasDeclaration, SourceFile, TypeNode } from 'ts-morph'
-import { DependencyCollector } from '../../src/utils/dependency-collector'
-import type { DefaultFileResolver, FileResolver } from '../../src/utils/dependency-file-resolver'
-import type {
+import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import {
+  DefaultFileResolver,
+  type FileResolver,
+} from '@daxserver/validation-schema-codegen/utils/dependency-file-resolver'
+import {
   DefaultTypeReferenceExtractor,
-  TypeReferenceExtractor,
-} from '../../src/utils/dependency-type'
+  type TypeReferenceExtractor,
+} from '@daxserver/validation-schema-codegen/utils/dependency-type'
+import { describe, expect, mock, test } from 'bun:test'
+import type { ImportDeclaration, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 
 describe('DependencyCollector Unit Tests', () => {
   const createMockTypeAlias = (name: string): TypeAliasDeclaration => {

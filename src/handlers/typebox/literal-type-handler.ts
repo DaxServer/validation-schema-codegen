@@ -1,6 +1,6 @@
-import { Node, ts, SyntaxKind } from 'ts-morph'
-import { makeTypeCall } from '../../utils/typebox-codegen-utils'
-import { BaseTypeHandler } from './base-type-handler'
+import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { Node, SyntaxKind, ts } from 'ts-morph'
 
 export class LiteralTypeHandler extends BaseTypeHandler {
   constructor() {

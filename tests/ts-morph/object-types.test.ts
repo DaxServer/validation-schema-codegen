@@ -1,6 +1,10 @@
+import {
+  createSourceFile,
+  formatWithPrettier,
+  generateFormattedCode,
+} from '@test-fixtures/ts-morph/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Object types', () => {
   let project: Project

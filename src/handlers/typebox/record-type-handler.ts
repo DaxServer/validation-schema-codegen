@@ -1,6 +1,6 @@
+import { BaseTypeHandler } from 'src/handlers/typebox/base-type-handler'
+import { makeTypeCall } from 'src/utils/typebox-codegen-utils'
 import { Node, ts } from 'ts-morph'
-import { makeTypeCall } from '../../utils/typebox-codegen-utils'
-import { BaseTypeHandler } from './base-type-handler'
 
 export class RecordTypeHandler extends BaseTypeHandler {
   constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {

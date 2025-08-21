@@ -14,6 +14,7 @@ const config: Config = {
   singleAttributePerLine: true,
   htmlWhitespaceSensitivity: 'ignore',
   endOfLine: 'lf',
+  plugins: ['prettier-plugin-organize-imports'],
 }
 
 export default config

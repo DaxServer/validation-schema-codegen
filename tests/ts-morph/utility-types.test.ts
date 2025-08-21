@@ -1,6 +1,10 @@
+import {
+  createSourceFile,
+  formatWithPrettier,
+  generateFormattedCode,
+} from '@test-fixtures/ts-morph/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Utility', () => {
   let project: Project
@@ -14,24 +18,24 @@ describe('Utility', () => {
       const sourceFile = createSourceFile(
         project,
         `
-      type T = keyof {
-        x: number;
-        y: string;
-      };
-      `,
+          type T = keyof {
+            x: number;
+            y: string;
+          };
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const T = Type.KeyOf(
-        Type.Object({
-          x: Type.Number(),
-          y: Type.String(),
-        }),
-      );
+          const T = Type.KeyOf(
+            Type.Object({
+              x: Type.Number(),
+              y: Type.String(),
+            }),
+          );
 
-      type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -40,10 +44,10 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const T = Type.Record(Type.String(), Type.Number());
+          const T = Type.Record(Type.String(), Type.Number());
 
-    type T = Static<typeof T>;
-      `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -52,15 +56,15 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const T = Type.Partial(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      })
-    );
+          const T = Type.Partial(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            })
+          );
 
-    type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -69,16 +73,16 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const T = Type.Pick(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      }),
-      Type.Literal("a")
-    );
+          const T = Type.Pick(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            }),
+            Type.Literal("a")
+          );
 
-    type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -87,16 +91,16 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const T = Type.Omit(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      }),
-      Type.Literal("a")
-    );
+          const T = Type.Omit(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            }),
+            Type.Literal("a")
+          );
 
-    type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -105,15 +109,15 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const T = Type.Required(
-      Type.Object({
-        a: Type.Optional(Type.Literal(1)),
-        b: Type.Optional(Type.Literal(2)),
-      })
-    );
+          const T = Type.Required(
+            Type.Object({
+              a: Type.Optional(Type.Literal(1)),
+              b: Type.Optional(Type.Literal(2)),
+            })
+          );
 
-    type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -121,26 +125,26 @@ describe('Utility', () => {
       const sourceFile = createSourceFile(
         project,
         `
-    type A = {
-      a: number;
-    };
+          type A = {
+            a: number;
+          };
 
-    type T = A["a"];
-    `,
+          type T = A["a"];
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    const A = Type.Object({
-      a: Type.Number(),
-    });
+          const A = Type.Object({
+            a: Type.Number(),
+          });
 
-    type A = Static<typeof A>;
+          type A = Static<typeof A>;
 
-    const T = Type.Index(A, Type.Literal("a"));
+          const T = Type.Index(A, Type.Literal("a"));
 
-    type T = Static<typeof T>;
-    `),
+          type T = Static<typeof T>;
+        `),
       )
     })
   })
@@ -150,24 +154,24 @@ describe('Utility', () => {
       const sourceFile = createSourceFile(
         project,
         `
-      export type T = keyof {
-        x: number;
-        y: string;
-      };
-      `,
+          export type T = keyof {
+            x: number;
+            y: string;
+          };
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.KeyOf(
-      Type.Object({
-        x: Type.Number(),
-        y: Type.String(),
-      }),
-    );
+          export const T = Type.KeyOf(
+            Type.Object({
+              x: Type.Number(),
+              y: Type.String(),
+            }),
+          );
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -176,10 +180,10 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.Record(Type.String(), Type.Number());
+          export const T = Type.Record(Type.String(), Type.Number());
 
-    export type T = Static<typeof T>;
-      `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -188,15 +192,15 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.Partial(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      })
-    );
+          export const T = Type.Partial(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            })
+          );
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -205,16 +209,16 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.Pick(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      }),
-      Type.Literal("a")
-    );
+          export const T = Type.Pick(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            }),
+            Type.Literal("a")
+          );
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -223,16 +227,16 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.Omit(
-      Type.Object({
-        a: Type.Literal(1),
-        b: Type.Literal(2),
-      }),
-      Type.Literal("a")
-    );
+          export const T = Type.Omit(
+            Type.Object({
+              a: Type.Literal(1),
+              b: Type.Literal(2),
+            }),
+            Type.Literal("a")
+          );
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -241,15 +245,15 @@ describe('Utility', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const T = Type.Required(
-      Type.Object({
-        a: Type.Optional(Type.Literal(1)),
-        b: Type.Optional(Type.Literal(2)),
-      })
-    );
+          export const T = Type.Required(
+            Type.Object({
+              a: Type.Optional(Type.Literal(1)),
+              b: Type.Optional(Type.Literal(2)),
+            })
+          );
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
@@ -257,26 +261,26 @@ describe('Utility', () => {
       const sourceFile = createSourceFile(
         project,
         `
-    export type A = {
-      a: number;
-    };
+          export type A = {
+            a: number;
+          };
 
-    export type T = A["a"];
-    `,
+          export type T = A["a"];
+        `,
       )
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-    export const A = Type.Object({
-      a: Type.Number(),
-    });
+          export const A = Type.Object({
+            a: Type.Number(),
+          });
 
-    export type A = Static<typeof A>;
+          export type A = Static<typeof A>;
 
-    export const T = Type.Index(A, Type.Literal("a"));
+          export const T = Type.Index(A, Type.Literal("a"));
 
-    export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
   })

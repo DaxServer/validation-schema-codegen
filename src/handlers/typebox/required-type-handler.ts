@@ -1,5 +1,5 @@
+import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
 import { Node, ts } from 'ts-morph'
-import { BaseTypeHandler } from './base-type-handler'
 
 export class RequiredTypeHandler extends BaseTypeHandler {
   canHandle(typeNode: Node | undefined): boolean {

@@ -1,7 +1,11 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import {
+  createSourceFile,
+  formatWithPrettier,
+  generateFormattedCode,
+} from '@test-fixtures/ts-morph/utils'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
-import { DependencyCollector } from '../../src/utils/dependency-collector'
 
 describe('ts-morph codegen with imports', () => {
   let project: Project

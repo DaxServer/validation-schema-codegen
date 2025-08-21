@@ -1,6 +1,6 @@
-import { ts, Node, IndexedAccessTypeNode } from 'ts-morph'
-import { BaseTypeHandler } from './base-type-handler'
-import { makeTypeCall } from '../../utils/typebox-codegen-utils'
+import { BaseTypeHandler } from 'src/handlers/typebox/base-type-handler'
+import { makeTypeCall } from 'src/utils/typebox-codegen-utils'
+import { IndexedAccessTypeNode, Node, ts } from 'ts-morph'
 
 export class IndexedAccessTypeHandler extends BaseTypeHandler {
   canHandle(node: Node | undefined): boolean {
