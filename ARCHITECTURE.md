@@ -10,9 +10,7 @@
     - [Key Features](#key-features)
     - [Implementation Details](#implementation-details)
 - [TSConfig Support](#tsconfig-support)
-  - [Overview](#tsconfig-overview)
-  - [TSConfig Utility](#tsconfig-utility)
-  - [Integration with Code Generation](#integration-with-code-generation)
+  - [TSConfig Overview](#tsconfig-overview)
   - [Usage Examples](#usage-examples)
 - [Utility Functions and Modules](#utility-functions-and-modules)
   - [Handlers Directory](#handlers-directory)
@@ -109,86 +107,23 @@ This approach ensures that complex import scenarios work correctly and generated
 
 ### TSConfig Overview
 
-The TypeBox code generation system includes comprehensive support for TypeScript configuration files (tsconfig.json). This feature enables the code generator to respect project-specific TypeScript compiler options, particularly the `verbatimModuleSyntax` setting, which affects how import statements are generated.
-
-### TSConfig Utility
-
-The <mcfile name="tsconfig-loader.ts" path="src/utils/tsconfig-loader.ts"></mcfile> module provides utilities for loading and parsing TypeScript configuration files:
-
-#### Types
-
-- **`TSConfigInput`**: A flexible union type that accepts:
-  - `string`: File path to a tsconfig.json file
-  - `{ toString(): string }`: URL-like objects that can be converted to strings
-  - `object`: Direct TSConfig object with optional `compilerOptions`
-
-- **`TSConfigResult`**: Normalized result containing:
-  - `verbatimModuleSyntax: boolean`: Whether verbatim module syntax is enabled
-  - Additional compiler options as key-value pairs
-
-#### Functions
-
-- **`loadTSConfig(project: Project, input: TSConfigInput): TSConfigResult`**: Main function that loads and processes TSConfig from various input types. It handles file loading, JSON parsing, and extracts relevant compiler options.
-
-### Integration with Code Generation
-
-The TSConfig support is integrated into the main code generation process through the `generateCode` function options:
-
-```typescript
-interface GenerateCodeOptions {
-  exportEverything?: boolean
-  tsConfig?: TSConfigInput // Optional TSConfig support
-}
-```
-
-When `tsConfig` is provided, the system:
-
-1. **Loads TSConfig**: Uses `loadTSConfig` to parse the configuration
-2. **Extracts Settings**: Determines if `verbatimModuleSyntax` is enabled
-3. **Adjusts Imports**: Modifies import statement generation based on the setting:
-   - When `verbatimModuleSyntax` is `true`: Uses type-only imports for `Static` (`import { type Static }`)
-   - When `verbatimModuleSyntax` is `false` or unspecified: Uses regular imports (`import { Static }`)
+The TypeBox code generation system includes automatic support for TypeScript configuration files (tsconfig.json). The system automatically detects and parses the closest tsconfig.json file using `tsconfck.parseNative`, ensuring that generated code respects project-specific TypeScript compiler options, particularly the `verbatimModuleSyntax` setting, which affects how import statements are generated.
 
 ### Usage Examples
 
-#### Using TSConfig File Path
+#### Basic Usage
 
 ```typescript
-const result = generateCode(sourceFile, {
-  tsConfig: './tsconfig.json',
-})
+const result = generateCode(sourceFile)
 ```
 
-#### Using TSConfig Object
-
-```typescript
-const result = generateCode(sourceFile, {
-  tsConfig: {
-    compilerOptions: {
-      verbatimModuleSyntax: true,
-    },
-  },
-})
-```
-
-#### Using URL-like Object
-
-```typescript
-const result = generateCode(sourceFile, {
-  tsConfig: new URL('./tsconfig.json', import.meta.url),
-})
-```
-
-#### Combined with Export Everything
+#### With Export Everything
 
 ```typescript
 const result = generateCode(sourceFile, {
   exportEverything: true,
-  tsConfig: './tsconfig.json',
 })
 ```
-
-The TSConfig support ensures that generated code is compatible with the project's TypeScript configuration, preventing compilation errors related to import statement formatting and module syntax requirements.
 
 ## Utility Functions and Modules
 

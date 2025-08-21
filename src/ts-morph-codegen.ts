@@ -1,10 +1,10 @@
 import { ts, SourceFile } from 'ts-morph'
+import { parseNative } from 'tsconfck'
 import { TypeAliasParser } from './parsers/parse-type-aliases'
 import { EnumParser } from './parsers/parse-enums'
 import { InterfaceParser } from './parsers/parse-interfaces'
 import { FunctionDeclarationParser } from './parsers/parse-function-declarations'
 import { DependencyCollector, type TypeDependency } from './utils/dependency-collector'
-import { loadTSConfig, type TSConfigInput } from './utils/tsconfig-loader'
 
 const sharedPrinter = ts.createPrinter()
 
@@ -12,7 +12,6 @@ export const generateCode = async (
   sourceFile: SourceFile,
   options: {
     exportEverything: boolean
-    tsConfig?: TSConfigInput
   } = { exportEverything: false },
 ): Promise<string> => {
   const processedTypes = new Set<string>()
@@ -20,11 +19,15 @@ export const generateCode = async (
     overwrite: true,
   })
 
-  // Load TSConfig and determine verbatimModuleSyntax setting
+  // Automatically detect and parse TSConfig using tsconfck.parseNative
   let verbatimModuleSyntax = false
-  if (options.tsConfig) {
-    const tsConfigResult = await loadTSConfig(options.tsConfig)
-    verbatimModuleSyntax = tsConfigResult.verbatimModuleSyntax
+  try {
+    const sourceFilePath = sourceFile.getFilePath()
+    const tsConfigResult = await parseNative(sourceFilePath)
+    verbatimModuleSyntax = tsConfigResult.tsconfig?.compilerOptions?.verbatimModuleSyntax === true
+  } catch {
+    // If tsconfig detection fails, default to false
+    verbatimModuleSyntax = false
   }
 
   // Add imports based on verbatimModuleSyntax setting

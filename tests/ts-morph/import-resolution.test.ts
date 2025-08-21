@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
-import { generateCode } from '../../src/ts-morph-codegen'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 import { DependencyCollector } from '../../src/utils/dependency-collector'
 
 describe('ts-morph codegen with imports', () => {
@@ -13,207 +12,207 @@ describe('ts-morph codegen with imports', () => {
   })
 
   describe('without exports', () => {
-    test('should resolve imported types', async () => {
+    test('should resolve imported types', () => {
       createSourceFile(
         project,
         `
-        export type ExternalType = {
-          value: string;
-        };
-      `,
+          export type ExternalType = {
+            value: string;
+          };
+        `,
         'external-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { ExternalType } from "./external-types";
+          import { ExternalType } from "./external-types";
 
-        type User = {
-          id: string;
-          name: string;
-          local: string;
-          external: ExternalType;
-        };
-      `,
+          type User = {
+            id: string;
+            name: string;
+            local: string;
+            external: ExternalType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-      const ExternalType = Type.Object({
-        value: Type.String(),
-      })
+          const ExternalType = Type.Object({
+            value: Type.String(),
+          })
 
-      type ExternalType = Static<typeof ExternalType>
+          type ExternalType = Static<typeof ExternalType>
 
-      const User = Type.Object({
-        id: Type.String(),
-        name: Type.String(),
-        local: Type.String(),
-        external: ExternalType,
-      })
+          const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+            local: Type.String(),
+            external: ExternalType,
+          })
 
-      type User = Static<typeof User>
-    `),
+          type User = Static<typeof User>
+        `),
       )
     })
 
-    test('should resolve imported types from a package', async () => {
+    test('should resolve imported types from a package', () => {
       createSourceFile(
         project,
         `
-        export type ExternalType = {
-          value: string;
-        };
-      `,
+          export type ExternalType = {
+            value: string;
+          };
+        `,
         'node_modules/some-package/external-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { ExternalType } from "some-package/external-types";
+          import { ExternalType } from "some-package/external-types";
 
-        type User = {
-          id: string;
-          name: string;
-          local: string;
-          external: ExternalType;
-        };
+          type User = {
+            id: string;
+            name: string;
+            local: string;
+            external: ExternalType;
+          };
       `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-      const ExternalType = Type.Object({
-        value: Type.String(),
-      })
+          const ExternalType = Type.Object({
+            value: Type.String(),
+          })
 
-      type ExternalType = Static<typeof ExternalType>
+          type ExternalType = Static<typeof ExternalType>
 
-      const User = Type.Object({
-        id: Type.String(),
-        name: Type.String(),
-        local: Type.String(),
-        external: ExternalType,
-      })
+          const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+            local: Type.String(),
+            external: ExternalType,
+          })
 
-      type User = Static<typeof User>
-    `),
+          type User = Static<typeof User>
+        `),
       )
     })
 
-    test('should resolve types from an imported file that imports another file', async () => {
+    test('should resolve types from an imported file that imports another file', () => {
       createSourceFile(
         project,
         `
-        export type DeeplyNestedType = {
-          value: boolean;
-        };
-      `,
+          export type DeeplyNestedType = {
+            value: boolean;
+          };
+        `,
         'deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { DeeplyNestedType } from "./deeply-nested-types";
+          import { DeeplyNestedType } from "./deeply-nested-types";
 
-        export type IntermediateType = {
-          id: string;
-          nested: DeeplyNestedType;
-        };
-      `,
+          export type IntermediateType = {
+            id: string;
+            nested: DeeplyNestedType;
+          };
+        `,
         'intermediate-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { IntermediateType } from "./intermediate-types";
+          import { IntermediateType } from "./intermediate-types";
 
-        type FinalUser = {
-          name: string;
-          data: IntermediateType;
-        };
-      `,
+          type FinalUser = {
+            name: string;
+            data: IntermediateType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-        const DeeplyNestedType = Type.Object({
-          value: Type.Boolean(),
-        })
+          const DeeplyNestedType = Type.Object({
+            value: Type.Boolean(),
+          })
 
-        type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-        const IntermediateType = Type.Object({
-          id: Type.String(),
-          nested: DeeplyNestedType,
-        })
+          const IntermediateType = Type.Object({
+            id: Type.String(),
+            nested: DeeplyNestedType,
+          })
 
-        type IntermediateType = Static<typeof IntermediateType>
+          type IntermediateType = Static<typeof IntermediateType>
 
-        const FinalUser = Type.Object({
-          name: Type.String(),
-          data: IntermediateType,
-        })
+          const FinalUser = Type.Object({
+            name: Type.String(),
+            data: IntermediateType,
+          })
 
-        type FinalUser = Static<typeof FinalUser>
-      `),
+          type FinalUser = Static<typeof FinalUser>
+        `),
       )
     })
 
-    test('should resolve types from a four-level nested import chain', async () => {
+    test('should resolve types from a four-level nested import chain', () => {
       createSourceFile(
         project,
         `
-        export type VeryDeeplyNestedType = {
-          core: string;
-        };
-      `,
+          export type VeryDeeplyNestedType = {
+            core: string;
+          };
+        `,
         'very-deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { VeryDeeplyNestedType } from "./very-deeply-nested-types";
+          import { VeryDeeplyNestedType } from "./very-deeply-nested-types";
 
-        export type DeeplyNestedType = {
-          value: boolean;
-          veryDeep: VeryDeeplyNestedType;
-        };
-      `,
+          export type DeeplyNestedType = {
+            value: boolean;
+            veryDeep: VeryDeeplyNestedType;
+          };
+        `,
         'deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { DeeplyNestedType } from "./deeply-nested-types";
+          import { DeeplyNestedType } from "./deeply-nested-types";
 
-        export type IntermediateType = {
-          id: string;
-          nested: DeeplyNestedType;
-        };
-      `,
+          export type IntermediateType = {
+            id: string;
+            nested: DeeplyNestedType;
+          };
+        `,
         'intermediate-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { IntermediateType } from "./intermediate-types";
+          import { IntermediateType } from "./intermediate-types";
 
-        type UltimateUser = {
-          name: string;
-          data: IntermediateType;
-        };
-      `,
+          type UltimateUser = {
+            name: string;
+            data: IntermediateType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
           const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),
@@ -247,235 +246,235 @@ describe('ts-morph codegen with imports', () => {
   })
 
   describe('with exports', () => {
-    test('should resolve imported types', async () => {
+    test('should resolve imported types', () => {
       createSourceFile(
         project,
         `
-        export type ExternalType = {
-          value: string;
-        };
-      `,
+          export type ExternalType = {
+            value: string;
+          };
+        `,
         'external-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { ExternalType } from "./external-types";
+          import { ExternalType } from "./external-types";
 
-        export type User = {
-          id: string;
-          name: string;
-          local: string;
-          external: ExternalType;
-        };
-      `,
+          export type User = {
+            id: string;
+            name: string;
+            local: string;
+            external: ExternalType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-      const ExternalType = Type.Object({
-        value: Type.String(),
-      })
+          const ExternalType = Type.Object({
+            value: Type.String(),
+          })
 
-      type ExternalType = Static<typeof ExternalType>
+          type ExternalType = Static<typeof ExternalType>
 
-      export const User = Type.Object({
-        id: Type.String(),
-        name: Type.String(),
-        local: Type.String(),
-        external: ExternalType,
-      })
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+            local: Type.String(),
+            external: ExternalType,
+          })
 
-      export type User = Static<typeof User>
-    `),
+          export type User = Static<typeof User>
+        `),
       )
     })
 
-    test('should resolve imported types from a package', async () => {
+    test('should resolve imported types from a package', () => {
       createSourceFile(
         project,
         `
-        export type ExternalType = {
-          value: string;
-        };
-      `,
+          export type ExternalType = {
+            value: string;
+          };
+        `,
         'node_modules/some-package/external-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { ExternalType } from "some-package/external-types";
+          import { ExternalType } from "some-package/external-types";
 
-        export type User = {
-          id: string;
-          name: string;
-          local: string;
-          external: ExternalType;
-        };
-      `,
+          export type User = {
+            id: string;
+            name: string;
+            local: string;
+            external: ExternalType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-      const ExternalType = Type.Object({
-        value: Type.String(),
-      })
+          const ExternalType = Type.Object({
+            value: Type.String(),
+          })
 
-      type ExternalType = Static<typeof ExternalType>
+          type ExternalType = Static<typeof ExternalType>
 
-      export const User = Type.Object({
-        id: Type.String(),
-        name: Type.String(),
-        local: Type.String(),
-        external: ExternalType,
-      })
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+            local: Type.String(),
+            external: ExternalType,
+          })
 
-      export type User = Static<typeof User>
-    `),
+          export type User = Static<typeof User>
+        `),
       )
     })
 
-    test('should resolve types from an imported file that imports another file', async () => {
+    test('should resolve types from an imported file that imports another file', () => {
       createSourceFile(
         project,
         `
-        export type DeeplyNestedType = {
-          value: boolean;
-        };
-      `,
+          export type DeeplyNestedType = {
+            value: boolean;
+          };
+        `,
         'deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { DeeplyNestedType } from "./deeply-nested-types";
+          import { DeeplyNestedType } from "./deeply-nested-types";
 
-        export type IntermediateType = {
-          id: string;
-          nested: DeeplyNestedType;
-        };
-      `,
+          export type IntermediateType = {
+            id: string;
+            nested: DeeplyNestedType;
+          };
+        `,
         'intermediate-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { IntermediateType } from "./intermediate-types";
+          import { IntermediateType } from "./intermediate-types";
 
-        export type FinalUser = {
-          name: string;
-          data: IntermediateType;
-        };
-      `,
+          export type FinalUser = {
+            name: string;
+            data: IntermediateType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-        const DeeplyNestedType = Type.Object({
-          value: Type.Boolean(),
-        })
+          const DeeplyNestedType = Type.Object({
+            value: Type.Boolean(),
+          })
 
-        type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-        const IntermediateType = Type.Object({
-          id: Type.String(),
-          nested: DeeplyNestedType,
-        })
+          const IntermediateType = Type.Object({
+            id: Type.String(),
+            nested: DeeplyNestedType,
+          })
 
-        type IntermediateType = Static<typeof IntermediateType>
+          type IntermediateType = Static<typeof IntermediateType>
 
-        export const FinalUser = Type.Object({
-          name: Type.String(),
-          data: IntermediateType,
-        })
+          export const FinalUser = Type.Object({
+            name: Type.String(),
+            data: IntermediateType,
+          })
 
-        export type FinalUser = Static<typeof FinalUser>
-      `),
+          export type FinalUser = Static<typeof FinalUser>
+        `),
       )
     })
 
-    test('should resolve types from a four-level nested import chain', async () => {
+    test('should resolve types from a four-level nested import chain', () => {
       createSourceFile(
         project,
         `
-        export type VeryDeeplyNestedType = {
-          core: string;
-        };
-      `,
+          export type VeryDeeplyNestedType = {
+            core: string;
+          };
+        `,
         'very-deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { VeryDeeplyNestedType } from "./very-deeply-nested-types";
+          import { VeryDeeplyNestedType } from "./very-deeply-nested-types";
 
-        export type DeeplyNestedType = {
-          value: boolean;
-          veryDeep: VeryDeeplyNestedType;
-        };
-      `,
+          export type DeeplyNestedType = {
+            value: boolean;
+            veryDeep: VeryDeeplyNestedType;
+          };
+        `,
         'deeply-nested-types.ts',
       )
 
       createSourceFile(
         project,
         `
-        import { DeeplyNestedType } from "./deeply-nested-types";
+          import { DeeplyNestedType } from "./deeply-nested-types";
 
-        export type IntermediateType = {
-          id: string;
-          nested: DeeplyNestedType;
-        };
-      `,
+          export type IntermediateType = {
+            id: string;
+            nested: DeeplyNestedType;
+          };
+        `,
         'intermediate-types.ts',
       )
 
       const userFile = createSourceFile(
         project,
         `
-        import { IntermediateType } from "./intermediate-types";
+          import { IntermediateType } from "./intermediate-types";
 
-        export type UltimateUser = {
-          name: string;
-          data: IntermediateType;
-        };
-      `,
+          export type UltimateUser = {
+            name: string;
+            data: IntermediateType;
+          };
+        `,
       )
 
-      expect(formatWithPrettier(await generateCode(userFile), false)).toBe(
+      expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-        const VeryDeeplyNestedType = Type.Object({
-          core: Type.String(),
-        })
+          const VeryDeeplyNestedType = Type.Object({
+            core: Type.String(),
+          })
 
-        type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
+          type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
 
-        const DeeplyNestedType = Type.Object({
-          value: Type.Boolean(),
-          veryDeep: VeryDeeplyNestedType,
-        })
+          const DeeplyNestedType = Type.Object({
+            value: Type.Boolean(),
+            veryDeep: VeryDeeplyNestedType,
+          })
 
-        type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-        const IntermediateType = Type.Object({
-          id: Type.String(),
-          nested: DeeplyNestedType,
-        })
+          const IntermediateType = Type.Object({
+            id: Type.String(),
+            nested: DeeplyNestedType,
+          })
 
-        type IntermediateType = Static<typeof IntermediateType>
+          type IntermediateType = Static<typeof IntermediateType>
 
-        export const UltimateUser = Type.Object({
-          name: Type.String(),
-          data: IntermediateType,
-        })
+          export const UltimateUser = Type.Object({
+            name: Type.String(),
+            data: IntermediateType,
+          })
 
-        export type UltimateUser = Static<typeof UltimateUser>
-    `),
+          export type UltimateUser = Static<typeof UltimateUser>
+        `),
       )
     })
   })

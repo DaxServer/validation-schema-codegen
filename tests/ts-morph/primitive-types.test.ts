@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Primitive types', () => {
   let project: Project
@@ -11,173 +10,173 @@ describe('Primitive types', () => {
   })
 
   describe('without exports', () => {
-    test('string', async () => {
+    test('string', () => {
       const sourceFile = createSourceFile(project, `type A = string`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.String();
+          const A = Type.String();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('number', async () => {
+    test('number', () => {
       const sourceFile = createSourceFile(project, `type A = number`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Number();
+          const A = Type.Number();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('boolean', async () => {
+    test('boolean', () => {
       const sourceFile = createSourceFile(project, `type A = boolean`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Boolean();
+          const A = Type.Boolean();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('any', async () => {
+    test('any', () => {
       const sourceFile = createSourceFile(project, `type A = any`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Any();
+          const A = Type.Any();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('unknown', async () => {
+    test('unknown', () => {
       const sourceFile = createSourceFile(project, `type A = unknown`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Unknown();
+          const A = Type.Unknown();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('never', async () => {
+    test('never', () => {
       const sourceFile = createSourceFile(project, `type A = never`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Never();
+          const A = Type.Never();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('null', async () => {
+    test('null', () => {
       const sourceFile = createSourceFile(project, `type A = null`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      const A = Type.Null();
+          const A = Type.Null();
 
-      type A = Static<typeof A>;
-    `),
+          type A = Static<typeof A>;
+        `),
       )
     })
   })
 
   describe('with exports', () => {
-    test('string', async () => {
+    test('string', () => {
       const sourceFile = createSourceFile(project, `export type A = string`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.String();
+          export const A = Type.String();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('number', async () => {
+    test('number', () => {
       const sourceFile = createSourceFile(project, `export type A = number`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Number();
+          export const A = Type.Number();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('boolean', async () => {
+    test('boolean', () => {
       const sourceFile = createSourceFile(project, `export type A = boolean`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Boolean();
+          export const A = Type.Boolean();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('any', async () => {
+    test('any', () => {
       const sourceFile = createSourceFile(project, `export type A = any`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Any();
+          export const A = Type.Any();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('unknown', async () => {
+    test('unknown', () => {
       const sourceFile = createSourceFile(project, `export type A = unknown`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Unknown();
+          export const A = Type.Unknown();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('never', async () => {
+    test('never', () => {
       const sourceFile = createSourceFile(project, `export type A = never`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Never();
+          export const A = Type.Never();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
-    test('null', async () => {
+    test('null', () => {
       const sourceFile = createSourceFile(project, `export type A = null`)
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Null();
+          export const A = Type.Null();
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
   })

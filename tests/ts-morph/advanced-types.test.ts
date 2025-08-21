@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Advanced types', () => {
   let project: Project
@@ -11,10 +10,10 @@ describe('Advanced types', () => {
   })
 
   describe('Template literal types', () => {
-    test('simple template literal', async () => {
+    test('simple template literal', () => {
       const sourceFile = createSourceFile(project, 'type A = `Q${number}`')
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
       const A = Type.TemplateLiteral("\`Q\${number}\`");
 
@@ -23,10 +22,10 @@ describe('Advanced types', () => {
       )
     })
 
-    test('complex template literal', async () => {
+    test('complex template literal', () => {
       const sourceFile = createSourceFile(project, 'type A = `prefix-${string}-suffix`')
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
       const A = Type.TemplateLiteral("\`prefix-\${string}-suffix\`");
 
@@ -37,7 +36,7 @@ describe('Advanced types', () => {
   })
 
   describe('Typeof expressions', () => {
-    test('typeof variable', async () => {
+    test('typeof variable', () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -46,7 +45,7 @@ describe('Advanced types', () => {
       `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
       const A = myVar;
 
@@ -55,7 +54,7 @@ describe('Advanced types', () => {
       )
     })
 
-    test('typeof with qualified name', async () => {
+    test('typeof with qualified name', () => {
       const sourceFile = createSourceFile(
         project,
         `
@@ -66,7 +65,7 @@ describe('Advanced types', () => {
       `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
       const A = MyNamespace_config;
 

@@ -28,5 +28,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "tsconfck": "^3.1.6"
+  }
 }

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Enum types', () => {
   let project: Project
@@ -11,7 +10,7 @@ describe('Enum types', () => {
   })
 
   describe('without export', () => {
-    test('only enum', async () => {
+    test('only enum', () => {
       const sourceFile = createSourceFile(
         project,
         `enum A {
@@ -21,7 +20,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`enum A {
         B,
         C,
@@ -34,7 +33,7 @@ describe('Enum types', () => {
       )
     })
 
-    test('enum with values', async () => {
+    test('enum with values', () => {
       const sourceFile = createSourceFile(
         project,
         `enum A {
@@ -44,7 +43,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`enum A {
         B = 'b',
         C = 'c',
@@ -59,7 +58,7 @@ describe('Enum types', () => {
   })
 
   describe('with export', () => {
-    test('only enum', async () => {
+    test('only enum', () => {
       const sourceFile = createSourceFile(
         project,
         `export enum A {
@@ -69,7 +68,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`export enum A {
         B,
         C,
@@ -82,7 +81,7 @@ describe('Enum types', () => {
       )
     })
 
-    test('enum with values', async () => {
+    test('enum with values', () => {
       const sourceFile = createSourceFile(
         project,
         `export enum A {
@@ -92,7 +91,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(await generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`export enum A {
         B = 'b',
         C = 'c',
