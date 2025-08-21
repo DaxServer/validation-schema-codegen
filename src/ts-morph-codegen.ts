@@ -1,4 +1,5 @@
 import { ts, SourceFile } from 'ts-morph'
+import { parseNative } from 'tsconfck'
 import { TypeAliasParser } from './parsers/parse-type-aliases'
 import { EnumParser } from './parsers/parse-enums'
 import { InterfaceParser } from './parsers/parse-interfaces'
@@ -7,21 +8,44 @@ import { DependencyCollector, type TypeDependency } from './utils/dependency-col
 
 const sharedPrinter = ts.createPrinter()
 
-export const generateCode = (
+export const generateCode = async (
   sourceFile: SourceFile,
   options: {
     exportEverything: boolean
   } = { exportEverything: false },
-): string => {
+): Promise<string> => {
   const processedTypes = new Set<string>()
   const newSourceFile = sourceFile.getProject().createSourceFile('temp.ts', '', {
     overwrite: true,
   })
 
-  newSourceFile.addImportDeclaration({
-    moduleSpecifier: '@sinclair/typebox',
-    namedImports: ['Type', 'Static'],
-  })
+  // Automatically detect and parse TSConfig using tsconfck.parseNative
+  let verbatimModuleSyntax = false
+  try {
+    const sourceFilePath = sourceFile.getFilePath()
+    const tsConfigResult = await parseNative(sourceFilePath)
+    verbatimModuleSyntax = tsConfigResult.tsconfig?.compilerOptions?.verbatimModuleSyntax === true
+  } catch {
+    // If tsconfig detection fails, default to false
+    verbatimModuleSyntax = false
+  }
+
+  // Add imports based on verbatimModuleSyntax setting
+  if (verbatimModuleSyntax) {
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: ['Type'],
+    })
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: [{ name: 'Static', isTypeOnly: true }],
+    })
+  } else {
+    newSourceFile.addImportDeclaration({
+      moduleSpecifier: '@sinclair/typebox',
+      namedImports: ['Type', 'Static'],
+    })
+  }
 
   const parserOptions = {
     newSourceFile,

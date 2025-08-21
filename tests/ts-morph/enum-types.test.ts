@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Enum types', () => {
   let project: Project
@@ -21,7 +20,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`enum A {
         B,
         C,
@@ -44,7 +43,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`enum A {
         B = 'b',
         C = 'c',
@@ -69,7 +68,7 @@ describe('Enum types', () => {
     `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`export enum A {
         B,
         C,
@@ -92,7 +91,7 @@ describe('Enum types', () => {
       `,
       )
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`export enum A {
         B = 'b',
         C = 'c',

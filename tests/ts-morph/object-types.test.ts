@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-import { createSourceFile, formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('Object types', () => {
   let project: Project
@@ -14,40 +13,40 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `type A = { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        const A = Type.Object({
-          a: Type.String(),
-        });
+          const A = Type.Object({
+            a: Type.String(),
+          });
 
-        type A = Static<typeof A>;
-      `),
+          type A = Static<typeof A>;
+        `),
       )
     })
 
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `type T = [number, null];`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        const T = Type.Tuple([Type.Number(), Type.Null()]);
+          const T = Type.Tuple([Type.Number(), Type.Null()]);
 
-        type T = Static<typeof T>;
-      `),
+          type T = Static<typeof T>;
+        `),
       )
     })
 
     test('interface', () => {
       const sourceFile = createSourceFile(project, `interface A { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-        const A = Type.Object({
-          a: Type.String(),
-        });
+          const A = Type.Object({
+            a: Type.String(),
+          });
 
-        type A = Static<typeof A>;
-      `),
+          type A = Static<typeof A>;
+        `),
       )
     })
   })
@@ -56,40 +55,40 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `export type A = { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Object({
-        a: Type.String(),
-      });
+          export const A = Type.Object({
+            a: Type.String(),
+          });
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
 
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `export type T = [number, null];`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      export const T = Type.Tuple([Type.Number(), Type.Null()]);
+          export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
-      export type T = Static<typeof T>;
-    `),
+          export type T = Static<typeof T>;
+        `),
       )
     })
 
     test('interface', () => {
       const sourceFile = createSourceFile(project, `export interface A { a: string }`)
 
-      expect(formatWithPrettier(generateCode(sourceFile), false)).toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-      export const A = Type.Object({
-        a: Type.String(),
-      });
+          export const A = Type.Object({
+            a: Type.String(),
+          });
 
-      export type A = Static<typeof A>;
-    `),
+          export type A = Static<typeof A>;
+        `),
       )
     })
   })

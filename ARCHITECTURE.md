@@ -9,6 +9,9 @@
     - [DependencyCollector](#dependencycollector)
     - [Key Features](#key-features)
     - [Implementation Details](#implementation-details)
+- [TSConfig Support](#tsconfig-support)
+  - [TSConfig Overview](#tsconfig-overview)
+  - [Usage Examples](#usage-examples)
 - [Utility Functions and Modules](#utility-functions-and-modules)
   - [Handlers Directory](#handlers-directory)
   - [Parsers Directory](#parsers-directory)
@@ -99,6 +102,28 @@ The import resolution process works in two phases:
    - Types are processed sequentially in the sorted order
 
 This approach ensures that complex import scenarios work correctly and generated code compiles without dependency errors.
+
+## TSConfig Support
+
+### TSConfig Overview
+
+The TypeBox code generation system includes automatic support for TypeScript configuration files (tsconfig.json). The system automatically detects and parses the closest tsconfig.json file using `tsconfck.parseNative`, ensuring that generated code respects project-specific TypeScript compiler options, particularly the `verbatimModuleSyntax` setting, which affects how import statements are generated.
+
+### Usage Examples
+
+#### Basic Usage
+
+```typescript
+const result = generateCode(sourceFile)
+```
+
+#### With Export Everything
+
+```typescript
+const result = generateCode(sourceFile, {
+  exportEverything: true,
+})
+```
 
 ## Utility Functions and Modules
 

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Project } from 'ts-morph'
-import { formatWithPrettier } from './utils'
-import { generateCode } from '../../src/ts-morph-codegen'
+import { formatWithPrettier, generateFormattedCode } from './utils'
 
 describe('exportEverything flag', () => {
   let project: Project
@@ -15,67 +14,74 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-      type MyType = string;
-      enum MyEnum { A, B, C = 'c' }
-    `,
+          type MyType = string;
+          enum MyEnum { A, B, C = 'c' }
+        `,
       )
-      const expected = formatWithPrettier(`
-      export const MyType = Type.String();
 
-      export type MyType = Static<typeof MyType>;
-      export enum MyEnum { A, B, C = 'c' }
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+        formatWithPrettier(`
+        export const MyType = Type.String();
 
-      export const MyEnum = Type.Enum(MyEnum);
+        export type MyType = Static<typeof MyType>;
+        export enum MyEnum { A, B, C = 'c' }
 
-      export type MyEnum = Static<typeof MyEnum>;
-    `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
-      expect(result).toBe(expected)
+        export const MyEnum = Type.Enum(MyEnum);
+
+        export type MyEnum = Static<typeof MyEnum>;
+      `),
+      )
     })
 
     it('should export imported types', () => {
-      const input = `
-      import { ImportedType } from './utils';
-      type MyType = ImportedType;
-      type LocalType = string;
-    `
       project.createSourceFile('utils.ts', 'export type ImportedType = string;')
-      const sourceFile = project.createSourceFile('test.ts', input)
-      const expected = formatWithPrettier(`
-      export const ImportedType = Type.String();
+      const sourceFile = project.createSourceFile(
+        'test.ts',
+        `
+        import { ImportedType } from './utils';
+        type MyType = ImportedType;
+        type LocalType = string;
+      `,
+      )
 
-      export type ImportedType = Static<typeof ImportedType>;
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+        formatWithPrettier(`
+        export const ImportedType = Type.String();
 
-      export const MyType = ImportedType;
+        export type ImportedType = Static<typeof ImportedType>;
 
-      export type MyType = Static<typeof MyType>;
+        export const MyType = ImportedType;
 
-      export const LocalType = Type.String();
+        export type MyType = Static<typeof MyType>;
 
-      export type LocalType = Static<typeof LocalType>;
-    `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
-      expect(result).toBe(expected)
+        export const LocalType = Type.String();
+
+        export type LocalType = Static<typeof LocalType>;
+      `),
+      )
     })
 
     it('should export unused imported types', () => {
-      const input = `
-      import { UnusedImportedType } from './unused-utils';
-      type MyType = string;
-    `
       project.createSourceFile('unused-utils.ts', 'export type UnusedImportedType = number;')
-      const sourceFile = project.createSourceFile('test.ts', input)
-      const expected = formatWithPrettier(`
-      export const UnusedImportedType = Type.Number();
+      const sourceFile = project.createSourceFile(
+        'test.ts',
+        `
+        import { UnusedImportedType } from './unused-utils';
+        type MyType = string;
+      `,
+      )
 
-      export type UnusedImportedType = Static<typeof UnusedImportedType>;
+      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+        formatWithPrettier(`
+        export const UnusedImportedType = Type.Number();
 
-      export const MyType = Type.String();
+        export type UnusedImportedType = Static<typeof UnusedImportedType>;
 
-      export type MyType = Static<typeof MyType>;
-    `)
-      const result = formatWithPrettier(generateCode(sourceFile, { exportEverything: true }), false)
-      expect(result).toBe(expected)
+        export const MyType = Type.String();
+
+        export type MyType = Static<typeof MyType>;
+      `),
+      )
     })
   })
 
@@ -84,78 +90,79 @@ describe('exportEverything flag', () => {
       const sourceFile = project.createSourceFile(
         'test.ts',
         `
-      type MyType = string;
+          type MyType = string;
 
-      enum MyEnum {
-        A,
-        B,
-        C = 'c',
-      }
-    `,
+          enum MyEnum {
+            A,
+            B,
+            C = 'c',
+          }
+        `,
       )
-      const expected = formatWithPrettier(`
-      const MyType = Type.String();
 
-      type MyType = Static<typeof MyType>;
-      enum MyEnum {
-        A,
-        B,
-        C = 'c',
-      }
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        formatWithPrettier(`
+        const MyType = Type.String();
 
-      const MyEnum = Type.Enum(MyEnum);
+        type MyType = Static<typeof MyType>;
+        enum MyEnum {
+          A,
+          B,
+          C = 'c',
+        }
 
-      type MyEnum = Static<typeof MyEnum>;
-    `)
-      const result = formatWithPrettier(
-        generateCode(sourceFile, { exportEverything: false }),
-        false,
+        const MyEnum = Type.Enum(MyEnum);
+
+        type MyEnum = Static<typeof MyEnum>;
+      `),
       )
-      expect(result).toBe(expected)
     })
 
     it('should not export imported types', () => {
-      const input = `
-      import { ImportedType } from './utils';
-      type MyType = ImportedType;
-      type LocalType = string;
-    `
       project.createSourceFile('utils.ts', 'export type ImportedType = string;')
-      const sourceFile = project.createSourceFile('test.ts', input)
-      const expected = formatWithPrettier(`
-      const ImportedType = Type.String();
-
-      type ImportedType = Static<typeof ImportedType>;
-
-      const MyType = ImportedType;
-
-      type MyType = Static<typeof MyType>;
-
-      const LocalType = Type.String();
-
-      type LocalType = Static<typeof LocalType>;
-    `)
-      const result = formatWithPrettier(
-        generateCode(sourceFile, { exportEverything: false }),
-        false,
+      const sourceFile = project.createSourceFile(
+        'test.ts',
+        `
+        import { ImportedType } from './utils';
+        type MyType = ImportedType;
+        type LocalType = string;
+      `,
       )
-      expect(result).toBe(expected)
+
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        formatWithPrettier(`
+        const ImportedType = Type.String();
+
+        type ImportedType = Static<typeof ImportedType>;
+
+        const MyType = ImportedType;
+
+        type MyType = Static<typeof MyType>;
+
+        const LocalType = Type.String();
+
+        type LocalType = Static<typeof LocalType>;
+      `),
+      )
     })
 
     it('should not export unused imported types', () => {
-      const input = `
-      import { UnusedImportedType } from './unused-utils';
-      export type MyType = string;
-    `
       project.createSourceFile('unused-utils.ts', 'export type UnusedImportedType = number;')
-      const sourceFile = project.createSourceFile('test.ts', input)
-      const expected = formatWithPrettier(`
-      export const MyType = Type.String();
+      const sourceFile = project.createSourceFile(
+        'test.ts',
+        `
+        import { UnusedImportedType } from './unused-utils';
+        export type MyType = string;
+      `,
+      )
 
-      export type MyType = Static<typeof MyType>;
-    `)
-      const result = formatWithPrettier(generateCode(sourceFile), false)
-      expect(result).toBe(expected)
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        formatWithPrettier(`
+        export const MyType = Type.String();
+
+        export type MyType = Static<typeof MyType>;
+      `),
+      )
     })
   })
 })
