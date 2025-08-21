@@ -1,7 +1,5 @@
 # TypeBox Code Generation Documentation
 
-# Table of Contents
-
 - [Overview](#overview)
 - [Core Component](#core-component)
   - [Function Flow](#function-flow)
@@ -9,19 +7,23 @@
     - [DependencyCollector](#dependencycollector)
     - [Key Features](#key-features)
     - [Implementation Details](#implementation-details)
-- [TSConfig Support](#tsconfig-support)
-  - [TSConfig Overview](#tsconfig-overview)
-  - [Usage Examples](#usage-examples)
+- [Input Handling System](#input-handling-system)
+  - [InputOptions Interface](#inputoptions-interface)
+  - [Input Processing Features](#input-processing-features)
+  - [Usage Patterns](#usage-patterns)
+- [Basic Usage](#basic-usage)
+  - [With Export Everything](#with-export-everything)
+  - [Using File Path](#using-file-path)
 - [Utility Functions and Modules](#utility-functions-and-modules)
   - [Handlers Directory](#handlers-directory)
   - [Parsers Directory](#parsers-directory)
-- [Performance Considerations](#performance-considerations)
+  - [Performance Considerations](#performance-considerations)
 - [Performance Optimizations](#performance-optimizations)
   - [TypeBox Type Handler Optimization](#typebox-type-handler-optimization)
   - [Parser Instance Reuse](#parser-instance-reuse)
   - [Prettier Optimization](#prettier-optimization)
   - [Import Resolution Performance Optimizations](#import-resolution-performance-optimizations)
-    - [ImportParser Optimizations](#importparser-optimizations)
+    - [ImportParser Optimizations](#importparser-optimations)
     - [DependencyCollector Optimizations](#dependencycollector-optimizations)
     - [TypeReferenceExtractor Optimizations](#typereferenceextractor-optimizations)
     - [TypeBoxTypeHandlers Optimizations](#typeboxtypehandlers-optimizations)
@@ -47,25 +49,27 @@ The primary goal of this codebase is to automate the creation of TypeBox schemas
 
 ## Core Component
 
-The main logic for code generation resides in the <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile> file. Its primary function, `generateCode`, takes a `SourceFile` object (representing a TypeScript file) as input and returns a string containing the generated TypeBox code.
+The main logic for code generation resides in the <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile> file. Its primary function, `generateCode`, takes a `GenerateCodeOptions` object as input and returns a string containing the generated TypeBox code. The input can be either a file path or source code string, with support for relative imports when using existing project contexts.
 
 ### Function Flow
 
-1.  **Initialization**: A new in-memory `SourceFile` (`temp.ts`) is created to build the generated code. Essential imports for TypeBox (`Type`, `Static`) are added.
+1.  **Input Processing**: The <mcfile name="input-handler.ts" path="src/input-handler.ts"></mcfile> module processes the input options to create a `SourceFile` object. This supports both file paths and source code strings, with proper validation for relative imports and path resolution.
 
-2.  **Parser Instantiation**: Instances of `ImportParser`, `EnumParser`, `TypeAliasParser`, and `FunctionDeclarationParser` are created, each responsible for handling specific types of declarations.
+2.  **Initialization**: A new in-memory `SourceFile` (`output.ts`) is created to build the generated code. Essential imports for TypeBox (`Type`, `Static`) are added as separate import declarations for better compatibility.
 
-3.  **Import Processing**: The `ImportParser` is instantiated and processes all import declarations in the input `sourceFile` to resolve imported types from external files. This includes locating corresponding source files for relative module specifiers and processing type aliases from imported files.
+3.  **Parser Instantiation**: Instances of `ImportParser`, `EnumParser`, `TypeAliasParser`, and `FunctionDeclarationParser` are created, each responsible for handling specific types of declarations.
 
-4.  **Enum Processing**: The `EnumParser` is instantiated and iterates through all `enum` declarations in the input `sourceFile`. For each enum, its original declaration is copied, a TypeBox `Type.Enum` schema is generated, and a corresponding static type alias is added.
+4.  **Import Processing**: The `ImportParser` is instantiated and processes all import declarations in the input `sourceFile` to resolve imported types from external files. This includes locating corresponding source files for relative module specifiers and processing type aliases from imported files.
 
-5.  **Type Alias Processing**: The `TypeAliasParser` is instantiated and iterates through all `type alias` declarations in the input `sourceFile`. For each type alias, its underlying type node is converted into a TypeBox-compatible type representation, a TypeBox schema is generated, and a corresponding static type alias is added.
+5.  **Enum Processing**: The `EnumParser` is instantiated and iterates through all `enum` declarations in the input `sourceFile`. For each enum, its original declaration is copied, a TypeBox `Type.Enum` schema is generated, and a corresponding static type alias is added.
 
-6.  **Interface Processing**: The `InterfaceParser` is instantiated and iterates through all `interface` declarations in the input `sourceFile`. For each interface, its properties and methods are converted into TypeBox object schemas with corresponding static type aliases.
+6.  **Type Alias Processing**: The `TypeAliasParser` is instantiated and iterates through all `type alias` declarations in the input `sourceFile`. For each type alias, its underlying type node is converted into a TypeBox-compatible type representation, a TypeBox schema is generated, and a corresponding static type alias is added.
 
-7.  **Function Declaration Processing**: The `FunctionDeclarationParser` is instantiated and iterates through all function declarations in the input `sourceFile`. For each function, its parameters, optional parameters, and return type are converted into TypeBox function schemas with corresponding static type aliases.
+7.  **Interface Processing**: The `InterfaceParser` is instantiated and iterates through all `interface` declarations in the input `sourceFile`. For each interface, its properties and methods are converted into TypeBox object schemas with corresponding static type aliases.
 
-8.  **Output**: Finally, the full text content of the newly generated `temp.ts` source file (which now contains all the TypeBox schemas and static types) is returned as a string.
+8.  **Function Declaration Processing**: The `FunctionDeclarationParser` is instantiated and iterates through all function declarations in the input `sourceFile`. For each function, its parameters, optional parameters, and return type are converted into TypeBox function schemas with corresponding static type aliases.
+
+9.  **Output**: Finally, the full text content of the newly generated `output.ts` source file (which now contains all the TypeBox schemas and static types) is returned as a string.
 
 ### Import Resolution and Dependency Management
 
@@ -103,25 +107,61 @@ The import resolution process works in two phases:
 
 This approach ensures that complex import scenarios work correctly and generated code compiles without dependency errors.
 
-## TSConfig Support
+## Input Handling System
 
-### TSConfig Overview
+The <mcfile name="input-handler.ts" path="src/input-handler.ts"></mcfile> module provides flexible input processing capabilities for the code generation system. It supports multiple input methods and handles various edge cases related to file resolution and import validation.
 
-The TypeBox code generation system includes automatic support for TypeScript configuration files (tsconfig.json). The system automatically detects and parses the closest tsconfig.json file using `tsconfck.parseNative`, ensuring that generated code respects project-specific TypeScript compiler options, particularly the `verbatimModuleSyntax` setting, which affects how import statements are generated.
+### InputOptions Interface
 
-### Usage Examples
-
-#### Basic Usage
+The `InputOptions` interface defines the available input parameters:
 
 ```typescript
-const result = generateCode(sourceFile)
+export interface InputOptions {
+  filePath?: string // Path to TypeScript file
+  sourceCode?: string // TypeScript source code as string
+  callerFile?: string // Context file path for relative import resolution
+  project?: Project // Existing ts-morph Project instance
+}
 ```
 
-#### With Export Everything
+### Input Processing Features
+
+1. **Dual Input Support**: Accepts either file paths or source code strings
+2. **Path Resolution**: Handles both absolute and relative file paths with proper validation
+3. **Relative Import Validation**: Prevents relative imports in string-based source code unless a `callerFile` context is provided
+4. **Project Context Sharing**: Supports passing existing `ts-morph` Project instances to maintain import resolution context
+5. **Error Handling**: Provides clear error messages for invalid inputs and unresolvable paths
+
+### Usage Patterns
+
+- **File Path Input**: Automatically resolves and loads TypeScript files from disk
+- **Source Code Input**: Processes TypeScript code directly from strings with validation
+- **Project Context**: Enables proper relative import resolution when working with in-memory source files
+
+## Basic Usage
 
 ```typescript
-const result = generateCode(sourceFile, {
+const result = generateCode({
+  sourceCode: sourceFile.getFullText(),
+  callerFile: sourceFile.getFilePath(),
+})
+```
+
+### With Export Everything
+
+```typescript
+const result = generateCode({
+  sourceCode: sourceFile.getFullText(),
   exportEverything: true,
+  callerFile: sourceFile.getFilePath(),
+})
+```
+
+### Using File Path
+
+```typescript
+const result = generateCode({
+  filePath: './types.ts',
 })
 ```
 
