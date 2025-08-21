@@ -3,9 +3,7 @@ import synchronizedPrettier from '@prettier/sync'
 import { Project, SourceFile } from 'ts-morph'
 
 const prettierOptions = { parser: 'typescript' as const }
-const typeboxImport = `import { Type } from "@sinclair/typebox";
-import { type Static } from "@sinclair/typebox";
-`
+const typeboxImport = 'import { Type, type Static } from "@sinclair/typebox";\n'
 
 export const createSourceFile = (project: Project, code: string, filePath: string = 'test.ts') => {
   return project.createSourceFile(filePath, code)
@@ -20,6 +18,11 @@ export const generateFormattedCode = async (
   sourceFile: SourceFile,
   exportEverything: boolean = false,
 ): Promise<string> => {
-  const code = await generateCode(sourceFile, { exportEverything })
+  const code = await generateCode({
+    sourceCode: sourceFile.getFullText(),
+    exportEverything,
+    callerFile: sourceFile.getFilePath(),
+    project: sourceFile.getProject(),
+  })
   return formatWithPrettier(code, false)
 }

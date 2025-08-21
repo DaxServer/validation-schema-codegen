@@ -27,12 +27,9 @@
   "description": "Codegen for validation schemas",
   "private": true,
   "scripts": {
-    "format": "prettier --write .",
+    "format": "prettier --cache --write .",
     "typecheck": "tsc --noEmit",
     "lint": "eslint"
   },
-  "type": "module",
-  "dependencies": {
-    "tsconfck": "^3.1.6"
-  }
+  "type": "module"
 }

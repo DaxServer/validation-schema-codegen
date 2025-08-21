@@ -8,8 +8,10 @@ const project = new Project()
 const sourceFile = project.createSourceFile('wikibase.ts', 'import { Entity } from "wikibase-sdk"')
 
 // Generate TypeBox code
-const typeboxCode = await generateCode(sourceFile, {
+const typeboxCode = await generateCode({
+  sourceCode: sourceFile.getFullText(),
   exportEverything: true,
+  callerFile: sourceFile.getFilePath(),
 })
 
 // Write the generated code to the output file
