@@ -1,5 +1,5 @@
-import { BaseTypeHandler } from 'src/handlers/typebox/base-type-handler'
-import { makeTypeCall } from 'src/utils/typebox-codegen-utils'
+import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, ts } from 'ts-morph'
 
 export class FunctionTypeHandler extends BaseTypeHandler {
