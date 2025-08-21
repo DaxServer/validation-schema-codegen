@@ -9,9 +9,12 @@ export interface InputOptions {
   project?: Project
 }
 
-const hasRelativeImports = (code: string): boolean => {
-  const relativeImportRegex = /import\s+.*?from\s+['"]\.[^'"]*['"]/g
-  return relativeImportRegex.test(code)
+const hasRelativeImports = (sourceFile: SourceFile): boolean => {
+  const hasRelativeImports = sourceFile
+    .getImportDeclarations()
+    .some((importDeclaration) => importDeclaration.isModuleSpecifierRelative())
+
+  return hasRelativeImports
 }
 
 const resolveFilePath = (input: string, callerFile?: string): string => {
@@ -31,7 +34,7 @@ const resolveFilePath = (input: string, callerFile?: string): string => {
 
   possiblePaths.push(resolve(process.cwd(), input))
 
-  const existingPaths = possiblePaths.filter((path) => existsSync(path))
+  const existingPaths = Array.from(new Set(possiblePaths)).filter((path) => existsSync(path))
 
   if (existingPaths.length === 0) {
     throw new Error(`Could not resolve path: ${input}. Tried: ${possiblePaths.join(', ')}`)
@@ -39,7 +42,9 @@ const resolveFilePath = (input: string, callerFile?: string): string => {
 
   if (existingPaths.length > 1) {
     throw new Error(
-      `Multiple resolutions found for path: ${input}. Found: ${existingPaths.join(', ')}. Please provide a more specific path.`,
+      `Multiple resolutions found for path: ${input}. '` +
+        `Found: ${existingPaths.join(', ')}. ' +
+        'Please provide a more specific path.`,
     )
   }
 
@@ -67,13 +72,20 @@ export const createSourceFileFromInput = (options: InputOptions): SourceFile => 
   if (sourceCode) {
     // If callerFile is provided, it means this code came from an existing SourceFile
     // and relative imports should be allowed
-    if (hasRelativeImports(sourceCode) && !callerFile) {
+
+    const sourceFile = project.createSourceFile('temp.ts', sourceCode)
+
+    if (!callerFile && hasRelativeImports(sourceFile)) {
       throw new Error(
-        'Relative imports are not supported when providing code as string. Only package imports from node_modules are allowed. Relative imports will be implemented in the future.',
+        'Relative imports are not supported when providing code as string. ' +
+          'Only package imports from node_modules are allowed. ' +
+          'Relative imports will be implemented in the future.',
       )
     }
 
-    return project.createSourceFile('temp.ts', sourceCode)
+    const virtualPath = callerFile ? resolve(dirname(callerFile), '__virtual__.ts') : 'temp.ts'
+    
+    return project.createSourceFile(virtualPath, sourceCode, { overwrite: true })
   }
 
   if (filePath) {

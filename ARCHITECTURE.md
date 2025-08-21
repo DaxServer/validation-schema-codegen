@@ -23,19 +23,15 @@
   - [Parser Instance Reuse](#parser-instance-reuse)
   - [Prettier Optimization](#prettier-optimization)
   - [Import Resolution Performance Optimizations](#import-resolution-performance-optimizations)
-    - [ImportParser Optimizations](#importparser-optimations)
+    - [ImportParser Optimizations](#importparser-optimizations)
     - [DependencyCollector Optimizations](#dependencycollector-optimizations)
     - [TypeReferenceExtractor Optimizations](#typereferenceextractor-optimizations)
     - [TypeBoxTypeHandlers Optimizations](#typeboxtypehandlers-optimizations)
   - [Performance Testing](#performance-testing)
-    - [Test Categories](#test-categories)
 - [Process Overview](#process-overview)
 - [Test-Driven Development (TDD) Approach](#test-driven-development-tdd-approach)
   - [TDD Cycle](#tdd-cycle)
   - [Running Tests](#running-tests)
-    - [Running All Tests](#running-all-tests)
-    - [Running Specific Test Files](#running-specific-test-files)
-    - [Running Tests by Pattern](#running-tests-by-pattern)
   - [TDD Workflow for New Features](#tdd-workflow-for-new-features)
   - [Test Organization](#test-organization)
   - [Best Practices](#best-practices)
@@ -141,7 +137,7 @@ export interface InputOptions {
 ## Basic Usage
 
 ```typescript
-const result = generateCode({
+const result = await generateCode({
   sourceCode: sourceFile.getFullText(),
   callerFile: sourceFile.getFilePath(),
 })
@@ -150,7 +146,7 @@ const result = generateCode({
 ### With Export Everything
 
 ```typescript
-const result = generateCode({
+const result = await generateCode({
   sourceCode: sourceFile.getFullText(),
   exportEverything: true,
   callerFile: sourceFile.getFilePath(),
@@ -160,7 +156,7 @@ const result = generateCode({
 ### Using File Path
 
 ```typescript
-const result = generateCode({
+const result = await generateCode({
   filePath: './types.ts',
 })
 ```
@@ -277,31 +273,7 @@ The optimizations maintain full backward compatibility and test reliability whil
 
 ### Performance Testing
 
-To ensure the dependency collection system performs efficiently under various scenarios, comprehensive performance tests have been implemented in <mcfile name="dependency-collector.performance.test.ts" path="tests/ts-morph/dependency-collector.performance.test.ts"></mcfile>. These tests specifically target potential bottlenecks in dependency collection and import processing:
-
-#### Test Categories
-
-1. **Large Dependency Chains**:
-   - **Deep Import Chains**: Tests performance with 50+ levels of nested imports to verify the system handles deep dependency trees efficiently
-   - **Wide Import Trees**: Tests scenarios with 100+ parallel imports to ensure the system scales well with broad dependency graphs
-
-2. **Cache Efficiency**:
-   - **Complex Type Structures**: Validates caching performance with intricate type definitions involving unions, intersections, and nested objects
-   - **Large Cache Operations**: Tests the system's ability to handle substantial cache sizes without performance degradation
-
-3. **Repeated File Processing**:
-   - **Diamond Dependency Patterns**: Tests scenarios where multiple import paths converge on the same files, ensuring efficient deduplication
-   - **Complex Topological Sort**: Validates performance of dependency ordering algorithms with interconnected type relationships
-
-4. **Memory Usage Patterns**:
-   - **Large Type Definitions**: Tests processing of substantial type definitions to ensure memory efficiency
-   - **Dependency Map Operations**: Validates performance of core dependency tracking data structures
-
-These performance tests provide baseline measurements and help identify potential bottlenecks before they impact production usage. The tests are designed to complete within reasonable timeframes while exercising the system under stress conditions that could reveal performance issues not apparent in standard unit tests.
-
-- **`ts-morph`**: The `ts-morph` library is heavily utilized for parsing, traversing, and manipulating the TypeScript Abstract Syntax Tree (AST). It provides a programmatic way to interact with TypeScript code.
-
-- **`@sinclair/typebox`**: This is the target library for schema generation. It provides a powerful and performant way to define JSON schemas with TypeScript type inference.
+To ensure the dependency collection system performs efficiently under various scenarios, comprehensive performance tests have been implemented in <mcfile name="dependency-collector.performance.test.ts" path="tests/ts-morph/dependency-collector.performance.test.ts"></mcfile>. These tests specifically target potential bottlenecks in dependency collection and import processing.
 
 ## Process Overview
 
@@ -326,33 +298,15 @@ This project follows a Test-Driven Development methodology to ensure code qualit
 
 The project uses Bun as the test runner. Here are the key commands for running tests:
 
-#### Running All Tests
-
 ```bash
+# Run all tests
 bun test
-```
 
-#### Running Specific Test Files
-
-```bash
 # Run a specific test file
 bun test tests/ts-morph/function-types.test.ts
 
 # Run tests in a specific directory
 bun test tests/ts-morph/
-
-# Run integration tests
-bun test tests/integration/
-```
-
-#### Running Tests by Pattern
-
-```bash
-# Run tests matching a pattern
-bun test --grep "function types"
-
-# Run tests for specific handlers
-bun test tests/ts-morph/advanced-types.test.ts
 ```
 
 ### TDD Workflow for New Features

@@ -1,9 +1,9 @@
 import { createSourceFileFromInput } from '@daxserver/validation-schema-codegen/input-handler'
+import type { StandardizedFilePath } from '@ts-morph/common'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { Project } from 'ts-morph'
-import type { StandardizedFilePath } from '@ts-morph/common'
 
 describe('Input Handler', () => {
   let tempDir: string
@@ -33,7 +33,7 @@ describe('Input Handler', () => {
       const code = `import { something } from "./relative-path"`
 
       expect(() => createSourceFileFromInput({ sourceCode: code })).toThrow(
-        'Relative imports are not supported when providing code as string'
+        'Relative imports are not supported when providing code as string',
       )
     })
 
@@ -41,7 +41,7 @@ describe('Input Handler', () => {
       const code = `import { something } from '../parent-path'`
 
       expect(() => createSourceFileFromInput({ sourceCode: code })).toThrow(
-        'Relative imports are not supported when providing code as string'
+        'Relative imports are not supported when providing code as string',
       )
     })
 
@@ -49,7 +49,7 @@ describe('Input Handler', () => {
       const code = `import { something } from './nested/deep/path'`
 
       expect(() => createSourceFileFromInput({ sourceCode: code })).toThrow(
-        'Relative imports are not supported when providing code as string'
+        'Relative imports are not supported when providing code as string',
       )
     })
 
@@ -58,7 +58,7 @@ describe('Input Handler', () => {
 
       const sourceFile = createSourceFileFromInput({
         sourceCode: code,
-        callerFile: '/some/caller/file.ts'
+        callerFile: '/some/caller/file.ts',
       })
 
       expect(sourceFile.getFullText()).toBe(code)
@@ -91,7 +91,7 @@ describe('Input Handler', () => {
       `
 
       expect(() => createSourceFileFromInput({ sourceCode: code })).toThrow(
-        'Relative imports are not supported when providing code as string'
+        'Relative imports are not supported when providing code as string',
       )
     })
   })
@@ -109,7 +109,7 @@ describe('Input Handler', () => {
       const nonExistentPath = join(tempDir, 'non-existent.ts')
 
       expect(() => createSourceFileFromInput({ filePath: nonExistentPath })).toThrow(
-        `Absolute path does not exist: ${nonExistentPath}`
+        `Absolute path does not exist: ${nonExistentPath}`,
       )
     })
 
@@ -129,7 +129,7 @@ describe('Input Handler', () => {
 
       const sourceFile = createSourceFileFromInput({
         filePath: './relative.ts',
-        callerFile
+        callerFile,
       })
 
       expect(sourceFile.getFilePath()).toBe(relativeFile as StandardizedFilePath)
@@ -137,7 +137,7 @@ describe('Input Handler', () => {
 
     test('throws error when relative path cannot be resolved', () => {
       expect(() => createSourceFileFromInput({ filePath: './non-existent.ts' })).toThrow(
-        'Could not resolve path: ./non-existent.ts'
+        'Could not resolve path: ./non-existent.ts',
       )
     })
 
@@ -153,10 +153,12 @@ describe('Input Handler', () => {
       const callerDirFile = join(callerDir, 'duplicate.ts')
       writeFileSync(callerDirFile, 'export type Test = string')
 
-      expect(() => createSourceFileFromInput({
-        filePath: './duplicate.ts',
-        callerFile
-      })).toThrow('Multiple resolutions found for path: ./duplicate.ts')
+      expect(() =>
+        createSourceFileFromInput({
+          filePath: './duplicate.ts',
+          callerFile,
+        }),
+      ).toThrow('Multiple resolutions found for path: ./duplicate.ts')
 
       // Cleanup
       rmSync(currentDirFile, { force: true })
@@ -164,7 +166,7 @@ describe('Input Handler', () => {
 
     test('throws error when path is not a file', () => {
       expect(() => createSourceFileFromInput({ filePath: tempDir })).toThrow(
-        `Path is not a file: ${tempDir}`
+        `Path is not a file: ${tempDir}`,
       )
     })
   })
@@ -172,17 +174,17 @@ describe('Input Handler', () => {
   describe('validateInputOptions function', () => {
     test('throws error when neither filePath nor sourceCode provided', () => {
       expect(() => createSourceFileFromInput({})).toThrow(
-        'Either filePath or sourceCode must be provided'
+        'Either filePath or sourceCode must be provided',
       )
     })
 
     test('throws error when both filePath and sourceCode provided', () => {
-      expect(() => createSourceFileFromInput({
-        filePath: './test.ts',
-        sourceCode: 'type Test = string'
-      })).toThrow(
-        'Only one of filePath or sourceCode can be provided, not both'
-      )
+      expect(() =>
+        createSourceFileFromInput({
+          filePath: './test.ts',
+          sourceCode: 'type Test = string',
+        }),
+      ).toThrow('Only one of filePath or sourceCode can be provided, not both')
     })
 
     test('accepts valid filePath option', () => {
@@ -227,7 +229,7 @@ describe('Input Handler', () => {
 
       const sourceFile = createSourceFileFromInput({
         sourceCode: code,
-        project: customProject
+        project: customProject,
       })
 
       expect(sourceFile.getProject()).toBe(customProject)
