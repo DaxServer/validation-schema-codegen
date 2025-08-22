@@ -10,11 +10,9 @@ export interface InputOptions {
 }
 
 const hasRelativeImports = (sourceFile: SourceFile): boolean => {
-  const hasRelativeImports = sourceFile
+  return sourceFile
     .getImportDeclarations()
     .some((importDeclaration) => importDeclaration.isModuleSpecifierRelative())
-
-  return hasRelativeImports
 }
 
 const resolveFilePath = (input: string, callerFile?: string): string => {
@@ -42,9 +40,9 @@ const resolveFilePath = (input: string, callerFile?: string): string => {
 
   if (existingPaths.length > 1) {
     throw new Error(
-      `Multiple resolutions found for path: ${input}. '` +
-        `Found: ${existingPaths.join(', ')}. ' +
-        'Please provide a more specific path.`,
+      `Multiple resolutions found for path: ${input}. ` +
+        `Found: ${existingPaths.join(', ')}. ` +
+        'Please provide a more specific path.',
     )
   }
 
@@ -73,7 +71,10 @@ export const createSourceFileFromInput = (options: InputOptions): SourceFile => 
     // If callerFile is provided, it means this code came from an existing SourceFile
     // and relative imports should be allowed
 
-    const sourceFile = project.createSourceFile('temp.ts', sourceCode)
+    const virtualPath = callerFile ? resolve(dirname(callerFile), '__virtual__.ts') : 'temp.ts'
+    const sourceFile = project.createSourceFile(virtualPath, sourceCode, {
+      overwrite: true,
+    })
 
     if (!callerFile && hasRelativeImports(sourceFile)) {
       throw new Error(
@@ -83,9 +84,7 @@ export const createSourceFileFromInput = (options: InputOptions): SourceFile => 
       )
     }
 
-    const virtualPath = callerFile ? resolve(dirname(callerFile), '__virtual__.ts') : 'temp.ts'
-
-    return project.createSourceFile(virtualPath, sourceCode, { overwrite: true })
+    return sourceFile
   }
 
   if (filePath) {
