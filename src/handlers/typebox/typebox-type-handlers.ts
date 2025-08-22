@@ -1,24 +1,26 @@
-import { ArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/array-type-handler'
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { ArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/array-type-handler'
+import { IntersectionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/intersection-type-handler'
+import { TupleTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/tuple-type-handler'
+import { UnionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/union-type-handler'
 import { FunctionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/function-type-handler'
 import { IndexedAccessTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/indexed-access-type-handler'
-import { InterfaceTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/interface-type-handler'
-import { IntersectionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/intersection-type-handler'
+import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-type-handler'
 import { LiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/literal-type-handler'
-import { ObjectTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object-type-handler'
-import { OmitTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/omit-type-handler'
-import { PartialTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/partial-type-handler'
-import { PickTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/pick-type-handler'
-import { RecordTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/record-type-handler'
-import { RequiredTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/required-type-handler'
+import { InterfaceTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/interface-type-handler'
+import { ObjectTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-type-handler'
+import { ReadonlyTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/readonly-type-handler'
+import { OmitTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/omit-type-handler'
+import { PartialTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/partial-type-handler'
+import { PickTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/pick-type-handler'
+import { RecordTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/record-type-handler'
+import { RequiredTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/required-type-handler'
 import { SimpleTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/simple-type-handler'
 import { TemplateLiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/template-literal-type-handler'
-import { TupleTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/tuple-type-handler'
-import { TypeOperatorHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-operator-handler'
 import { TypeQueryHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-query-handler'
 import { TypeReferenceHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-reference-handler'
-import { UnionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/union-type-handler'
-import { Node, SyntaxKind, ts } from 'ts-morph'
+import { TypeofTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/typeof-type-handler'
+import { Node, SyntaxKind } from 'ts-morph'
 
 export class TypeBoxTypeHandlers {
   private syntaxKindHandlers = new Map<SyntaxKind, BaseTypeHandler>()
@@ -26,26 +28,28 @@ export class TypeBoxTypeHandlers {
   private fallbackHandlers: BaseTypeHandler[]
   private handlerCache = new Map<string, BaseTypeHandler>()
 
-  constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {
+  constructor() {
     const simpleTypeHandler = new SimpleTypeHandler()
     const literalTypeHandler = new LiteralTypeHandler()
-    const objectTypeHandler = new ObjectTypeHandler(getTypeBoxType)
-    const arrayTypeHandler = new ArrayTypeHandler(getTypeBoxType)
-    const tupleTypeHandler = new TupleTypeHandler(getTypeBoxType)
-    const unionTypeHandler = new UnionTypeHandler(getTypeBoxType)
-    const intersectionTypeHandler = new IntersectionTypeHandler(getTypeBoxType)
-    const recordTypeHandler = new RecordTypeHandler(getTypeBoxType)
-    const partialTypeHandler = new PartialTypeHandler(getTypeBoxType)
-    const pickTypeHandler = new PickTypeHandler(getTypeBoxType)
-    const omitTypeHandler = new OmitTypeHandler(getTypeBoxType)
-    const requiredTypeHandler = new RequiredTypeHandler(getTypeBoxType)
-    const typeReferenceHandler = new TypeReferenceHandler(getTypeBoxType)
-    const typeOperatorHandler = new TypeOperatorHandler(getTypeBoxType)
-    const indexedAccessTypeHandler = new IndexedAccessTypeHandler(getTypeBoxType)
-    const interfaceTypeHandler = new InterfaceTypeHandler(getTypeBoxType)
-    const functionTypeHandler = new FunctionTypeHandler(getTypeBoxType)
-    const typeQueryHandler = new TypeQueryHandler(getTypeBoxType)
-    const templateLiteralTypeHandler = new TemplateLiteralTypeHandler(getTypeBoxType)
+    const objectTypeHandler = new ObjectTypeHandler()
+    const arrayTypeHandler = new ArrayTypeHandler()
+    const tupleTypeHandler = new TupleTypeHandler()
+    const unionTypeHandler = new UnionTypeHandler()
+    const intersectionTypeHandler = new IntersectionTypeHandler()
+    const recordTypeHandler = new RecordTypeHandler()
+    const partialTypeHandler = new PartialTypeHandler()
+    const pickTypeHandler = new PickTypeHandler()
+    const omitTypeHandler = new OmitTypeHandler()
+    const requiredTypeHandler = new RequiredTypeHandler()
+    const typeReferenceHandler = new TypeReferenceHandler()
+    const keyOfTypeHandler = new KeyOfTypeHandler()
+    const indexedAccessTypeHandler = new IndexedAccessTypeHandler()
+    const interfaceTypeHandler = new InterfaceTypeHandler()
+    const functionTypeHandler = new FunctionTypeHandler()
+    const typeQueryHandler = new TypeQueryHandler()
+    const templateLiteralTypeHandler = new TemplateLiteralTypeHandler()
+    const typeofTypeHandler = new TypeofTypeHandler()
+    const readonlyTypeHandler = new ReadonlyTypeHandler()
 
     // O(1) lookup by SyntaxKind
     this.syntaxKindHandlers.set(SyntaxKind.AnyKeyword, simpleTypeHandler)
@@ -64,7 +68,7 @@ export class TypeBoxTypeHandlers {
     this.syntaxKindHandlers.set(SyntaxKind.TupleType, tupleTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.UnionType, unionTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.IntersectionType, intersectionTypeHandler)
-    this.syntaxKindHandlers.set(SyntaxKind.TypeOperator, typeOperatorHandler)
+    // TypeOperator handling moved to fallback handlers for specific operator types
     this.syntaxKindHandlers.set(SyntaxKind.IndexedAccessType, indexedAccessTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.InterfaceDeclaration, interfaceTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.FunctionType, functionTypeHandler)
@@ -79,16 +83,19 @@ export class TypeBoxTypeHandlers {
     this.typeReferenceHandlers.set('Required', requiredTypeHandler)
 
     // Fallback handlers for complex cases
-    this.fallbackHandlers = [typeReferenceHandler]
+    this.fallbackHandlers = [
+      typeReferenceHandler,
+      keyOfTypeHandler,
+      typeofTypeHandler,
+      readonlyTypeHandler,
+    ]
   }
 
-  public getHandler(typeNode?: Node): BaseTypeHandler | undefined {
-    if (!typeNode) return undefined
-
-    const nodeKind = typeNode.getKind()
+  public getHandler(node: Node): BaseTypeHandler {
+    const nodeKind = node.getKind()
 
     // Use stable cache key based on node text and kind
-    const nodeText = typeNode.getText()
+    const nodeText = node.getText()
     const cacheKey = `${nodeKind}-${nodeText}`
 
     const cachedHandler = this.handlerCache.get(cacheKey)
@@ -102,24 +109,29 @@ export class TypeBoxTypeHandlers {
     handler = this.syntaxKindHandlers.get(nodeKind)
 
     // O(1) lookup for type references by name
-    if (!handler && nodeKind === SyntaxKind.TypeReference && Node.isTypeReference(typeNode)) {
-      const typeNameNode = typeNode.getTypeName()
+    if (!handler && nodeKind === SyntaxKind.TypeReference && Node.isTypeReference(node)) {
+      const typeNameNode = node.getTypeName()
 
       if (Node.isIdentifier(typeNameNode)) {
         const typeNameText = typeNameNode.getText()
         handler = this.typeReferenceHandlers.get(typeNameText)
       }
+    }
 
-      // If no specific utility type handler found, use TypeReferenceHandler as default
-      if (!handler) {
-        handler = this.fallbackHandlers[0] // TypeReferenceHandler
+    // If no handler found yet, check fallback handlers
+    if (!handler) {
+      for (const fallbackHandler of this.fallbackHandlers) {
+        if (fallbackHandler.canHandle(node)) {
+          handler = fallbackHandler
+          break
+        }
       }
     }
 
     if (handler) {
       this.handlerCache.set(cacheKey, handler)
     } else {
-      throw new Error(`No handler found for type: ${typeNode.getText()}`)
+      throw new Error(`No handler found for type: ${node.getText()}`)
     }
 
     return handler

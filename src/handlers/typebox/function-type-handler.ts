@@ -1,28 +1,21 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { Node, ts } from 'ts-morph'
+import { FunctionTypeNode, Node, ts } from 'ts-morph'
 
 export class FunctionTypeHandler extends BaseTypeHandler {
-  constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {
-    super(getTypeBoxType)
+  canHandle(node: Node): boolean {
+    return Node.isFunctionTypeNode(node)
   }
 
-  canHandle(typeNode?: Node): boolean {
-    return Node.isFunctionTypeNode(typeNode)
-  }
-
-  handle(typeNode: Node): ts.Expression {
-    if (!Node.isFunctionTypeNode(typeNode)) {
-      return makeTypeCall('Any')
-    }
-
-    const parameters = typeNode.getParameters()
-    const returnType = typeNode.getReturnTypeNode()
+  handle(node: FunctionTypeNode): ts.Expression {
+    const parameters = node.getParameters()
+    const returnType = node.getReturnTypeNode()
 
     // Convert parameters to TypeBox types
     const parameterTypes = parameters.map((param) => {
       const paramTypeNode = param.getTypeNode()
-      const paramType = this.getTypeBoxType(paramTypeNode)
+      const paramType = getTypeBoxType(paramTypeNode)
 
       // Check if parameter is optional
       if (param.hasQuestionToken()) {
@@ -33,7 +26,7 @@ export class FunctionTypeHandler extends BaseTypeHandler {
     })
 
     // Convert return type to TypeBox type
-    const returnTypeBox = this.getTypeBoxType(returnType)
+    const returnTypeBox = getTypeBoxType(returnType)
 
     // Create TypeBox Function call with parameters array and return type
     return makeTypeCall('Function', [

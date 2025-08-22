@@ -166,33 +166,57 @@ const result = await generateCode({
 - <mcfile name="typebox-call.ts" path="src/utils/typebox-call.ts"></mcfile>: Contains the core logic for converting TypeScript type nodes into TypeBox `Type` expressions. `getTypeBoxType` takes a `TypeNode` as input and returns a `ts.Node` representing the equivalent TypeBox schema.
 - <mcfile name="add-static-type-alias.ts" path="src/utils/add-static-type-alias.ts"></mcfile>: Generates and adds the `export type [TypeName] = Static<typeof [TypeName]>` declaration to the output source file. This declaration is essential for enabling TypeScript's static type inference from the dynamically generated TypeBox schemas, ensuring type safety at compile time.
 - <mcfile name="typebox-codegen-utils.ts" path="src/utils/typebox-codegen-utils.ts"></mcfile>: Contains general utility functions that support the TypeBox code generation process, such as helper functions for string manipulation or AST node creation.
-- <mcfile name="typescript-ast-parser.ts" path="src/utils/typescript-ast-parser.ts"></mcfile>: Responsible for parsing TypeScript source code and extracting relevant Abstract Syntax Tree (AST) information. It provides functions to navigate the AST and identify specific nodes like type aliases, interfaces, or enums.
-- <mcfile name="typescript-ast-types.ts" path="src/utils/typescript-ast-types.ts"></mcfile>: Defines custom types and interfaces that represent the structured AST information extracted by `typescript-ast-parser.ts`, providing a consistent data model for further processing.
 
 ### Handlers Directory
 
-This directory contains a collection of specialized handler modules, each responsible for converting a specific type of TypeScript AST node into its corresponding TypeBox schema. This modular approach allows for easy extension and maintenance of the type mapping logic.
+This directory contains a collection of specialized handler modules, each responsible for converting a specific type of TypeScript AST node into its corresponding TypeBox schema. The handlers follow a hierarchical architecture with specialized base classes to reduce code duplication and ensure consistent behavior.
 
-- <mcfile name="array-type-handler.ts" path="src/handlers/typebox/array-type-handler.ts"></mcfile>: Handles TypeScript array types (e.g., `string[]`, `Array<number>`).
-- <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>: Handles TypeScript indexed access types (e.g., `Type[Key]`).
-- <mcfile name="intersection-type-handler.ts" path="src/handlers/typebox/intersection-type-handler.ts"></mcfile>: Handles TypeScript intersection types (e.g., `TypeA & TypeB`).
-- <mcfile name="literal-type-handler.ts" path="src/handlers/typebox/literal-type-handler.ts"></mcfile>: Handles TypeScript literal types (e.g., `'hello'`, `123`, `true`).
-- <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object-type-handler.ts"></mcfile>: Handles TypeScript object types and interfaces.
-- <mcfile name="omit-type-handler.ts" path="src/handlers/typebox/omit-type-handler.ts"></mcfile>: Handles TypeScript `Omit` utility types.
-- <mcfile name="partial-type-handler.ts" path="src/handlers/typebox/partial-type-handler.ts"></mcfile>: Handles TypeScript `Partial` utility types.
-- <mcfile name="pick-type-handler.ts" path="src/handlers/typebox/pick-type-handler.ts"></mcfile>: Handles TypeScript `Pick` utility types.
-- <mcfile name="required-type-handler.ts" path="src/handlers/typebox/required-type-handler.ts"></mcfile>: Handles TypeScript `Required` utility types.
-- <mcfile name="record-type-handler.ts" path="src/handlers/typebox/record-type-handler.ts"></mcfile>: Handles TypeScript `Record` utility types.
+#### Base Handler Classes
+
+- <mcfile name="base-type-handler.ts" path="src/handlers/typebox/base-type-handler.ts"></mcfile>: The root abstract base class that defines the common interface for all type handlers. Provides the `canHandle` and `handle` methods, along with utility functions like `makeTypeCall` for creating TypeBox expressions.
+- <mcfile name="type-reference-base-handler.ts" path="src/handlers/typebox/reference/type-reference-base-handler.ts"></mcfile>: Specialized base class for utility type handlers that work with TypeScript type references. Provides `validateTypeReference` and `extractTypeArguments` methods for consistent handling of generic utility types like `Partial<T>`, `Pick<T, K>`, etc.
+- <mcfile name="object-like-base-handler.ts" path="src/handlers/typebox/object/object-like-base-handler.ts"></mcfile>: Base class for handlers that process object-like structures (objects and interfaces). Provides `processProperties`, `extractProperties`, and `createObjectType` methods for consistent property handling and TypeBox object creation.
+- <mcfile name="collection-base-handler.ts" path="src/handlers/typebox/collection/collection-base-handler.ts"></mcfile>: Base class for handlers that work with collections of types (arrays, tuples, unions, intersections). Provides `processTypeCollection`, `processSingleType`, and `validateNonEmptyCollection` methods for consistent type collection processing.
+
+#### Type Handler Implementations
+
+**Utility Type Handlers** (extend `TypeReferenceBaseHandler`):
+
+- <mcfile name="partial-type-handler.ts" path="src/handlers/typebox/reference/partial-type-handler.ts"></mcfile>: Handles TypeScript `Partial` utility types.
+- <mcfile name="pick-type-handler.ts" path="src/handlers/typebox/reference/pick-type-handler.ts"></mcfile>: Handles TypeScript `Pick` utility types.
+- <mcfile name="omit-type-handler.ts" path="src/handlers/typebox/reference/omit-type-handler.ts"></mcfile>: Handles TypeScript `Omit` utility types.
+- <mcfile name="required-type-handler.ts" path="src/handlers/typebox/reference/required-type-handler.ts"></mcfile>: Handles TypeScript `Required` utility types.
+- <mcfile name="record-type-handler.ts" path="src/handlers/typebox/reference/record-type-handler.ts"></mcfile>: Handles TypeScript `Record` utility types.
+
+**Object-Like Type Handlers** (extend `ObjectLikeBaseHandler`):
+
+- <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object/object-type-handler.ts"></mcfile>: Handles TypeScript object types and type literals.
+- <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>: Handles TypeScript interface declarations.
+
+**Collection Type Handlers** (extend `CollectionBaseHandler`):
+
+- <mcfile name="array-type-handler.ts" path="src/handlers/typebox/collection/array-type-handler.ts"></mcfile>: Handles TypeScript array types (e.g., `string[]`, `Array<number>`).
+- <mcfile name="tuple-type-handler.ts" path="src/handlers/typebox/collection/tuple-type-handler.ts"></mcfile>: Handles TypeScript tuple types.
+- <mcfile name="union-type-handler.ts" path="src/handlers/typebox/collection/union-type-handler.ts"></mcfile>: Handles TypeScript union types (e.g., `string | number`).
+- <mcfile name="intersection-type-handler.ts" path="src/handlers/typebox/collection/intersection-type-handler.ts"></mcfile>: Handles TypeScript intersection types (e.g., `TypeA & TypeB`).
+
+**Standalone Type Handlers** (extend `BaseTypeHandler`):
+
 - <mcfile name="simple-type-handler.ts" path="src/handlers/typebox/simple-type-handler.ts"></mcfile>: Handles basic TypeScript types like `string`, `number`, `boolean`, `null`, `undefined`, `any`, `unknown`, `void`.
+- <mcfile name="literal-type-handler.ts" path="src/handlers/typebox/literal-type-handler.ts"></mcfile>: Handles TypeScript literal types (e.g., `'hello'`, `123`, `true`).
 - <mcfile name="function-type-handler.ts" path="src/handlers/typebox/function-type-handler.ts"></mcfile>: Handles TypeScript function types and function declarations, including parameter types, optional parameters, and return types.
 - <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>: Handles TypeScript template literal types (e.g., `` `hello-${string}` ``). Parses template literals into components, handling literal text, embedded types (string, number, unions), and string/numeric literals.
 - <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>: Handles TypeScript `typeof` expressions for extracting types from values.
-- <mcfile name="tuple-type-handler.ts" path="src/handlers/typebox/tuple-type-handler.ts"></mcfile>: Handles TypeScript tuple types.
-- <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>: Handles TypeScript type operators like `keyof`, `typeof`.
+- <mcfile name="keyof-type-handler.ts" path="src/handlers/typebox/keyof-type-handler.ts"></mcfile>: Handles TypeScript `keyof` type operator for extracting object keys.
+- <mcfile name="readonly-type-handler.ts" path="src/handlers/typebox/readonly-type-handler.ts"></mcfile>: Handles TypeScript `readonly` type modifier for creating immutable types.
+- <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>: Fallback handler for other TypeScript type operators not covered by specific handlers.
 - <mcfile name="type-reference-handler.ts" path="src/handlers/typebox/type-reference-handler.ts"></mcfile>: Handles references to other types (e.g., `MyType`).
+- <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>: Handles TypeScript indexed access types (e.g., `Type[Key]`).
 - <mcfile name="typebox-type-handler.ts" path="src/handlers/typebox/typebox-type-handler.ts"></mcfile>: A generic handler for TypeBox types.
-- <mcfile name="typebox-type-handlers.ts" path="src/handlers/typebox/typebox-type-handlers.ts"></mcfile>: Orchestrates the use of the individual type handlers, acting as a dispatcher based on the type of AST node encountered.
-- <mcfile name="union-type-handler.ts" path="src/handlers/typebox/union-type-handler.ts"></mcfile>: Handles TypeScript union types (e.g., `string | number`).
+
+**Handler Orchestration**:
+
+- <mcfile name="typebox-type-handlers.ts" path="src/handlers/typebox/typebox-type-handlers.ts"></mcfile>: Orchestrates the use of the individual type handlers, acting as a dispatcher based on the type of AST node encountered. Uses optimized lookup mechanisms for performance with O(1) syntax kind-based lookups and type reference name mappings. Includes specialized handlers for type operators (KeyOfTypeHandler, TypeofTypeHandler, ReadonlyTypeHandler) and maintains fallback handlers for edge cases requiring custom logic.
 
 ### Parsers Directory
 

@@ -26,17 +26,11 @@ const kindToTypeBox: Record<SimpleKinds, string> = {
 }
 
 export class SimpleTypeHandler extends BaseTypeHandler {
-  constructor() {
-    super(() => ts.factory.createIdentifier('')) // getTypeBoxType is not used in SimpleTypeHandler
+  canHandle(node: Node): boolean {
+    return node.getKind() in kindToTypeBox
   }
 
-  canHandle(typeNode?: Node): boolean {
-    const kind = typeNode?.getKind()
-    return kind !== undefined && kind in kindToTypeBox
-  }
-
-  handle(typeNode: Node): ts.Expression {
-    const kind = typeNode?.getKind() ?? SyntaxKind.AnyKeyword
-    return makeTypeCall(kindToTypeBox[kind as SimpleKinds])
+  handle(node: Node): ts.Expression {
+    return makeTypeCall(kindToTypeBox[node.getKind() as SimpleKinds])
   }
 }
