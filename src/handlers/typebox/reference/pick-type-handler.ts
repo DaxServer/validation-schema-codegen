@@ -1,29 +1,21 @@
-import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { TypeReferenceBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/type-reference-base-handler'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, ts } from 'ts-morph'
 
-export class PickTypeHandler extends BaseTypeHandler {
-  constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {
-    super(getTypeBoxType)
-  }
+export class PickTypeHandler extends TypeReferenceBaseHandler {
+  protected supportedTypeNames = ['Pick']
+  protected expectedArgumentCount = 2
 
-  canHandle(typeNode?: Node): boolean {
-    if (!Node.isTypeReference(typeNode)) {
-      return false
-    }
-    const referencedType = typeNode.getTypeName()
-    return Node.isIdentifier(referencedType) && referencedType.getText() === 'Pick'
-  }
+  handle(node: Node): ts.Expression {
+    const typeRef = this.validateTypeReference(node)
+    const [objectType, keysType] = this.extractTypeArguments(typeRef)
 
-  handle(typeNode: Node): ts.Expression {
-    if (!Node.isTypeReference(typeNode) || typeNode.getTypeArguments().length !== 2) {
-      return makeTypeCall('Any')
-    }
-    const [objectType, keysType] = typeNode.getTypeArguments()
     if (!keysType) {
       return makeTypeCall('Any')
     }
-    const typeboxObjectType = this.getTypeBoxType(objectType)
+
+    const typeboxObjectType = getTypeBoxType(objectType)
 
     let pickKeys: string[] = []
     if (Node.isUnionTypeNode(keysType)) {
@@ -54,6 +46,7 @@ export class PickTypeHandler extends BaseTypeHandler {
         ),
       ])
     }
+
     return makeTypeCall('Pick', [typeboxObjectType, typeboxKeys])
   }
 }

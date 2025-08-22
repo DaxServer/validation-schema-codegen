@@ -1,27 +1,27 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { IndexedAccessTypeNode, Node, ts } from 'ts-morph'
 
 export class IndexedAccessTypeHandler extends BaseTypeHandler {
-  canHandle(node: Node | undefined): boolean {
-    return node !== undefined && node.isKind(ts.SyntaxKind.IndexedAccessType)
+  canHandle(node: Node): boolean {
+    return node.isKind(ts.SyntaxKind.IndexedAccessType)
   }
 
-  handle(node: Node): ts.Expression {
-    const typeNode = node as IndexedAccessTypeNode
-    const objectType = typeNode.getObjectTypeNode()
-    const indexType = typeNode.getIndexTypeNode()
+  handle(node: IndexedAccessTypeNode): ts.Expression {
+    const objectType = node.getObjectTypeNode()
+    const indexType = node.getIndexTypeNode()
 
     // Handle special case: typeof A[number] where A is a readonly tuple
     if (
       objectType?.isKind(ts.SyntaxKind.TypeQuery) &&
       indexType?.isKind(ts.SyntaxKind.NumberKeyword)
     ) {
-      return this.handleTypeofArrayAccess(objectType, typeNode)
+      return this.handleTypeofArrayAccess(objectType, node)
     }
 
-    const typeboxObjectType = this.getTypeBoxType(objectType)
-    const typeboxIndexType = this.getTypeBoxType(indexType)
+    const typeboxObjectType = getTypeBoxType(objectType)
+    const typeboxIndexType = getTypeBoxType(indexType)
 
     return makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
   }
@@ -58,8 +58,8 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
     }
 
     // Fallback to default Index behavior
-    const typeboxObjectType = this.getTypeBoxType(typeQuery)
-    const typeboxIndexType = this.getTypeBoxType(indexedAccessType.getIndexTypeNode())
+    const typeboxObjectType = getTypeBoxType(typeQuery)
+    const typeboxIndexType = getTypeBoxType(indexedAccessType.getIndexTypeNode())
     return makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
   }
 

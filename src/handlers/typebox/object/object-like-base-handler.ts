@@ -1,27 +1,21 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { Node, ts, TypeLiteralNode } from 'ts-morph'
+import { PropertySignature, ts } from 'ts-morph'
 
-export class ObjectTypeHandler extends BaseTypeHandler {
-  constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {
-    super(getTypeBoxType)
-  }
+export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
+  protected processProperties(properties: PropertySignature[]): ts.PropertyAssignment[] {
+    const propertyAssignments: ts.PropertyAssignment[] = []
 
-  canHandle(typeNode?: Node): boolean {
-    return Node.isTypeLiteral(typeNode)
-  }
-
-  handle(typeNode: Node): ts.Expression {
-    if (!Node.isTypeLiteral(typeNode)) {
-      return makeTypeCall('Any')
-    }
-
-    const literal = typeNode as TypeLiteralNode
-    const properties: ts.PropertyAssignment[] = []
-    for (const prop of literal.getProperties()) {
+    for (const prop of properties) {
       const propName = prop.getName()
       const propTypeNode = prop.getTypeNode()
-      const valueExpr = this.getTypeBoxType(propTypeNode)
+
+      if (!propTypeNode) {
+        continue
+      }
+
+      const valueExpr = getTypeBoxType(propTypeNode)
       const isAlreadyOptional =
         ts.isCallExpression(valueExpr) &&
         ts.isPropertyAccessExpression(valueExpr.expression) &&
@@ -36,10 +30,15 @@ export class ObjectTypeHandler extends BaseTypeHandler {
         ? ts.factory.createIdentifier(propName)
         : ts.factory.createStringLiteral(propName)
 
-      properties.push(ts.factory.createPropertyAssignment(nameNode, maybeOptional))
+      propertyAssignments.push(ts.factory.createPropertyAssignment(nameNode, maybeOptional))
     }
 
+    return propertyAssignments
+  }
+
+  protected createObjectType(properties: ts.PropertyAssignment[]): ts.Expression {
     const objectLiteral = ts.factory.createObjectLiteralExpression(properties, true)
+
     return makeTypeCall('Object', [objectLiteral])
   }
 }
