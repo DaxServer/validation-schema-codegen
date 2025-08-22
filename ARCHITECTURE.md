@@ -163,15 +163,11 @@ const result = await generateCode({
 
 ## Utility Functions and Modules
 
-- **<mcfile name="typebox-call.ts" path="src/utils/typebox-call.ts"></mcfile>**: This module contains the core logic for converting TypeScript type nodes into TypeBox `Type` expressions. Its primary function, `getTypeBoxType`, takes a TypeScript `TypeNode` as input and returns a `ts.Node` representing the equivalent TypeBox schema. This is a crucial part of the transformation process, handling various TypeScript types like primitives, arrays, objects, and unions.
-
-- **<mcfile name="add-static-type-alias.ts" path="src/utils/add-static-type-alias.ts"></mcfile>**: This utility function is responsible for generating and adding the `export type [TypeName] = Static<typeof [TypeName]>` declaration to the output source file. This declaration is essential for enabling TypeScript's static type inference from the dynamically generated TypeBox schemas, ensuring type safety at compile time.
-
-- **<mcfile name="typebox-codegen-utils.ts" path="src/utils/typebox-codegen-utils.ts"></mcfile>**: This file likely contains general utility functions that support the TypeBox code generation process, such as helper functions for string manipulation or AST node creation.
-
-- **<mcfile name="typescript-ast-parser.ts" path="src/utils/typescript-ast-parser.ts"></mcfile>**: This module is responsible for parsing TypeScript source code and extracting relevant Abstract Syntax Tree (AST) information. It might provide functions to navigate the AST and identify specific nodes like type aliases, interfaces, or enums.
-
-- **<mcfile name="typescript-ast-types.ts" path="src/utils/typescript-ast-types.ts"></mcfile>**: This file likely defines custom types or interfaces that represent the structured AST information extracted by `typescript-ast-parser.ts`, providing a consistent data model for further processing.
+- <mcfile name="typebox-call.ts" path="src/utils/typebox-call.ts"></mcfile>: This module contains the core logic for converting TypeScript type nodes into TypeBox `Type` expressions. Its primary function, `getTypeBoxType`, takes a TypeScript `TypeNode` as input and returns a `ts.Node` representing the equivalent TypeBox schema. This is a crucial part of the transformation process, handling various TypeScript types like primitives, arrays, objects, and unions.
+- <mcfile name="add-static-type-alias.ts" path="src/utils/add-static-type-alias.ts"></mcfile>: This utility function is responsible for generating and adding the `export type [TypeName] = Static<typeof [TypeName]>` declaration to the output source file. This declaration is essential for enabling TypeScript's static type inference from the dynamically generated TypeBox schemas, ensuring type safety at compile time.
+- <mcfile name="typebox-codegen-utils.ts" path="src/utils/typebox-codegen-utils.ts"></mcfile>: This file likely contains general utility functions that support the TypeBox code generation process, such as helper functions for string manipulation or AST node creation.
+- <mcfile name="typescript-ast-parser.ts" path="src/utils/typescript-ast-parser.ts"></mcfile>: This module is responsible for parsing TypeScript source code and extracting relevant Abstract Syntax Tree (AST) information. It might provide functions to navigate the AST and identify specific nodes like type aliases, interfaces, or enums.
+- <mcfile name="typescript-ast-types.ts" path="src/utils/typescript-ast-types.ts"></mcfile>: This file likely defines custom types or interfaces that represent the structured AST information extracted by `typescript-ast-parser.ts`, providing a consistent data model for further processing.
 
 ### Handlers Directory
 
@@ -189,7 +185,7 @@ This directory contains a collection of specialized handler modules, each respon
 - <mcfile name="record-type-handler.ts" path="src/handlers/typebox/record-type-handler.ts"></mcfile>: Handles TypeScript `Record` utility types.
 - <mcfile name="simple-type-handler.ts" path="src/handlers/typebox/simple-type-handler.ts"></mcfile>: Handles basic TypeScript types like `string`, `number`, `boolean`, `null`, `undefined`, `any`, `unknown`, `void`.
 - <mcfile name="function-type-handler.ts" path="src/handlers/typebox/function-type-handler.ts"></mcfile>: Handles TypeScript function types and function declarations, including parameter types, optional parameters, and return types.
-- <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>: Handles TypeScript template literal types (e.g., `` `hello-${string}` ``).
+- <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>: Handles TypeScript template literal types (e.g., `` `hello-${string}` ``). Parses template literals into their component parts, handling literal strings, embedded types (string, number, union types), and string/numeric literals. Generates `Type.TemplateLiteral()` calls with arrays of `Type.Literal()`, `Type.String()`, `Type.Number()`, and `Type.Union()` components.
 - <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>: Handles TypeScript `typeof` expressions for extracting types from values.
 - <mcfile name="tuple-type-handler.ts" path="src/handlers/typebox/tuple-type-handler.ts"></mcfile>: Handles TypeScript tuple types.
 - <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>: Handles TypeScript type operators like `keyof`, `typeof`.
@@ -273,7 +269,7 @@ The optimizations maintain full backward compatibility and test reliability whil
 
 ### Performance Testing
 
-To ensure the dependency collection system performs efficiently under various scenarios, comprehensive performance tests have been implemented in <mcfile name="dependency-collector.performance.test.ts" path="tests/ts-morph/dependency-collector.performance.test.ts"></mcfile>. These tests specifically target potential bottlenecks in dependency collection and import processing.
+To ensure the dependency collection system performs efficiently under various scenarios, comprehensive performance tests have been implemented in <mcfile name="dependency-collector.performance.test.ts" path="tests/dependency-collector.performance.test.ts"></mcfile>. These tests specifically target potential bottlenecks in dependency collection and import processing.
 
 ## Process Overview
 
@@ -303,29 +299,27 @@ The project uses Bun as the test runner. Here are the key commands for running t
 bun test
 
 # Run a specific test file
-bun test tests/ts-morph/function-types.test.ts
+bun test tests/handlers/typebox/function-types.test.ts
 
 # Run tests in a specific directory
-bun test tests/ts-morph/
+bun test tests/
 ```
 
 ### TDD Workflow for New Features
 
 When implementing new type handlers or features:
 
-1. **Start with Tests**: Create test cases in the appropriate test file (e.g., `tests/ts-morph/function-types.test.ts` for function-related features)
-2. **Run Tests First**: Execute `bun test tests/ts-morph/[test-file]` to confirm tests fail as expected
+1. **Start with Tests**: Create test cases in the appropriate test file (e.g., `tests/handlers/typebox/function-types.test.ts` for function-related features)
+2. **Run Tests First**: Execute `bun test tests/handlers/typebox/[test-file]` to confirm tests fail as expected
 3. **Implement Handler**: Create or modify the type handler to make tests pass
 4. **Verify Implementation**: Run tests again to ensure they pass
 5. **Integration Testing**: Run the full test suite with `bun test` to ensure no regressions
-6. **Manual Verification**: Test with integration examples like `tests/integration/wikibase/wikibase.ts`
 
 ### Test Organization
 
 Tests are organized into several categories:
 
-- **Unit Tests** (`tests/ts-morph/`): Test individual type handlers and parsers
-- **Integration Tests** (`tests/integration/`): Test end-to-end functionality with real-world examples
+- **Unit Tests** (`tests/handlers/`): Test individual type handlers and parsers
 - **Performance Tests**: Validate performance characteristics of complex operations
 
 ### Best Practices

@@ -84,7 +84,7 @@ export const createSourceFileFromInput = (options: InputOptions): SourceFile => 
     }
 
     const virtualPath = callerFile ? resolve(dirname(callerFile), '__virtual__.ts') : 'temp.ts'
-    
+
     return project.createSourceFile(virtualPath, sourceCode, { overwrite: true })
   }
 

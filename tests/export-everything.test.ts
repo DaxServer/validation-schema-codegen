@@ -1,4 +1,4 @@
-import { formatWithPrettier, generateFormattedCode } from '@test-fixtures/ts-morph/utils'
+import { formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Project } from 'ts-morph'
 
@@ -73,13 +73,13 @@ describe('exportEverything flag', () => {
 
       expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
         formatWithPrettier(`
-          export const UnusedImportedType = Type.Number();
-
-          export type UnusedImportedType = Static<typeof UnusedImportedType>;
-
           export const MyType = Type.String();
 
           export type MyType = Static<typeof MyType>;
+
+          export const UnusedImportedType = Type.Number();
+
+          export type UnusedImportedType = Static<typeof UnusedImportedType>;
         `),
       )
     })
