@@ -1,9 +1,5 @@
 import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
-import {
-  createSourceFile,
-  formatWithPrettier,
-  generateFormattedCode,
-} from '@test-fixtures/ts-morph/utils'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
 

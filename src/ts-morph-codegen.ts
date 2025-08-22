@@ -6,10 +6,7 @@ import { EnumParser } from '@daxserver/validation-schema-codegen/parsers/parse-e
 import { FunctionDeclarationParser } from '@daxserver/validation-schema-codegen/parsers/parse-function-declarations'
 import { InterfaceParser } from '@daxserver/validation-schema-codegen/parsers/parse-interfaces'
 import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
-import {
-  DependencyCollector,
-  type TypeDependency,
-} from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
 import { Project, ts } from 'ts-morph'
 
 export interface GenerateCodeOptions extends InputOptions {
@@ -61,36 +58,23 @@ export const generateCode = async ({
   const importDeclarations = sourceFile.getImportDeclarations()
   const localTypeAliases = sourceFile.getTypeAliases()
 
-  let orderedDependencies: TypeDependency[]
-  if (exportEverything) {
-    // When exporting everything, maintain original order
-    orderedDependencies = dependencyCollector.collectFromImports(
-      importDeclarations,
-      exportEverything,
-    )
-    dependencyCollector.addLocalTypes(localTypeAliases, sourceFile)
-  } else {
-    // When not exporting everything, add local types first so filtering can detect their dependencies
-    dependencyCollector.addLocalTypes(localTypeAliases, sourceFile)
-    orderedDependencies = dependencyCollector.collectFromImports(
-      importDeclarations,
-      exportEverything,
-    )
-  }
+  // Always add local types first so they can be included in topological sort
+  dependencyCollector.addLocalTypes(localTypeAliases, sourceFile)
 
-  // Process all dependencies in topological order
+  const orderedDependencies = dependencyCollector.collectFromImports(
+    importDeclarations,
+    exportEverything,
+  )
+
+  // Process all dependencies (both imported and local) in topological order
   for (const dependency of orderedDependencies) {
     if (!processedTypes.has(dependency.typeAlias.getName())) {
       typeAliasParser.parseWithImportFlag(dependency.typeAlias, dependency.isImported)
     }
   }
 
-  // Process local types
+  // Process any remaining local types that weren't included in the dependency graph
   if (exportEverything) {
-    for (const typeAlias of localTypeAliases) {
-      typeAliasParser.parseWithImportFlag(typeAlias, false)
-    }
-  } else {
     for (const typeAlias of localTypeAliases) {
       if (!processedTypes.has(typeAlias.getName())) {
         typeAliasParser.parseWithImportFlag(typeAlias, false)
