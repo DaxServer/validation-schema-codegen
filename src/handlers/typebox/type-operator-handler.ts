@@ -1,26 +1,16 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { Node, SyntaxKind, ts } from 'ts-morph'
+import { Node, ts, TypeOperatorTypeNode } from 'ts-morph'
 
 export class TypeOperatorHandler extends BaseTypeHandler {
-  constructor(getTypeBoxType: (typeNode?: Node) => ts.Expression) {
-    super(getTypeBoxType)
+  canHandle(node: Node): boolean {
+    // This handler now serves as a fallback for unhandled type operators
+    // Specific operators like KeyOf and Readonly have their own handlers
+    return Node.isTypeOperatorTypeNode(node)
   }
 
-  canHandle(typeNode?: Node): boolean {
-    return Node.isTypeOperatorTypeNode(typeNode)
-  }
-
-  handle(typeNode: Node): ts.Expression {
-    if (!Node.isTypeOperatorTypeNode(typeNode)) {
-      return makeTypeCall('Any')
-    }
-    if (typeNode.getOperator() === SyntaxKind.KeyOfKeyword) {
-      const operandType = typeNode.getTypeNode()
-      const typeboxOperand = this.getTypeBoxType(operandType)
-      return makeTypeCall('KeyOf', [typeboxOperand])
-    }
-
-    return makeTypeCall('Any')
+  handle(node: TypeOperatorTypeNode): ts.Expression {
+    // Fallback for any unhandled type operators
+    throw new Error(`Unhandled type operator: ${node.getOperator()}`)
+    // return makeTypeCall('Any')
   }
 }

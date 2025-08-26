@@ -3,23 +3,16 @@ import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox
 import { Node, SyntaxKind, ts } from 'ts-morph'
 
 export class LiteralTypeHandler extends BaseTypeHandler {
-  constructor() {
-    super(() => ts.factory.createIdentifier('')) // getTypeBoxType is not used in LiteralTypeHandler
-  }
-  canHandle(typeNode?: Node): boolean {
-    return (
-      Node.isLiteralTypeNode(typeNode) ||
-      Node.isTrueLiteral(typeNode) ||
-      Node.isFalseLiteral(typeNode)
-    )
+  canHandle(node: Node): boolean {
+    return Node.isLiteralTypeNode(node) || Node.isTrueLiteral(node) || Node.isFalseLiteral(node)
   }
 
-  handle(typeNode: Node): ts.Expression {
-    if (!Node.isLiteralTypeNode(typeNode)) {
+  handle(node: Node): ts.Expression {
+    if (!Node.isLiteralTypeNode(node)) {
       return makeTypeCall('Any')
     }
 
-    const literal = typeNode.getLiteral()
+    const literal = node.getLiteral()
     const literalKind = literal.getKind()
 
     switch (literalKind) {
