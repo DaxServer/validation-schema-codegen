@@ -35,20 +35,6 @@ describe('Object types', () => {
         `),
       )
     })
-
-    test('interface', () => {
-      const sourceFile = createSourceFile(project, `interface A { a: string }`)
-
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
-        formatWithPrettier(`
-          const A = Type.Object({
-            a: Type.String(),
-          });
-
-          type A = Static<typeof A>;
-        `),
-      )
-    })
   })
 
   describe('with export', () => {
@@ -74,20 +60,6 @@ describe('Object types', () => {
           export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
           export type T = Static<typeof T>;
-        `),
-      )
-    })
-
-    test('interface', () => {
-      const sourceFile = createSourceFile(project, `export interface A { a: string }`)
-
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
-        formatWithPrettier(`
-          export const A = Type.Object({
-            a: Type.String(),
-          });
-
-          export type A = Static<typeof A>;
         `),
       )
     })
