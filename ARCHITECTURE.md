@@ -221,7 +221,7 @@ This directory contains a collection of specialized handler modules, each respon
 **Object-Like Type Handlers** (extend `ObjectLikeBaseHandler`):
 
 - <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object/object-type-handler.ts"></mcfile>: Handles TypeScript object types and type literals.
-- <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>: Handles TypeScript interface declarations, including support for interface inheritance using `Type.Composite` to combine base interfaces with extended properties.
+- <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>: Handles TypeScript interface declarations, including support for interface inheritance using `Type.Composite` to combine base interfaces with extended properties. Supports generic interfaces with type parameters, generating parameterized functions that accept TypeBox schemas as arguments. Handles generic type calls in heritage clauses, converting expressions like `A<number>` to `A(Type.Number())` for proper TypeBox composition.
 
 **Collection Type Handlers** (extend `CollectionBaseHandler`):
 
@@ -257,7 +257,7 @@ This directory contains a collection of parser classes, each extending the `Base
 - <mcfile name="parse-imports.ts" path="src/parsers/parse-imports.ts"></mcfile>: Implements the `ImportParser` class, responsible for resolving and processing TypeScript import declarations.
 - <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile>: Implements the `TypeAliasParser` class, responsible for processing TypeScript `type alias` declarations.
 - <mcfile name="parse-function-declarations.ts" path="src/parsers/parse-function-declarations.ts"></mcfile>: Implements the `FunctionDeclarationParser` class, responsible for processing TypeScript function declarations and converting them to TypeBox function schemas.
-- <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile>: Implements the `InterfaceParser` class, responsible for processing TypeScript interface declarations with support for inheritance through dependency ordering and `Type.Composite` generation.
+- <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile>: Implements the `InterfaceParser` class, responsible for processing TypeScript interface declarations with support for inheritance through dependency ordering and `Type.Composite` generation. Handles generic interfaces by generating parameterized functions with type parameters that accept TypeBox schemas as arguments.
 
 ### Performance Considerations
 
