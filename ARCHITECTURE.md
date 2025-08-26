@@ -7,6 +7,10 @@
     - [DependencyCollector](#dependencycollector)
     - [Key Features](#key-features)
     - [Implementation Details](#implementation-details)
+- [Interface Inheritance Support](#interface-inheritance-support)
+  - [Dependency-Ordered Processing](#dependency-ordered-processing)
+  - [TypeBox Composite Generation](#typebox-composite-generation)
+  - [Implementation Details](#implementation-details-1)
 - [Input Handling System](#input-handling-system)
   - [InputOptions Interface](#inputoptions-interface)
   - [Input Processing Features](#input-processing-features)
@@ -115,7 +119,7 @@ Interfaces are processed in dependency order using a topological sort algorithm 
 2. **Topological Sorting**: Interfaces are sorted to ensure base interfaces are processed before extended interfaces
 3. **Circular Dependency Detection**: The algorithm detects and handles circular inheritance scenarios gracefully
 
-### TypeBox.Composite Generation
+### TypeBox Composite Generation
 
 Interface inheritance is implemented using TypeBox's `Type.Composite` functionality:
 
