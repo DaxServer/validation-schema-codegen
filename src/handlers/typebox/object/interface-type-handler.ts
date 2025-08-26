@@ -21,23 +21,7 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
       return baseObjectType
     }
 
-    const extendedTypes: ts.Expression[] = []
-
-    for (const heritageClause of heritageClauses) {
-      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) {
-        continue
-      }
-
-      for (const typeNode of heritageClause.getTypeNodes()) {
-        const typeText = typeNode.getText()
-        const genericCall = this.parseGenericTypeCall(typeText)
-        if (genericCall) {
-          extendedTypes.push(genericCall)
-        } else {
-          extendedTypes.push(ts.factory.createIdentifier(typeText))
-        }
-      }
-    }
+    const extendedTypes = this.collectExtendedTypes(heritageClauses)
 
     if (extendedTypes.length === 0) {
       return baseObjectType
@@ -72,36 +56,19 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     let functionBody: ts.Expression = baseObjectType
 
     // Handle heritage clauses for generic interfaces
-    if (heritageClauses.length > 0) {
-      const extendedTypes: ts.Expression[] = []
+    const extendedTypes = this.collectExtendedTypes(heritageClauses)
 
-      for (const heritageClause of heritageClauses) {
-        if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) {
-          continue
-        }
-
-        for (const typeNode of heritageClause.getTypeNodes()) {
-          const typeText = typeNode.getText()
-          const genericCall = this.parseGenericTypeCall(typeText)
-          if (genericCall) {
-            extendedTypes.push(genericCall)
-          } else {
-            extendedTypes.push(ts.factory.createIdentifier(typeText))
-          }
-        }
-      }
-
-      if (extendedTypes.length > 0) {
-        const allTypes = [...extendedTypes, baseObjectType]
-        functionBody = makeTypeCall('Composite', [
-          ts.factory.createArrayLiteralExpression(allTypes, true),
-        ])
-      }
+    if (extendedTypes.length > 0) {
+      const allTypes = [...extendedTypes, baseObjectType]
+      functionBody = makeTypeCall('Composite', [
+        ts.factory.createArrayLiteralExpression(allTypes, true),
+      ])
     }
 
     // Create type parameters for the function
     const functionTypeParams = typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
+
       return ts.factory.createTypeParameterDeclaration(
         undefined,
         ts.factory.createIdentifier(paramName),
@@ -127,6 +94,7 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     if (match && match[1] && match[2]) {
       const baseName = match[1].trim()
       const typeArg = match[2].trim()
+
       return ts.factory.createCallExpression(ts.factory.createIdentifier(baseName), undefined, [
         this.createTypeExpression(typeArg),
       ])
@@ -148,5 +116,24 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
         // For other types, assume it's a reference
         return ts.factory.createIdentifier(typeArg)
     }
+  }
+
+  private collectExtendedTypes(heritageClauses: HeritageClause[]): ts.Expression[] {
+    const extendedTypes: ts.Expression[] = []
+
+    for (const heritageClause of heritageClauses) {
+      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) {
+        continue
+      }
+
+      for (const typeNode of heritageClause.getTypeNodes()) {
+        const typeText = typeNode.getText()
+        extendedTypes.push(
+          this.parseGenericTypeCall(typeText) ?? ts.factory.createIdentifier(typeText),
+        )
+      }
+    }
+
+    return extendedTypes
   }
 }
