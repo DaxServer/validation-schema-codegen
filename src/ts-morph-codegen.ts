@@ -30,16 +30,30 @@ export const generateCode = async ({
     overwrite: true,
   })
 
+  // Check if any interfaces have generic type parameters
+  const hasGenericInterfaces = sourceFile
+    .getInterfaces()
+    .some((i) => i.getTypeParameters().length > 0)
+
   // Add imports
+  const namedImports = [
+    'Type',
+    {
+      name: 'Static',
+      isTypeOnly: true,
+    },
+  ]
+
+  if (hasGenericInterfaces) {
+    namedImports.push({
+      name: 'TSchema',
+      isTypeOnly: true,
+    })
+  }
+
   newSourceFile.addImportDeclaration({
     moduleSpecifier: '@sinclair/typebox',
-    namedImports: [
-      'Type',
-      {
-        name: 'Static',
-        isTypeOnly: true,
-      },
-    ],
+    namedImports,
   })
 
   const parserOptions = {

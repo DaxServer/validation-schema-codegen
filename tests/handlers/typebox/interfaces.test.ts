@@ -200,5 +200,35 @@ describe('Interfaces', () => {
         `),
       )
     })
+
+    test('generic types', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          interface A<T> { a: T }
+          interface B extends A<number> { b: number }
+        `,
+      )
+
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        formatWithPrettier(
+          `
+          const A = <T extends TSchema>(T: T) => Type.Object({
+            a: T
+          });
+
+          type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
+
+          const B = Type.Composite([A(Type.Number()), Type.Object({
+            b: Type.Number()
+          })]);
+
+          type B = Static<typeof B>;
+        `,
+          true,
+          true,
+        ),
+      )
+    })
   })
 })
