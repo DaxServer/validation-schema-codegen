@@ -1,4 +1,4 @@
-import type { TypeDependency } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import type { TypeDependency } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
 import { Node, TypeReferenceNode } from 'ts-morph'
 
 export interface TypeReferenceExtractor {
