@@ -68,7 +68,6 @@ export class TypeBoxTypeHandlers {
     this.syntaxKindHandlers.set(SyntaxKind.TupleType, tupleTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.UnionType, unionTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.IntersectionType, intersectionTypeHandler)
-    // TypeOperator handling moved to fallback handlers for specific operator types
     this.syntaxKindHandlers.set(SyntaxKind.IndexedAccessType, indexedAccessTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.InterfaceDeclaration, interfaceTypeHandler)
     this.syntaxKindHandlers.set(SyntaxKind.FunctionType, functionTypeHandler)

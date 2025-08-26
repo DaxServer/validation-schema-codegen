@@ -61,7 +61,7 @@ The main logic for code generation resides in the <mcfile name="ts-morph-codegen
 
 6.  **Type Alias Processing**: The `TypeAliasParser` is instantiated and iterates through all `type alias` declarations in the input `sourceFile`. For each type alias, its underlying type node is converted into a TypeBox-compatible type representation, a TypeBox schema is generated, and a corresponding static type alias is added.
 
-7.  **Interface Processing**: The `InterfaceParser` is instantiated and iterates through all `interface` declarations in the input `sourceFile`. For each interface, its properties and methods are converted into TypeBox object schemas with corresponding static type aliases.
+7.  **Interface Processing**: The `InterfaceParser` is instantiated and iterates through all `interface` declarations in the input `sourceFile`. Interfaces are processed in dependency order to handle inheritance properly. For each interface, its properties and methods are converted into TypeBox object schemas. Interfaces that extend other interfaces are generated using `Type.Intersect` to combine the base interface with additional properties, ensuring proper inheritance semantics.
 
 8.  **Function Declaration Processing**: The `FunctionDeclarationParser` is instantiated and iterates through all function declarations in the input `sourceFile`. For each function, its parameters, optional parameters, and return type are converted into TypeBox function schemas with corresponding static type aliases.
 
@@ -102,6 +102,32 @@ The import resolution process works in two phases:
    - Types are processed sequentially in the sorted order
 
 This approach ensures that complex import scenarios work correctly and generated code compiles without dependency errors.
+
+## Interface Inheritance Support
+
+The codebase provides comprehensive support for TypeScript interface inheritance through a sophisticated dependency resolution and code generation system:
+
+### Dependency-Ordered Processing
+
+Interfaces are processed in dependency order using a topological sort algorithm implemented in <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile>:
+
+1. **Dependency Analysis**: The `getInterfaceProcessingOrder` function analyzes all interfaces to identify inheritance relationships
+2. **Topological Sorting**: Interfaces are sorted to ensure base interfaces are processed before extended interfaces
+3. **Circular Dependency Detection**: The algorithm detects and handles circular inheritance scenarios gracefully
+
+### TypeBox.Composite Generation
+
+Interface inheritance is implemented using TypeBox's `Type.Composite` functionality:
+
+- **Base Interface Reference**: Extended interfaces reference their base interfaces by name as identifiers
+- **Property Combination**: The `InterfaceTypeHandler` generates `Type.Composite([BaseInterface, Type.Object({...})])` for extended interfaces
+- **Type Safety**: Generated code maintains full TypeScript type safety through proper static type aliases
+
+### Implementation Details
+
+- **Heritage Clause Processing**: The <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile> processes `extends` clauses by extracting referenced type names
+- **Identifier Generation**: Base interface references are converted to TypeScript identifiers rather than attempting recursive type resolution
+- **Error Prevention**: The dependency ordering prevents "No handler found for type" errors that occur when extended interfaces are processed before their base interfaces
 
 ## Input Handling System
 
@@ -191,7 +217,7 @@ This directory contains a collection of specialized handler modules, each respon
 **Object-Like Type Handlers** (extend `ObjectLikeBaseHandler`):
 
 - <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object/object-type-handler.ts"></mcfile>: Handles TypeScript object types and type literals.
-- <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>: Handles TypeScript interface declarations.
+- <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>: Handles TypeScript interface declarations, including support for interface inheritance using `Type.Composite` to combine base interfaces with extended properties.
 
 **Collection Type Handlers** (extend `CollectionBaseHandler`):
 
@@ -227,6 +253,7 @@ This directory contains a collection of parser classes, each extending the `Base
 - <mcfile name="parse-imports.ts" path="src/parsers/parse-imports.ts"></mcfile>: Implements the `ImportParser` class, responsible for resolving and processing TypeScript import declarations.
 - <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile>: Implements the `TypeAliasParser` class, responsible for processing TypeScript `type alias` declarations.
 - <mcfile name="parse-function-declarations.ts" path="src/parsers/parse-function-declarations.ts"></mcfile>: Implements the `FunctionDeclarationParser` class, responsible for processing TypeScript function declarations and converting them to TypeBox function schemas.
+- <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile>: Implements the `InterfaceParser` class, responsible for processing TypeScript interface declarations with support for inheritance through dependency ordering and `Type.Composite` generation.
 
 ### Performance Considerations
 

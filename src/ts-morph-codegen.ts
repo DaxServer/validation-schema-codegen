@@ -7,6 +7,7 @@ import { FunctionDeclarationParser } from '@daxserver/validation-schema-codegen/
 import { InterfaceParser } from '@daxserver/validation-schema-codegen/parsers/parse-interfaces'
 import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
 import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import { getInterfaceProcessingOrder } from '@daxserver/validation-schema-codegen/utils/interface-processing-order'
 import { Project, ts } from 'ts-morph'
 
 export interface GenerateCodeOptions extends InputOptions {
@@ -67,34 +68,34 @@ export const generateCode = async ({
   )
 
   // Process all dependencies (both imported and local) in topological order
-  for (const dependency of orderedDependencies) {
+  orderedDependencies.forEach((dependency) => {
     if (!processedTypes.has(dependency.typeAlias.getName())) {
       typeAliasParser.parseWithImportFlag(dependency.typeAlias, dependency.isImported)
     }
-  }
+  })
 
   // Process any remaining local types that weren't included in the dependency graph
   if (exportEverything) {
-    for (const typeAlias of localTypeAliases) {
+    localTypeAliases.forEach((typeAlias) => {
       if (!processedTypes.has(typeAlias.getName())) {
         typeAliasParser.parseWithImportFlag(typeAlias, false)
       }
-    }
+    })
   }
 
   // Process enums
-  sourceFile.getEnums().forEach((enumDeclaration) => {
-    enumParser.parse(enumDeclaration)
+  sourceFile.getEnums().forEach((e) => {
+    enumParser.parse(e)
   })
 
-  // Process interfaces
-  sourceFile.getInterfaces().forEach((interfaceDeclaration) => {
-    interfaceParser.parse(interfaceDeclaration)
+  // Process interfaces in dependency order
+  getInterfaceProcessingOrder(sourceFile.getInterfaces()).forEach((i) => {
+    interfaceParser.parse(i)
   })
 
   // Process function declarations
-  sourceFile.getFunctions().forEach((functionDeclaration) => {
-    functionDeclarationParser.parse(functionDeclaration)
+  sourceFile.getFunctions().forEach((f) => {
+    functionDeclarationParser.parse(f)
   })
 
   return newSourceFile.getFullText()
