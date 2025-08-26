@@ -1,12 +1,12 @@
-import { DependencyCollector } from '@daxserver/validation-schema-codegen/utils/dependency-collector'
+import { DependencyCollector } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
 import {
   DefaultFileResolver,
   type FileResolver,
-} from '@daxserver/validation-schema-codegen/utils/dependency-file-resolver'
+} from '@daxserver/validation-schema-codegen/traverse/dependency-file-resolver'
 import {
   DefaultTypeReferenceExtractor,
   type TypeReferenceExtractor,
-} from '@daxserver/validation-schema-codegen/utils/dependency-type'
+} from '@daxserver/validation-schema-codegen/traverse/dependency-type'
 import { describe, expect, mock, test } from 'bun:test'
 import type { ImportDeclaration, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 

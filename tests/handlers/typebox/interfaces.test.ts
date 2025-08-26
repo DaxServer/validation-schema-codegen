@@ -201,34 +201,105 @@ describe('Interfaces', () => {
       )
     })
 
-    test('generic types', () => {
-      const sourceFile = createSourceFile(
-        project,
-        `
-          interface A<T> { a: T }
-          interface B extends A<number> { b: number }
-        `,
-      )
-
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
-        formatWithPrettier(
+    describe('generic types', () => {
+      test('generic types', () => {
+        const sourceFile = createSourceFile(
+          project,
           `
-          const A = <T extends TSchema>(T: T) => Type.Object({
-            a: T
-          });
+            interface A<T> { a: T }
+            interface B extends A<number> { b: number }
+          `,
+        )
 
-          type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+          formatWithPrettier(
+            `
+            const A = <T extends TSchema>(T: T) => Type.Object({
+              a: T
+            });
 
-          const B = Type.Composite([A(Type.Number()), Type.Object({
-            b: Type.Number()
-          })]);
+            type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
 
-          type B = Static<typeof B>;
-        `,
-          true,
-          true,
-        ),
-      )
+            const B = Type.Composite([A(Type.Number()), Type.Object({
+              b: Type.Number()
+            })]);
+
+            type B = Static<typeof B>;
+          `,
+            true,
+            true,
+          ),
+        )
+      })
+
+      test('generic types extension', () => {
+        const sourceFile = createSourceFile(
+          project,
+          `
+            interface A<T> { a: T }
+            interface B<T> extends A<T> { b: T }
+          `,
+        )
+
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+          formatWithPrettier(
+            `
+            const A = <T extends TSchema>(T: T) => Type.Object({
+              a: T
+            });
+
+            type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
+
+            const B = <T extends TSchema>(T: T) => Type.Composite([A(T), Type.Object({
+              b: T
+            })]);
+
+            type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>;
+          `,
+            true,
+            true,
+          ),
+        )
+      })
+
+      test('generic types with extended type', () => {
+        const sourceFile = createSourceFile(
+          project,
+          `
+            declare const A: readonly ["a", "b"]
+            type A = typeof A[number]
+            interface B<T extends A> { a: T }
+            type C = B<'a'>
+            type D = B<'b'>
+          `,
+        )
+
+        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+          formatWithPrettier(
+            `
+              const A = Type.Union([Type.Literal('a'), Type.Literal('b')])
+
+              type A = Static<typeof A>
+
+              const B = <T extends TSchema>(T: T) => Type.Object({
+                a: T
+              })
+
+              type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>
+
+              const C = B(Type.Literal('a'))
+
+              type C = Static<typeof C>
+
+              const D = B(Type.Literal('b'))
+
+              type D = Static<typeof D>
+            `,
+            true,
+            true,
+          ),
+        )
+      })
     })
   })
 })

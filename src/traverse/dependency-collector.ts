@@ -1,11 +1,11 @@
 import {
   DefaultFileResolver,
   type FileResolver,
-} from '@daxserver/validation-schema-codegen/utils/dependency-file-resolver'
+} from '@daxserver/validation-schema-codegen/traverse/dependency-file-resolver'
 import {
   DefaultTypeReferenceExtractor,
   type TypeReferenceExtractor,
-} from '@daxserver/validation-schema-codegen/utils/dependency-type'
+} from '@daxserver/validation-schema-codegen/traverse/dependency-type'
 import { ImportDeclaration, SourceFile, TypeAliasDeclaration } from 'ts-morph'
 
 export interface TypeDependency {

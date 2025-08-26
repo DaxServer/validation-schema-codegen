@@ -33,7 +33,7 @@
     - [TypeBoxTypeHandlers Optimizations](#typeboxtypehandlers-optimizations)
   - [Performance Testing](#performance-testing)
 - [Process Overview](#process-overview)
-- [Test-Driven Development (TDD) Approach](#test-driven-development-tdd-approach)
+- [Test-Driven Development](#test-driven-development)
   - [TDD Cycle](#tdd-cycle)
   - [Running Tests](#running-tests)
   - [TDD Workflow for New Features](#tdd-workflow-for-new-features)
@@ -77,7 +77,7 @@ The code generation process includes sophisticated import resolution and depende
 
 #### DependencyCollector
 
-The <mcfile name="dependency-collector.ts" path="src/utils/dependency-collector.ts"></mcfile> module implements a `DependencyCollector` class that:
+The <mcfile name="dependency-collector.ts" path="src/traverse/dependency-collector.ts"></mcfile> module implements a `DependencyCollector` class that:
 
 - **Traverses Import Chains**: Recursively follows import declarations to collect all type dependencies from external files
 - **Builds Dependency Graph**: Creates a comprehensive map of type dependencies, tracking which types depend on which other types
@@ -113,11 +113,15 @@ The codebase provides comprehensive support for TypeScript interface inheritance
 
 ### Dependency-Ordered Processing
 
-Interfaces are processed in dependency order using a topological sort algorithm implemented in <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile>:
+The main codegen logic in <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile> implements sophisticated processing order management:
 
-1. **Dependency Analysis**: The `getInterfaceProcessingOrder` function analyzes all interfaces to identify inheritance relationships
-2. **Topological Sorting**: Interfaces are sorted to ensure base interfaces are processed before extended interfaces
-3. **Circular Dependency Detection**: The algorithm detects and handles circular inheritance scenarios gracefully
+1. **Dependency Analysis**: Uses `InterfaceTypeDependencyAnalyzer` to analyze complex relationships between interfaces and type aliases
+2. **Conditional Processing**: Handles three scenarios:
+   - Interfaces depending on type aliases only
+   - Type aliases depending on interfaces only
+   - Both dependencies present (three-phase processing)
+3. **Topological Sorting**: Ensures types are processed in correct dependency order to prevent "type not found" errors
+4. **Circular Dependency Detection**: The algorithm detects and handles circular inheritance scenarios gracefully
 
 ### TypeBox Composite Generation
 
@@ -126,11 +130,13 @@ Interface inheritance is implemented using TypeBox's `Type.Composite` functional
 - **Base Interface Reference**: Extended interfaces reference their base interfaces by name as identifiers
 - **Property Combination**: The `InterfaceTypeHandler` generates `Type.Composite([BaseInterface, Type.Object({...})])` for extended interfaces
 - **Type Safety**: Generated code maintains full TypeScript type safety through proper static type aliases
+- **Generic Type Parameter Handling**: Uses `TSchema` as the constraint for TypeBox compatibility instead of preserving original TypeScript constraints
 
 ### Implementation Details
 
 - **Heritage Clause Processing**: The <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile> processes `extends` clauses by extracting referenced type names
 - **Identifier Generation**: Base interface references are converted to TypeScript identifiers rather than attempting recursive type resolution
+- **TypeBox Constraint Normalization**: Generic type parameters use `TSchema` constraints for TypeBox schema compatibility
 - **Error Prevention**: The dependency ordering prevents "No handler found for type" errors that occur when extended interfaces are processed before their base interfaces
 
 ## Input Handling System
@@ -341,9 +347,9 @@ To ensure the dependency collection system performs efficiently under various sc
 5.  **Static Type Generation**: Alongside each TypeBox schema, a TypeScript `type` alias is generated using `Static<typeof ...>` to provide compile-time type safety and seamless integration with existing TypeScript code.
 6.  **Output**: A new TypeScript file (as a string) containing the generated TypeBox schemas and static type aliases, ready to be written to disk or integrated into your application.
 
-## Test-Driven Development (TDD) Approach
+## Test-Driven Development
 
-This project follows a Test-Driven Development methodology to ensure code quality, maintainability, and reliability. The TDD workflow consists of three main phases:
+This project follows a Test-Driven Development (TDD) methodology to ensure code quality, maintainability, and reliability. The TDD workflow consists of three main phases:
 
 ### TDD Cycle
 

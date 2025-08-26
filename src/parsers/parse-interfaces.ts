@@ -107,10 +107,13 @@ export class InterfaceParser extends BaseParser {
     // Create type parameters for the type alias
     const typeParamDeclarations = typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
+      // Use TSchema as the constraint for TypeBox compatibility
+      const constraintNode = ts.factory.createTypeReferenceNode('TSchema', undefined)
+
       return ts.factory.createTypeParameterDeclaration(
         undefined,
         ts.factory.createIdentifier(paramName),
-        ts.factory.createTypeReferenceNode('TSchema', undefined),
+        constraintNode,
         undefined,
       )
     })
