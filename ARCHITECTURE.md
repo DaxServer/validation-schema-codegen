@@ -75,14 +75,17 @@ The main logic for code generation resides in the <mcfile name="ts-morph-codegen
 
 The code generation process includes sophisticated import resolution and dependency management to handle complex type hierarchies and multi-level import chains:
 
-#### DependencyCollector
+#### DependencyTraversal
 
-The <mcfile name="dependency-collector.ts" path="src/traverse/dependency-collector.ts"></mcfile> module implements a `DependencyCollector` class that:
+The <mcfile name="dependency-traversal.ts" path="src/traverse/dependency-traversal.ts"></mcfile> module implements a unified `DependencyTraversal` class that exclusively uses Graphology for all dependency management:
 
+- **Graphology-Only Architecture**: Uses Graphology's DirectedGraph exclusively for all dependency tracking, eliminating Map-based and other tracking mechanisms
+- **Unified Data Management**: All dependency information is stored and managed through the Graphology graph structure with node attributes
+- **Topological Sorting**: Employs graphology-dag for robust dependency ordering with circular dependency detection and preference-based sorting
 - **Traverses Import Chains**: Recursively follows import declarations to collect all type dependencies from external files
-- **Builds Dependency Graph**: Creates a comprehensive map of type dependencies, tracking which types depend on which other types
-- **Topological Sorting**: Performs topological sorting to ensure types are generated in the correct dependency order
 - **Handles Multi-level Imports**: Supports complex scenarios with 3+ levels of nested imports (e.g., `TypeA` imports `TypeB` which imports `TypeC`)
+- **Graph-Based Caching**: Uses Graphology node attributes for caching type information and dependency relationships
+- **Export-Aware Ordering**: Provides specialized ordering logic for `exportEverything=false` scenarios to ensure proper dependency resolution
 
 #### Key Features
 
@@ -93,19 +96,58 @@ The <mcfile name="dependency-collector.ts" path="src/traverse/dependency-collect
 
 #### Implementation Details
 
-The import resolution process works in two phases:
+The import resolution process works in three phases using the unified architecture:
 
 1. **Collection Phase**:
-   - `DependencyCollector.collectFromImports()` traverses all import declarations
-   - `DependencyCollector.addLocalTypes()` adds local type aliases
-   - Dependencies are tracked in a `Map<string, TypeInfo>` structure
+   - `DependencyTraversal.collectFromImports()` traverses all import declarations using integrated AST traversal
+   - `DependencyTraversal.addLocalTypes()` adds local type aliases with unified type reference extraction
+   - Dependencies are tracked using Graphology's DirectedGraph with nodes and edges representing type relationships
 
-2. **Generation Phase**:
-   - `DependencyCollector.getTopologicallySortedTypes()` returns types in dependency order
+2. **Analysis Phase**:
+   - `DependencyTraversal.getTopologicallySortedTypesWithPreference()` performs dependency ordering with export-aware preferences
+   - Uses graphology-dag for circular dependency detection and topological sorting
+   - Handles complex dependency scenarios including imported vs. local type ordering based on `exportEverything` flag
+
+3. **Generation Phase**:
+   - `DependencyTraversal.getTopologicallySortedTypes()` returns types in dependency order
    - `TypeAliasParser.parseWithImportFlag()` generates code with appropriate export handling
    - Types are processed sequentially in the sorted order
 
-This approach ensures that complex import scenarios work correctly and generated code compiles without dependency errors.
+This unified approach ensures robust handling of complex import scenarios, circular dependencies, and generates code that compiles without dependency errors while maintaining optimal performance through reduced module boundaries.
+
+### Unified Dependency Management
+
+The dependency management system is built on a unified architecture that integrates all dependency-related functionality:
+
+#### DependencyTraversal Integration
+
+The <mcfile name="dependency-traversal.ts" path="src/traverse/dependency-traversal.ts"></mcfile> module provides comprehensive dependency management:
+
+- **Integrated AST Traversal**: Combines AST traversal logic with dependency collection for optimal performance
+- **Direct Graphology Usage**: Uses Graphology's DirectedGraph directly for dependency tracking without abstraction layers
+- **Unified Type Reference Extraction**: Consolidates type reference extraction logic within the main traversal module
+- **Export-Aware Processing**: Implements specialized logic for handling `exportEverything=false` scenarios with proper dependency ordering
+- **Performance Optimization**: Eliminates module boundaries and reduces function call overhead through unified architecture
+
+#### Graph-Based Dependency Resolution
+
+The unified module leverages Graphology's ecosystem for robust dependency management:
+
+- **DirectedGraph**: Uses Graphology's optimized graph data structure for dependency relationships
+- **Topological Sorting**: Employs `topologicalSort` from `graphology-dag` for dependency ordering with circular dependency detection
+- **Preference-Based Ordering**: Implements `getTopologicallySortedTypesWithPreference()` for export-aware type ordering
+- **Memory Efficiency**: Direct Graphology usage provides optimal memory management for large dependency graphs
+- **Type Safety**: Full TypeScript support through graphology-types package
+
+#### Simplified Architecture Benefits
+
+The Graphology-only approach provides several advantages:
+
+- **Simplified Architecture**: Eliminates multiple tracking mechanisms (Map-based dependencies, visitedFiles, various caches) in favor of a single graph-based solution
+- **Enhanced Performance**: Direct Graphology operations provide optimized graph algorithms and data structures
+- **Improved Maintainability**: Single dependency tracking mechanism reduces complexity and potential inconsistencies
+- **Better Memory Management**: Graphology's optimized memory handling for large dependency graphs
+- **Unified Data Model**: All dependency information stored consistently in graph nodes and edges
 
 ## Interface Inheritance Support
 
@@ -115,13 +157,13 @@ The codebase provides comprehensive support for TypeScript interface inheritance
 
 The main codegen logic in <mcfile name="ts-morph-codegen.ts" path="src/ts-morph-codegen.ts"></mcfile> implements sophisticated processing order management:
 
-1. **Dependency Analysis**: Uses `InterfaceTypeDependencyAnalyzer` to analyze complex relationships between interfaces and type aliases
-2. **Conditional Processing**: Handles three scenarios:
-   - Interfaces depending on type aliases only
-   - Type aliases depending on interfaces only
-   - Both dependencies present (three-phase processing)
-3. **Topological Sorting**: Ensures types are processed in correct dependency order to prevent "type not found" errors
-4. **Circular Dependency Detection**: The algorithm detects and handles circular inheritance scenarios gracefully
+1. **Unified Dependency Analysis**: Uses <mcfile name="dependency-traversal.ts" path="src/traverse/dependency-traversal.ts"></mcfile> with integrated graph-based architecture to analyze complex relationships between interfaces and type aliases
+2. **Direct Graph Processing**: Leverages Graphology's DirectedGraph and topological sorting for robust dependency ordering without abstraction layers
+3. **Export-Aware Processing**: Handles dependency ordering based on `exportEverything` flag:
+   - `exportEverything=true`: Prioritizes imported types for consistent ordering
+   - `exportEverything=false`: Ensures dependency-aware ordering while respecting local type preferences
+4. **Topological Sorting**: Uses `getTopologicallySortedTypesWithPreference()` to ensure types are processed in correct dependency order to prevent "type not found" errors
+5. **Circular Dependency Detection**: The graph-based algorithm detects and handles circular inheritance scenarios gracefully with detailed error reporting
 
 ### TypeBox Composite Generation
 
@@ -277,7 +319,25 @@ When implementing new type handlers or modifying existing ones, it is crucial to
 
 ## Performance Optimizations
 
-Several optimizations have been implemented to improve the performance of the code generation process, particularly for import resolution:
+Several optimizations have been implemented to improve the performance of the code generation process, particularly for import resolution and dependency management:
+
+### Unified Dependency Management with Graphology
+
+The project uses **Graphology** through a unified architecture for all dependency graph operations, providing:
+
+- **Production-Ready Graph Library**: Leverages Graphology's battle-tested graph data structures and algorithms
+- **Optimized Performance**: Benefits from Graphology's highly optimized internal implementations for graph operations
+- **Advanced Graph Algorithms**: Direct access to specialized algorithms through Graphology ecosystem (graphology-dag, graphology-traversal)
+- **Type Safety**: Full TypeScript support through graphology-types package
+- **Memory Efficiency**: Graphology's optimized memory management for large graphs
+- **Unified Architecture**: Single module eliminates abstraction layers and reduces complexity
+
+#### Core Architecture
+
+- **DependencyTraversal**: Uses Graphology's `DirectedGraph` exclusively for all dependency tracking, with no fallback to Map-based structures
+- **Integrated Topological Sorting**: Leverages `topologicalSort` from `graphology-dag` for ordering dependencies with export-aware preferences
+- **Graph-Based Data Storage**: All dependency information, visited files, and type metadata stored as Graphology node attributes
+- **Export-Aware Processing**: Implements specialized ordering logic for different export scenarios using graph-based algorithms
 
 ### TypeBox Type Handler Optimization
 

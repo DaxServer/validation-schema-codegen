@@ -1,16 +1,12 @@
-import { DependencyCollector } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
-import {
+import type {
   DefaultFileResolver,
-  type FileResolver,
+  FileResolver,
 } from '@daxserver/validation-schema-codegen/traverse/dependency-file-resolver'
-import {
-  DefaultTypeReferenceExtractor,
-  type TypeReferenceExtractor,
-} from '@daxserver/validation-schema-codegen/traverse/dependency-type'
+import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
 import { describe, expect, mock, test } from 'bun:test'
 import type { ImportDeclaration, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 
-describe('DependencyCollector Unit Tests', () => {
+describe('DependencyTraversal Unit Tests', () => {
   const createMockTypeAlias = (name: string): TypeAliasDeclaration => {
     return {
       getName: () => name,
@@ -30,22 +26,21 @@ describe('DependencyCollector Unit Tests', () => {
 
   describe('constructor', () => {
     test('should initialize with default dependencies', () => {
-      const collector = new DependencyCollector()
+      const collector = new DependencyTraversal()
       expect(collector.getDependencies().size).toBe(0)
       expect(collector.getVisitedFiles().size).toBe(0)
     })
 
-    test('should accept custom file resolver and type reference extractor', () => {
+    test('should accept custom file resolver', () => {
       const mockFileResolver = {} as DefaultFileResolver
-      const mockTypeReferenceExtractor = {} as DefaultTypeReferenceExtractor
-      const collector = new DependencyCollector(mockFileResolver, mockTypeReferenceExtractor)
+      const collector = new DependencyTraversal(mockFileResolver)
       expect(collector.getDependencies().size).toBe(0)
     })
   })
 
   describe('getDependencies', () => {
     test('should return a copy of dependencies map', () => {
-      const collector = new DependencyCollector()
+      const collector = new DependencyTraversal()
       const mockTypeAlias = createMockTypeAlias('TestType')
       const mockSourceFile = createMockSourceFile('/test.ts')
 
@@ -62,7 +57,7 @@ describe('DependencyCollector Unit Tests', () => {
 
   describe('getVisitedFiles', () => {
     test('should return a copy of visited files set', () => {
-      const collector = new DependencyCollector()
+      const collector = new DependencyTraversal()
 
       const visitedFiles1 = collector.getVisitedFiles()
       const visitedFiles2 = collector.getVisitedFiles()
@@ -73,7 +68,7 @@ describe('DependencyCollector Unit Tests', () => {
 
   describe('addLocalTypes', () => {
     test('should add local types to dependencies', () => {
-      const collector = new DependencyCollector()
+      const collector = new DependencyTraversal()
       const mockTypeAlias = createMockTypeAlias('LocalType')
       const mockSourceFile = createMockSourceFile('/local.ts')
 
@@ -87,7 +82,7 @@ describe('DependencyCollector Unit Tests', () => {
     })
 
     test('should not add duplicate types', () => {
-      const collector = new DependencyCollector()
+      const collector = new DependencyTraversal()
       const mockTypeAlias1 = createMockTypeAlias('DuplicateType')
       const mockTypeAlias2 = createMockTypeAlias('DuplicateType')
       const mockSourceFile = createMockSourceFile('/local.ts')
@@ -114,7 +109,7 @@ describe('DependencyCollector Unit Tests', () => {
         ]),
       }
 
-      const collector = new DependencyCollector(mockFileResolver)
+      const collector = new DependencyTraversal(mockFileResolver)
       const mockImport = createMockImportDeclaration()
 
       const result = collector.collectFromImports([mockImport])
@@ -133,7 +128,7 @@ describe('DependencyCollector Unit Tests', () => {
         getTypeAliases: mock(() => []),
       }
 
-      const collector = new DependencyCollector(mockFileResolver)
+      const collector = new DependencyTraversal(mockFileResolver)
       const mockImport = createMockImportDeclaration()
 
       const result = collector.collectFromImports([mockImport])
@@ -153,7 +148,7 @@ describe('DependencyCollector Unit Tests', () => {
         getTypeAliases: mock(() => [createMockTypeAlias('CircularType')]),
       }
 
-      const collector = new DependencyCollector(mockFileResolver)
+      const collector = new DependencyTraversal(mockFileResolver)
       const mockImport = createMockImportDeclaration()
 
       const result = collector.collectFromImports([mockImport])
@@ -164,29 +159,18 @@ describe('DependencyCollector Unit Tests', () => {
   })
 
   describe('topological sort integration', () => {
-    test('should use type reference extractor for dependency resolution', () => {
-      const mockTypeReferenceExtractor: TypeReferenceExtractor = {
-        extractTypeReferences: mock(() => ['ReferencedType']),
-      }
-
+    test('should handle dependency resolution', () => {
       const mockTypeAlias1 = createMockTypeAlias('TypeA')
       const mockTypeAlias2 = createMockTypeAlias('ReferencedType')
 
-      // Mock getTypeNode to return a node
       mockTypeAlias1.getTypeNode = mock(() => ({}) as TypeNode)
       mockTypeAlias2.getTypeNode = mock(() => undefined)
 
-      const collector = new DependencyCollector(
-        undefined,
-        mockTypeReferenceExtractor as DefaultTypeReferenceExtractor,
-      )
+      const collector = new DependencyTraversal()
       const mockSourceFile = createMockSourceFile('/test.ts')
 
       collector.addLocalTypes([mockTypeAlias1, mockTypeAlias2], mockSourceFile)
 
-      collector.addLocalTypes([], mockSourceFile)
-
-      // Access dependencies to potentially trigger internal operations
       const dependencies = collector.getDependencies()
       expect(dependencies.size).toBe(2)
     })
