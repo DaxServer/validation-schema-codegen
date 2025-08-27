@@ -6,8 +6,7 @@ import { EnumParser } from '@daxserver/validation-schema-codegen/parsers/parse-e
 import { FunctionDeclarationParser } from '@daxserver/validation-schema-codegen/parsers/parse-function-declarations'
 import { InterfaceParser } from '@daxserver/validation-schema-codegen/parsers/parse-interfaces'
 import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
-import { DependencyAnalyzer } from '@daxserver/validation-schema-codegen/traverse/dependency-analyzer'
-import { DependencyCollector } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
+import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
 import { getInterfaceProcessingOrder } from '@daxserver/validation-schema-codegen/utils/interface-processing-order'
 import { Project, ts } from 'ts-morph'
 
@@ -68,8 +67,7 @@ export const generateCode = async ({
   const enumParser = new EnumParser(parserOptions)
   const interfaceParser = new InterfaceParser(parserOptions)
   const functionDeclarationParser = new FunctionDeclarationParser(parserOptions)
-  const dependencyCollector = new DependencyCollector()
-  const dependencyAnalyzer = new DependencyAnalyzer()
+  const dependencyTraversal = new DependencyTraversal()
 
   // Collect all dependencies in correct order
   const importDeclarations = sourceFile.getImportDeclarations()
@@ -77,7 +75,10 @@ export const generateCode = async ({
   const interfaces = sourceFile.getInterfaces()
 
   // Analyze cross-dependencies between interfaces and type aliases
-  const dependencyAnalysis = dependencyAnalyzer.analyzeProcessingOrder(localTypeAliases, interfaces)
+  const dependencyAnalysis = dependencyTraversal.analyzeProcessingOrder(
+    localTypeAliases,
+    interfaces,
+  )
 
   // Handle different dependency scenarios:
   // 1. If interfaces depend on type aliases, process those type aliases first
@@ -103,12 +104,17 @@ export const generateCode = async ({
   }
 
   // Always add local types first so they can be included in topological sort
-  dependencyCollector.addLocalTypes(localTypeAliases, sourceFile)
+  dependencyTraversal.addLocalTypes(localTypeAliases, sourceFile)
 
-  const orderedDependencies = dependencyCollector.collectFromImports(
-    importDeclarations,
-    exportEverything,
-  )
+  // Collect from imports to resolve dependencies
+  dependencyTraversal.collectFromImports(importDeclarations)
+
+  // Filter unused imports if exportEverything is false
+  if (!exportEverything) {
+    dependencyTraversal.filterUnusedImports()
+  }
+
+  const orderedDependencies = dependencyTraversal.getTopologicallySortedTypes(exportEverything)
 
   if (!hasInterfacesDependingOnTypeAliases && hasTypeAliasesDependingOnInterfaces) {
     // Case 2: Only process type aliases that don't depend on interfaces
@@ -127,7 +133,7 @@ export const generateCode = async ({
         (interfaceName) => {
           const interfaceDecl = interfaces.find((i) => i.getName() === interfaceName)
           if (!interfaceDecl) return false
-          const typeAliasRefs = dependencyAnalyzer.extractTypeAliasReferences(
+          const typeAliasRefs = dependencyTraversal.extractTypeAliasReferences(
             interfaceDecl,
             new Map(localTypeAliases.map((ta) => [ta.getName(), ta])),
           )
@@ -152,15 +158,6 @@ export const generateCode = async ({
         typeAliasParser.parseWithImportFlag(dependency.typeAlias, dependency.isImported)
       }
     })
-
-    // Process any remaining local types that weren't included in the dependency graph
-    if (exportEverything) {
-      localTypeAliases.forEach((typeAlias) => {
-        if (!processedTypes.has(typeAlias.getName())) {
-          typeAliasParser.parseWithImportFlag(typeAlias, false)
-        }
-      })
-    }
   }
 
   // Process enums
@@ -182,6 +179,7 @@ export const generateCode = async ({
 
   // Process remaining type aliases that depend on interfaces (Case 2 and Case 3)
   if (hasTypeAliasesDependingOnInterfaces) {
+    // Process remaining type aliases (phase 2)
     orderedDependencies.forEach((dependency) => {
       const dependsOnInterface = dependencyAnalysis.typeAliasesDependingOnInterfaces.includes(
         dependency.typeAlias.getName(),

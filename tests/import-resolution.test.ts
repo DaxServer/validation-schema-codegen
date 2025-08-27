@@ -1,4 +1,3 @@
-import { DependencyCollector } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
 import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
@@ -8,7 +7,6 @@ describe('ts-morph codegen with imports', () => {
 
   beforeEach(() => {
     project = new Project()
-    DependencyCollector.clearGlobalCache()
   })
 
   describe('without exports', () => {
