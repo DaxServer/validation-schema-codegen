@@ -13,13 +13,13 @@ describe('Interfaces', () => {
     test('without export', () => {
       const sourceFile = createSourceFile(project, `interface A { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const A = Type.Object({
+          export const A = Type.Object({
             a: Type.String(),
           });
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -27,7 +27,7 @@ describe('Interfaces', () => {
     test('with export', () => {
       const sourceFile = createSourceFile(project, `export interface A { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -49,22 +49,22 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const Base = Type.Object({
+          export const Base = Type.Object({
             id: Type.String(),
           });
 
-          type Base = Static<typeof Base>;
+          export type Base = Static<typeof Base>;
 
-          const Extended = Type.Composite([
+          export const Extended = Type.Composite([
             Base,
             Type.Object({
               name: Type.String(),
             }),
           ]);
 
-          type Extended = Static<typeof Extended>;
+          export type Extended = Static<typeof Extended>;
         `),
       )
     })
@@ -79,21 +79,21 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const A = Type.Object({
+          export const A = Type.Object({
             a: Type.String(),
           });
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
 
-          const B = Type.Object({
+          export const B = Type.Object({
             b: Type.Number(),
           });
 
-          type B = Static<typeof B>;
+          export type B = Static<typeof B>;
 
-          const C = Type.Composite([
+          export const C = Type.Composite([
             A,
             B,
             Type.Object({
@@ -101,7 +101,7 @@ describe('Interfaces', () => {
             }),
           ]);
 
-          type C = Static<typeof C>;
+          export type C = Static<typeof C>;
         `),
       )
     })
@@ -115,7 +115,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const Base = Type.Object({
             id: Type.String(),
@@ -144,20 +144,20 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const Base = Type.Object({
+          export const Base = Type.Object({
             id: Type.String(),
           });
 
-          type Base = Static<typeof Base>;
+          export type Base = Static<typeof Base>;
 
-          const Extended = Type.Composite([
+          export const Extended = Type.Composite([
             Base,
             Type.Object({}),
           ]);
 
-          type Extended = Static<typeof Extended>;
+          export type Extended = Static<typeof Extended>;
         `),
       )
     })
@@ -172,31 +172,31 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const A = Type.Object({
+          export const A = Type.Object({
             a: Type.String(),
           });
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
 
-          const B = Type.Composite([
+          export const B = Type.Composite([
             A,
             Type.Object({
               b: Type.Number(),
             }),
           ]);
 
-          type B = Static<typeof B>;
+          export type B = Static<typeof B>;
 
-          const C = Type.Composite([
+          export const C = Type.Composite([
             B,
             Type.Object({
               c: Type.Boolean(),
             }),
           ]);
 
-          type C = Static<typeof C>;
+          export type C = Static<typeof C>;
         `),
       )
     })
@@ -211,21 +211,21 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
-            const A = <T extends TSchema>(T: T) => Type.Object({
-              a: T
-            });
+              export const A = <T extends TSchema>(T: T) => Type.Object({
+                a: T
+              });
 
-            type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
+              export type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
 
-            const B = Type.Composite([A(Type.Number()), Type.Object({
-              b: Type.Number()
-            })]);
+              export const B = Type.Composite([A(Type.Number()), Type.Object({
+                b: Type.Number()
+              })]);
 
-            type B = Static<typeof B>;
-          `,
+              export type B = Static<typeof B>;
+            `,
             true,
             true,
           ),
@@ -241,21 +241,21 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
-            const A = <T extends TSchema>(T: T) => Type.Object({
-              a: T
-            });
+              export const A = <T extends TSchema>(T: T) => Type.Object({
+                a: T
+              });
 
-            type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
+              export type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>;
 
-            const B = <T extends TSchema>(T: T) => Type.Composite([A(T), Type.Object({
-              b: T
-            })]);
+              export const B = <T extends TSchema>(T: T) => Type.Composite([A(T), Type.Object({
+                b: T
+              })]);
 
-            type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>;
-          `,
+              export type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>;
+            `,
             true,
             true,
           ),
@@ -274,26 +274,26 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
-              const A = Type.Union([Type.Literal('a'), Type.Literal('b')])
+              export const A = Type.Union([Type.Literal('a'), Type.Literal('b')])
 
-              type A = Static<typeof A>
+              export type A = Static<typeof A>
 
-              const B = <T extends TSchema>(T: T) => Type.Object({
+              export const B = <T extends TSchema>(T: T) => Type.Object({
                 a: T
               })
 
-              type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>
+              export type B<T extends TSchema> = Static<ReturnType<typeof B<T>>>
 
-              const C = B(Type.Literal('a'))
+              export const C = B(Type.Literal('a'))
 
-              type C = Static<typeof C>
+              export type C = Static<typeof C>
 
-              const D = B(Type.Literal('b'))
+              export const D = B(Type.Literal('b'))
 
-              type D = Static<typeof D>
+              export type D = Static<typeof D>
             `,
             true,
             true,

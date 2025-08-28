@@ -1,429 +1,397 @@
-// import { DependencyCollector } from '@daxserver/validation-schema-codegen/traverse/dependency-collector'
-// import { createSourceFile } from '@test-fixtures/utils'
-// import { beforeEach, describe, expect, test } from 'bun:test'
-// import { Project } from 'ts-morph'
+import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
+import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
+import { createSourceFile } from '@test-fixtures/utils'
+import { beforeEach, describe, expect, test } from 'bun:test'
+import { Project } from 'ts-morph'
 
-// describe('DependencyCollector', () => {
-//   let project: Project
-//   let collector: DependencyCollector
+const getNodeName = (traversedNode: TraversedNode): string => {
+  return traversedNode.originalName
+}
 
-//   beforeEach(() => {
-//     project = new Project()
-//     collector = new DependencyCollector()
-//     DependencyCollector.clearGlobalCache()
-//   })
+describe('DependencyCollector', () => {
+  let project: Project
+  let traverser: DependencyTraversal
 
-//   describe('collectFromImports', () => {
-//     test('should collect dependencies from single import', () => {
-//       const externalFile = createSourceFile(
-//         project,
-//         `
-//         export type User = {
-//           id: string;
-//           name: string;
-//         };
-//         `,
-//         'external.ts',
-//       )
+  beforeEach(() => {
+    project = new Project()
+    traverser = new DependencyTraversal()
+  })
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { User } from "./external";
-//         `,
-//         'main.ts',
-//       )
+  describe('collectFromImports', () => {
+    test('should collect dependencies from single import', () => {
+      createSourceFile(
+        project,
+        `
+          export type User = {
+            id: string;
+            name: string;
+          };
+        `,
+        'external.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      const mainFile = createSourceFile(project, 'import { User } from "./external";', 'main.ts')
 
-//       expect(dependencies).toHaveLength(1)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('User')
-//       expect(dependencies[0]!.isImported).toBe(true)
-//       expect(dependencies[0]!.sourceFile).toBe(externalFile)
-//     })
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//     test('should collect dependencies from multiple imports', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type User = {
-//           id: string;
-//           name: string;
-//         };
-//         `,
-//         'user.ts',
-//       )
+      expect(dependencies).toHaveLength(1)
+      expect(getNodeName(dependencies[0]!)).toBe('User')
+      expect(dependencies[0]!.isImported).toBe(true)
+    })
 
-//       createSourceFile(
-//         project,
-//         `
-//         export type Product = {
-//           id: string;
-//           title: string;
-//         };
-//         `,
-//         'product.ts',
-//       )
+    test('should collect dependencies from multiple imports', () => {
+      createSourceFile(
+        project,
+        `
+          export type User = {
+            id: string;
+            name: string;
+          };
+        `,
+        'user.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { User } from "./user";
-//         import { Product } from "./product";
-//         `,
-//         'main.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          export type Product = {
+            id: string;
+            title: string;
+          };
+        `,
+        'product.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      const mainFile = createSourceFile(
+        project,
+        `
+          import { User } from "./user";
+          import { Product } from "./product";
+        `,
+        'main.ts',
+      )
 
-//       expect(dependencies).toHaveLength(2)
-//       const typeNames = dependencies.map((d) => d.typeAlias.getName())
-//       expect(typeNames).toContain('User')
-//       expect(typeNames).toContain('Product')
-//     })
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//     test('should handle nested imports', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type BaseType = {
-//           id: string;
-//         };
-//         `,
-//         'base.ts',
-//       )
+      expect(dependencies).toHaveLength(2)
+      const typeNames = dependencies.map((d) => getNodeName(d))
+      expect(typeNames).toContain('User')
+      expect(typeNames).toContain('Product')
+    })
 
-//       createSourceFile(
-//         project,
-//         `
-//         import { BaseType } from "./base";
-//         export type User = BaseType & {
-//           name: string;
-//         };
-//         `,
-//         'user.ts',
-//       )
+    test('should handle nested imports', () => {
+      createSourceFile(
+        project,
+        `
+          export type BaseType = {
+            id: string;
+          };
+        `,
+        'base.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { User } from "./user";
-//         `,
-//         'main.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          import { BaseType } from "./base";
+          export type User = BaseType & {
+            name: string;
+          };
+        `,
+        'user.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
 
-//       expect(dependencies).toHaveLength(2)
-//       const typeNames = dependencies.map((d) => d.typeAlias.getName())
-//       expect(typeNames).toContain('BaseType')
-//       expect(typeNames).toContain('User')
-//     })
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//     test('should handle missing module specifier source file', () => {
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { NonExistent } from "./non-existent";
-//         `,
-//         'main.ts',
-//       )
+      expect(dependencies).toHaveLength(2)
+      const typeNames = dependencies.map((d) => getNodeName(d))
+      expect(typeNames).toContain('BaseType')
+      expect(typeNames).toContain('User')
+    })
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+    test('should handle missing module specifier source file', () => {
+      const mainFile = createSourceFile(
+        project,
+        'import { NonExistent } from "./non-existent";',
+        'main.ts',
+      )
 
-//       expect(dependencies).toHaveLength(0)
-//     })
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//     test('should not duplicate dependencies', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type User = {
-//           id: string;
-//           name: string;
-//         };
-//         `,
-//         'user.ts',
-//       )
+      expect(dependencies).toHaveLength(0)
+    })
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { User } from "./user";
-//         import { User as UserAlias } from "./user";
-//         `,
-//         'main.ts',
-//       )
+    test('should not duplicate dependencies', () => {
+      createSourceFile(
+        project,
+        `
+          export type User = {
+            id: string;
+            name: string;
+          };
+        `,
+        'user.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      const mainFile = createSourceFile(
+        project,
+        `
+          import { User } from "./user";
+          import { User as UserAlias } from "./user";
+        `,
+        'main.ts',
+      )
 
-//       expect(dependencies).toHaveLength(1)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('User')
-//     })
-//   })
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//   describe('addLocalTypes', () => {
-//     test('should add local type aliases', () => {
-//       const sourceFile = createSourceFile(
-//         project,
-//         `
-//         type LocalUser = {
-//           id: string;
-//           name: string;
-//         };
+      expect(dependencies).toHaveLength(1)
+      expect(getNodeName(dependencies[0]!)).toBe('User')
+    })
+  })
 
-//         type LocalProduct = {
-//           id: string;
-//           title: string;
-//         };
-//         `,
-//       )
+  describe('addLocalTypes', () => {
+    test('should add local type aliases', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          type LocalUser = {
+            id: string;
+            name: string;
+          };
 
-//       const typeAliases = sourceFile.getTypeAliases()
-//       collector.addLocalTypes(typeAliases, sourceFile)
+          type LocalProduct = {
+            id: string;
+            title: string;
+          };
+        `,
+      )
 
-//       const dependencies = collector.collectFromImports([])
-//       expect(dependencies).toHaveLength(2)
+      traverser.startTraversal(sourceFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       const typeNames = dependencies.map((d) => d.typeAlias.getName())
-//       expect(typeNames).toContain('LocalUser')
-//       expect(typeNames).toContain('LocalProduct')
+      expect(dependencies).toHaveLength(2)
+      const typeNames = dependencies.map((d) => getNodeName(d))
+      expect(typeNames).toContain('LocalUser')
+      expect(typeNames).toContain('LocalProduct')
 
-//       dependencies.forEach((dep) => {
-//         expect(dep!.isImported).toBe(false)
-//         expect(dep!.sourceFile).toBe(sourceFile)
-//       })
-//     })
+      dependencies.forEach((dep) => {
+        expect(dep!.isImported).toBe(false)
+      })
+    })
 
-//     test('should not duplicate existing types', () => {
-//       const sourceFile = createSourceFile(
-//         project,
-//         `
-//         type User = {
-//           id: string;
-//           name: string;
-//         };
-//         `,
-//       )
+    test('should not duplicate existing types', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          type User = {
+            id: string;
+            name: string;
+          };
+        `,
+      )
 
-//       const typeAliases = sourceFile.getTypeAliases()
-//       collector.addLocalTypes(typeAliases, sourceFile)
-//       collector.addLocalTypes(typeAliases, sourceFile)
+      traverser.addLocalTypes(sourceFile)
+      traverser.addLocalTypes(sourceFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       const dependencies = collector.collectFromImports([])
-//       expect(dependencies).toHaveLength(1)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('User')
-//     })
-//   })
+      expect(dependencies).toHaveLength(1)
+      expect(getNodeName(dependencies[0]!)).toBe('User')
+    })
+  })
 
-//   describe('topological sorting', () => {
-//     test('should sort dependencies in correct order', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type BaseType = {
-//           id: string;
-//         };
-//         `,
-//         'base.ts',
-//       )
+  describe('topological sorting', () => {
+    test('should sort dependencies in correct order', () => {
+      createSourceFile(
+        project,
+        `
+          export type BaseType = {
+            id: string;
+          };
+        `,
+        'base.ts',
+      )
 
-//       createSourceFile(
-//         project,
-//         `
-//         import { BaseType } from "./base";
-//         export type User = BaseType & {
-//           name: string;
-//         };
-//         `,
-//         'user.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          import { BaseType } from "./base";
+          export type User = BaseType & {
+            name: string;
+          };
+        `,
+        'user.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { User } from "./user";
-//         `,
-//         'main.ts',
-//       )
+      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       expect(dependencies).toHaveLength(2)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('BaseType')
-//       expect(dependencies[1]!.typeAlias.getName()).toBe('User')
-//     })
+      expect(dependencies).toHaveLength(2)
+      expect(getNodeName(dependencies[0]!)).toBe('BaseType')
+      expect(getNodeName(dependencies[1]!)).toBe('User')
+    })
 
-//     test('should handle complex dependency chains', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type A = {
-//           value: string;
-//         };
-//         `,
-//         'a.ts',
-//       )
+    test('should handle complex dependency chains', () => {
+      createSourceFile(
+        project,
+        `
+          export type A = {
+            value: string;
+          };
+        `,
+        'a.ts',
+      )
 
-//       createSourceFile(
-//         project,
-//         `
-//         import { A } from "./a";
-//         export type B = {
-//           a: A;
-//           name: string;
-//         };
-//         `,
-//         'b.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          import { A } from "./a";
+          export type B = {
+            a: A;
+            name: string;
+          };
+        `,
+        'b.ts',
+      )
 
-//       createSourceFile(
-//         project,
-//         `
-//         import { B } from "./b";
-//         export type C = {
-//           b: B;
-//           id: number;
-//         };
-//         `,
-//         'c.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          import { B } from "./b";
+          export type C = {
+            b: B;
+            id: number;
+          };
+        `,
+        'c.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { C } from "./c";
-//         `,
-//         'main.ts',
-//       )
+      const mainFile = createSourceFile(project, 'import { C } from "./c";', 'main.ts')
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       expect(dependencies).toHaveLength(3)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('A')
-//       expect(dependencies[1]!.typeAlias.getName()).toBe('B')
-//       expect(dependencies[2]!.typeAlias.getName()).toBe('C')
-//     })
+      expect(dependencies).toHaveLength(3)
+      expect(getNodeName(dependencies[0]!)).toBe('A')
+      expect(getNodeName(dependencies[1]!)).toBe('B')
+      expect(getNodeName(dependencies[2]!)).toBe('C')
+    })
 
-//     test('should handle circular dependencies gracefully', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         import { B } from "./b";
-//         export type A = {
-//           b?: B;
-//           value: string;
-//         };
-//         `,
-//         'a.ts',
-//       )
+    test('should handle circular dependencies gracefully', () => {
+      createSourceFile(
+        project,
+        `
+          import { B } from "./b";
+          export type A = {
+            b?: B;
+            value: string;
+          };
+        `,
+        'a.ts',
+      )
 
-//       createSourceFile(
-//         project,
-//         `
-//         import { A } from "./a";
-//         export type B = {
-//           a?: A;
-//           name: string;
-//         };
-//         `,
-//         'b.ts',
-//       )
+      createSourceFile(
+        project,
+        `
+          import { A } from "./a";
+          export type B = {
+            a?: A;
+            name: string;
+          };
+        `,
+        'b.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { A } from "./a";
-//         import { B } from "./b";
-//         `,
-//         'main.ts',
-//       )
+      const mainFile = createSourceFile(
+        project,
+        `
+          import { A } from "./a";
+          import { B } from "./b";
+        `,
+        'main.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       expect(dependencies).toHaveLength(2)
-//       const typeNames = dependencies.map((d) => d.typeAlias.getName())
-//       expect(typeNames).toContain('A')
-//       expect(typeNames).toContain('B')
-//     })
+      expect(dependencies).toHaveLength(2)
+      const typeNames = dependencies.map((d) => getNodeName(d))
+      expect(typeNames).toContain('A')
+      expect(typeNames).toContain('B')
+    })
 
-//     test('should handle types with no dependencies', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type SimpleType = {
-//           id: string;
-//           name: string;
-//         };
-//         `,
-//         'simple.ts',
-//       )
+    test('should handle types with no dependencies', () => {
+      createSourceFile(
+        project,
+        `
+          export type SimpleType = {
+            id: string;
+            name: string;
+          };
+        `,
+        'simple.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { SimpleType } from "./simple";
-//         `,
-//         'main.ts',
-//       )
+      const mainFile = createSourceFile(
+        project,
+        'import { SimpleType } from "./simple";',
+        'main.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       expect(dependencies).toHaveLength(1)
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('SimpleType')
-//     })
-//   })
+      expect(dependencies).toHaveLength(1)
+      expect(getNodeName(dependencies[0]!)).toBe('SimpleType')
+    })
+  })
 
-//   describe('mixed local and imported types', () => {
-//     test('should handle both local and imported types correctly', () => {
-//       createSourceFile(
-//         project,
-//         `
-//         export type ExternalType = {
-//           id: string;
-//         };
-//         `,
-//         'external.ts',
-//       )
+  describe('mixed local and imported types', () => {
+    test('should handle both local and imported types correctly', () => {
+      createSourceFile(
+        project,
+        `
+          export type ExternalType = {
+            id: string;
+          };
+        `,
+        'external.ts',
+      )
 
-//       const mainFile = createSourceFile(
-//         project,
-//         `
-//         import { ExternalType } from "./external";
+      const mainFile = createSourceFile(
+        project,
+        `
+          import { ExternalType } from "./external";
 
-//         type LocalType = {
-//           external: ExternalType;
-//           local: string;
-//         };
-//         `,
-//         'main.ts',
-//       )
+          type LocalType = {
+            external: ExternalType;
+            local: string;
+          };
+        `,
+        'main.ts',
+      )
 
-//       const importDeclarations = mainFile.getImportDeclarations()
-//       const typeAliases = mainFile.getTypeAliases()
+      traverser.startTraversal(mainFile)
+      const dependencies = traverser.getNodesToPrint()
 
-//       collector.addLocalTypes(typeAliases, mainFile)
-//       const dependencies = collector.collectFromImports(importDeclarations)
+      expect(dependencies).toHaveLength(2)
 
-//       expect(dependencies).toHaveLength(2)
+      const externalDep = dependencies.find((d) => getNodeName(d) === 'ExternalType')
+      const localDep = dependencies.find((d) => getNodeName(d) === 'LocalType')
 
-//       const externalDep = dependencies.find((d) => d.typeAlias.getName() === 'ExternalType')
-//       const localDep = dependencies.find((d) => d.typeAlias.getName() === 'LocalType')
+      expect(externalDep!.isImported).toBe(true)
+      expect(localDep!.isImported).toBe(false)
 
-//       expect(externalDep!.isImported).toBe(true)
-//       expect(localDep!.isImported).toBe(false)
-
-//       expect(dependencies[0]!.typeAlias.getName()).toBe('ExternalType')
-//       expect(dependencies[1]!.typeAlias.getName()).toBe('LocalType')
-//     })
-//   })
-// })
+      expect(getNodeName(dependencies[0]!)).toBe('ExternalType')
+      expect(getNodeName(dependencies[1]!)).toBe('LocalType')
+    })
+  })
+})

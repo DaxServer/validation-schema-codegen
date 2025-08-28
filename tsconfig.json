@@ -24,6 +24,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "baseUrl": ".",
     "paths": {
+      "@daxserver/validation-schema-codegen": ["./src/index.ts"],
       "@daxserver/validation-schema-codegen/*": ["./src/*"],
       "@test-fixtures/*": ["./tests/*"]
     }

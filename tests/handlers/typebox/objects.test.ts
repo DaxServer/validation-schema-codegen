@@ -13,13 +13,13 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `type A = { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const A = Type.Object({
+          export const A = Type.Object({
             a: Type.String(),
           });
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -27,11 +27,11 @@ describe('Object types', () => {
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `type T = [number, null];`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
-          const T = Type.Tuple([Type.Number(), Type.Null()]);
+          export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
-          type T = Static<typeof T>;
+          export type T = Static<typeof T>;
         `),
       )
     })
@@ -41,7 +41,7 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `export type A = { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -55,7 +55,7 @@ describe('Object types', () => {
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `export type T = [number, null];`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.Tuple([Type.Number(), Type.Null()]);
 

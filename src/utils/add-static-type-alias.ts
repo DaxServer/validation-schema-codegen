@@ -6,7 +6,6 @@ export const addStaticTypeAlias = (
   name: string,
   compilerNode: ts.SourceFile,
   printer: ts.Printer,
-  isExported: boolean,
 ) => {
   const staticTypeNode = ts.factory.createTypeReferenceNode(
     ts.factory.createIdentifier(TypeBoxStatic),
@@ -16,7 +15,7 @@ export const addStaticTypeAlias = (
   const staticType = printer.printNode(ts.EmitHint.Unspecified, staticTypeNode, compilerNode)
 
   newSourceFile.addTypeAlias({
-    isExported,
+    isExported: true,
     name,
     type: staticType,
   })

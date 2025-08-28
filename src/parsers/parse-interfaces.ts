@@ -10,17 +10,6 @@ import {
 
 export class InterfaceParser extends BaseParser {
   parse(interfaceDecl: InterfaceDeclaration): void {
-    this.parseWithImportFlag(interfaceDecl, false)
-  }
-
-  parseWithImportFlag(interfaceDecl: InterfaceDeclaration, isImported: boolean): void {
-    this.parseInterfaceWithImportFlag(interfaceDecl, isImported)
-  }
-
-  private parseInterfaceWithImportFlag(
-    interfaceDecl: InterfaceDeclaration,
-    isImported: boolean,
-  ): void {
     const interfaceName = interfaceDecl.getName()
 
     if (this.processedTypes.has(interfaceName)) {
@@ -30,17 +19,16 @@ export class InterfaceParser extends BaseParser {
     this.processedTypes.add(interfaceName)
 
     const typeParameters = interfaceDecl.getTypeParameters()
-    const isExported = this.getIsExported(interfaceDecl, isImported)
 
     // Check if interface has type parameters (generic)
     if (typeParameters.length > 0) {
-      this.parseGenericInterface(interfaceDecl, isExported)
+      this.parseGenericInterface(interfaceDecl)
     } else {
-      this.parseRegularInterface(interfaceDecl, isExported)
+      this.parseRegularInterface(interfaceDecl)
     }
   }
 
-  private parseRegularInterface(interfaceDecl: InterfaceDeclaration, isExported: boolean): void {
+  private parseRegularInterface(interfaceDecl: InterfaceDeclaration): void {
     const interfaceName = interfaceDecl.getName()
 
     // Generate TypeBox type definition
@@ -52,7 +40,7 @@ export class InterfaceParser extends BaseParser {
     )
 
     this.newSourceFile.addVariableStatement({
-      isExported,
+      isExported: true,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
@@ -67,11 +55,10 @@ export class InterfaceParser extends BaseParser {
       interfaceName,
       this.newSourceFile.compilerNode,
       this.printer,
-      isExported,
     )
   }
 
-  private parseGenericInterface(interfaceDecl: InterfaceDeclaration, isExported: boolean): void {
+  private parseGenericInterface(interfaceDecl: InterfaceDeclaration): void {
     const interfaceName = interfaceDecl.getName()
     const typeParameters = interfaceDecl.getTypeParameters()
 
@@ -85,7 +72,7 @@ export class InterfaceParser extends BaseParser {
 
     // Add the function declaration
     this.newSourceFile.addVariableStatement({
-      isExported,
+      isExported: true,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
@@ -96,14 +83,10 @@ export class InterfaceParser extends BaseParser {
     })
 
     // Add generic type alias: type A<T extends TSchema> = Static<ReturnType<typeof A<T>>>
-    this.addGenericTypeAlias(interfaceName, typeParameters, isExported)
+    this.addGenericTypeAlias(interfaceName, typeParameters)
   }
 
-  private addGenericTypeAlias(
-    name: string,
-    typeParameters: TypeParameterDeclaration[],
-    isExported: boolean,
-  ): void {
+  private addGenericTypeAlias(name: string, typeParameters: TypeParameterDeclaration[]): void {
     // Create type parameters for the type alias
     const typeParamDeclarations = typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
@@ -152,7 +135,7 @@ export class InterfaceParser extends BaseParser {
     )
 
     this.newSourceFile.addTypeAlias({
-      isExported,
+      isExported: true,
       name,
       typeParameters: typeParamDeclarations.map((tp) =>
         this.printer.printNode(ts.EmitHint.Unspecified, tp, this.newSourceFile.compilerNode),
