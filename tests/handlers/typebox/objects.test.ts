@@ -13,7 +13,7 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `type A = { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -27,7 +27,7 @@ describe('Object types', () => {
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `type T = [number, null];`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
@@ -41,7 +41,7 @@ describe('Object types', () => {
     test('object', () => {
       const sourceFile = createSourceFile(project, `export type A = { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -55,7 +55,7 @@ describe('Object types', () => {
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `export type T = [number, null];`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.Tuple([Type.Number(), Type.Null()]);
 

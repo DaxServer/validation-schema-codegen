@@ -6,24 +6,10 @@ import { FunctionDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class FunctionDeclarationParser extends BaseParser {
   parse(functionDecl: FunctionDeclaration): void {
-    this.parseWithImportFlag(functionDecl)
-  }
-
-  parseWithImportFlag(functionDecl: FunctionDeclaration): void {
-    this.parseFunctionWithImportFlag(functionDecl)
-  }
-
-  private parseFunctionWithImportFlag(
-    functionDecl: FunctionDeclaration,
-  ): void {
     const functionName = functionDecl.getName()
-    if (!functionName) {
-      return
-    }
+    if (!functionName) return
 
-    if (this.processedTypes.has(functionName)) {
-      return
-    }
+    if (this.processedTypes.has(functionName)) return
     this.processedTypes.add(functionName)
 
     // Get function parameters and return type

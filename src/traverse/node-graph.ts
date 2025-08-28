@@ -31,7 +31,7 @@ export class NodeGraph extends DirectedGraph<TraversedNode> {
 
     for (const nodeId of this.nodes()) {
       const nodeData = this.getNodeAttributes(nodeId)
-      if (nodeData?.isImported && !nodeData?.isRootImport) {
+      if (nodeData?.isImported && !nodeData?.isMainCode) {
         // Check if this imported type has any outgoing edges (other nodes depend on it)
         const outgoingEdges = this.outboundNeighbors(nodeId)
         if (outgoingEdges.length === 0) {

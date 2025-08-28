@@ -13,7 +13,7 @@ describe('Template literals', () => {
     test('one string', () => {
       const sourceFile = createSourceFile(project, "type T = `${'A'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([Type.Literal('A')]);
 
@@ -25,7 +25,7 @@ describe('Template literals', () => {
     test('multiple strings', () => {
       const sourceFile = createSourceFile(project, "type T = `${'A'|'B'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Union([Type.Literal('A'), Type.Literal('B')])
@@ -39,7 +39,7 @@ describe('Template literals', () => {
     test('concatenated with literal at start', () => {
       const sourceFile = createSourceFile(project, "type T = `${'A'|'B'}prop`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Union([Type.Literal('A'), Type.Literal('B')]),
@@ -54,7 +54,7 @@ describe('Template literals', () => {
     test('concatenated with literal at end', () => {
       const sourceFile = createSourceFile(project, "type T = `prop${'A'|'B'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Literal('prop'),
@@ -69,7 +69,7 @@ describe('Template literals', () => {
     test('concatenated with numeric type', () => {
       const sourceFile = createSourceFile(project, 'type T = `prop${number}`;')
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([Type.Literal('prop'), Type.Number()]);
 
@@ -81,7 +81,7 @@ describe('Template literals', () => {
     test('concatenation before and after', () => {
       const sourceFile = createSourceFile(project, 'type A = `prefix-${string}-suffix`')
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.TemplateLiteral([
             Type.Literal("prefix-"),
@@ -99,7 +99,7 @@ describe('Template literals', () => {
     test('one string', () => {
       const sourceFile = createSourceFile(project, "export type T = `${'A'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([Type.Literal('A')]);
 
@@ -111,7 +111,7 @@ describe('Template literals', () => {
     test('multiple strings', () => {
       const sourceFile = createSourceFile(project, "export type T = `${'A'|'B'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Union([Type.Literal('A'), Type.Literal('B')])
@@ -125,7 +125,7 @@ describe('Template literals', () => {
     test('concatenated with literal at start', () => {
       const sourceFile = createSourceFile(project, "export type T = `${'A'|'B'}prop`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Union([Type.Literal('A'), Type.Literal('B')]),
@@ -140,7 +140,7 @@ describe('Template literals', () => {
     test('concatenated with literal at end', () => {
       const sourceFile = createSourceFile(project, "export type T = `prop${'A'|'B'}`;")
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([
             Type.Literal('prop'),
@@ -155,7 +155,7 @@ describe('Template literals', () => {
     test('concatenated with numeric type', () => {
       const sourceFile = createSourceFile(project, 'export type T = `prop${number}`;')
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const T = Type.TemplateLiteral([Type.Literal('prop'), Type.Number()]);
 
@@ -167,7 +167,7 @@ describe('Template literals', () => {
     test('concatenation before and after', () => {
       const sourceFile = createSourceFile(project, 'export type A = `prefix-${string}-suffix`')
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.TemplateLiteral([
             Type.Literal("prefix-"),

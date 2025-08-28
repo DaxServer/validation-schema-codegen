@@ -23,11 +23,11 @@ export const formatWithPrettier = (
   return synchronizedPrettier.format(code, prettierOptions)
 }
 
-export const generateFormattedCode = async (
+export const generateFormattedCode = (
   sourceFile: SourceFile,
   withTSchema: boolean = false,
-): Promise<string> => {
-  const code = await generateCode({
+): string => {
+  const code = generateCode({
     sourceCode: sourceFile.getFullText(),
     callerFile: sourceFile.getFilePath(),
     project: sourceFile.getProject(),

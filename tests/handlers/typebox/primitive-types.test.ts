@@ -13,7 +13,7 @@ describe('Primitive types', () => {
     test('string', () => {
       const sourceFile = createSourceFile(project, `type A = string`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.String();
 
@@ -25,7 +25,7 @@ describe('Primitive types', () => {
     test('number', () => {
       const sourceFile = createSourceFile(project, `type A = number`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Number();
 
@@ -37,7 +37,7 @@ describe('Primitive types', () => {
     test('boolean', () => {
       const sourceFile = createSourceFile(project, `type A = boolean`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Boolean();
 
@@ -49,7 +49,7 @@ describe('Primitive types', () => {
     test('any', () => {
       const sourceFile = createSourceFile(project, `type A = any`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Any();
 
@@ -61,7 +61,7 @@ describe('Primitive types', () => {
     test('unknown', () => {
       const sourceFile = createSourceFile(project, `type A = unknown`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Unknown();
 
@@ -73,7 +73,7 @@ describe('Primitive types', () => {
     test('never', () => {
       const sourceFile = createSourceFile(project, `type A = never`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Never();
 
@@ -85,7 +85,7 @@ describe('Primitive types', () => {
     test('null', () => {
       const sourceFile = createSourceFile(project, `type A = null`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Null();
 
@@ -99,7 +99,7 @@ describe('Primitive types', () => {
     test('string', () => {
       const sourceFile = createSourceFile(project, `export type A = string`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.String();
 
@@ -111,7 +111,7 @@ describe('Primitive types', () => {
     test('number', () => {
       const sourceFile = createSourceFile(project, `export type A = number`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Number();
 
@@ -123,7 +123,7 @@ describe('Primitive types', () => {
     test('boolean', () => {
       const sourceFile = createSourceFile(project, `export type A = boolean`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Boolean();
 
@@ -135,7 +135,7 @@ describe('Primitive types', () => {
     test('any', () => {
       const sourceFile = createSourceFile(project, `export type A = any`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Any();
 
@@ -147,7 +147,7 @@ describe('Primitive types', () => {
     test('unknown', () => {
       const sourceFile = createSourceFile(project, `export type A = unknown`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Unknown();
 
@@ -159,7 +159,7 @@ describe('Primitive types', () => {
     test('never', () => {
       const sourceFile = createSourceFile(project, `export type A = never`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Never();
 
@@ -171,7 +171,7 @@ describe('Primitive types', () => {
     test('null', () => {
       const sourceFile = createSourceFile(project, `export type A = null`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Null();
 

@@ -5,6 +5,7 @@ import { EnumDeclaration, VariableDeclarationKind } from 'ts-morph'
 export class EnumParser extends BaseParser {
   parse(enumDeclaration: EnumDeclaration): void {
     const enumName = enumDeclaration.getName()
+    const schemaName = `${enumName}Schema`
 
     this.newSourceFile.addEnum({
       name: enumName,
@@ -23,7 +24,7 @@ export class EnumParser extends BaseParser {
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
-          name: enumName,
+          name: schemaName,
           initializer: typeboxType,
         },
       ],
@@ -31,7 +32,7 @@ export class EnumParser extends BaseParser {
 
     addStaticTypeAlias(
       this.newSourceFile,
-      enumName,
+      schemaName,
       this.newSourceFile.compilerNode,
       this.printer,
     )

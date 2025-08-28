@@ -13,7 +13,7 @@ describe('Interfaces', () => {
     test('without export', () => {
       const sourceFile = createSourceFile(project, `interface A { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -27,7 +27,7 @@ describe('Interfaces', () => {
     test('with export', () => {
       const sourceFile = createSourceFile(project, `export interface A { a: string }`)
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -49,7 +49,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const Base = Type.Object({
             id: Type.String(),
@@ -79,7 +79,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -115,7 +115,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const Base = Type.Object({
             id: Type.String(),
@@ -144,7 +144,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const Base = Type.Object({
             id: Type.String(),
@@ -172,7 +172,7 @@ describe('Interfaces', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = Type.Object({
             a: Type.String(),
@@ -211,7 +211,7 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
               export const A = <T extends TSchema>(T: T) => Type.Object({
@@ -241,7 +241,7 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
               export const A = <T extends TSchema>(T: T) => Type.Object({
@@ -274,7 +274,7 @@ describe('Interfaces', () => {
           `,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(
             `
               export const A = Type.Union([Type.Literal('a'), Type.Literal('b')])

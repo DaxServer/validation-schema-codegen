@@ -30,15 +30,9 @@ describe('DependencyCollector', () => {
         'external.ts',
       )
 
-      const mainFile = createSourceFile(
-        project,
-        'import { User } from "./external";',
-        'main.ts',
-      )
+      const mainFile = createSourceFile(project, 'import { User } from "./external";', 'main.ts')
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(1)
@@ -78,9 +72,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)
@@ -111,14 +103,9 @@ describe('DependencyCollector', () => {
         'user.ts',
       )
 
-      const mainFile = createSourceFile(
-        project,
-        'import { User } from "./user";',
-        'main.ts',
-      )
+      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)
@@ -134,8 +121,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(0)
@@ -162,9 +148,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(1)
@@ -189,7 +173,7 @@ describe('DependencyCollector', () => {
         `,
       )
 
-      traverser.addLocalTypes(sourceFile)
+      traverser.startTraversal(sourceFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)
@@ -245,15 +229,9 @@ describe('DependencyCollector', () => {
         'user.ts',
       )
 
-      const mainFile = createSourceFile(
-        project,
-        'import { User } from "./user";',
-        'main.ts',
-      )
+      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)
@@ -296,15 +274,9 @@ describe('DependencyCollector', () => {
         'c.ts',
       )
 
-      const mainFile = createSourceFile(
-        project,
-        'import { C } from "./c";',
-        'main.ts',
-      )
+      const mainFile = createSourceFile(project, 'import { C } from "./c";', 'main.ts')
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(3)
@@ -347,8 +319,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)
@@ -375,8 +346,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-      traverser.collectFromImports(importDeclarations, true, mainFile)
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(1)
@@ -409,11 +379,7 @@ describe('DependencyCollector', () => {
         'main.ts',
       )
 
-      const importDeclarations = mainFile.getImportDeclarations()
-
-      traverser.addLocalTypes(mainFile)
-      traverser.collectFromImports(importDeclarations, true, mainFile)
-      traverser.extractDependencies()
+      traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(2)

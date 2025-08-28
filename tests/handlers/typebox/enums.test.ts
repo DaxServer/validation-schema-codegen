@@ -21,16 +21,16 @@ describe('Enum types', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export enum A {
             B,
             C,
           }
 
-          export const A = Type.Enum(A);
+          export const ASchema = Type.Enum(A);
 
-          export type A = Static<typeof A>;
+          export type ASchema = Static<typeof ASchema>;
         `),
       )
     })
@@ -46,16 +46,16 @@ describe('Enum types', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export enum A {
             B = 'b',
             C = 'c',
           }
 
-          export const A = Type.Enum(A);
+          export const ASchema = Type.Enum(A);
 
-          export type A = Static<typeof A>;
+          export type ASchema = Static<typeof ASchema>;
         `),
       )
     })
@@ -73,16 +73,16 @@ describe('Enum types', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export enum A {
             B,
             C,
           }
 
-          export const A = Type.Enum(A);
+          export const ASchema = Type.Enum(A);
 
-          export type A = Static<typeof A>;
+          export type ASchema = Static<typeof ASchema>;
         `),
       )
     })
@@ -98,16 +98,16 @@ describe('Enum types', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export enum A {
             B = 'b',
             C = 'c',
           }
 
-          export const A = Type.Enum(A);
+          export const ASchema = Type.Enum(A);
 
-          export type A = Static<typeof A>;
+          export type ASchema = Static<typeof ASchema>;
         `),
       )
     })

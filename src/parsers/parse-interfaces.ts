@@ -86,10 +86,7 @@ export class InterfaceParser extends BaseParser {
     this.addGenericTypeAlias(interfaceName, typeParameters)
   }
 
-  private addGenericTypeAlias(
-    name: string,
-    typeParameters: TypeParameterDeclaration[],
-  ): void {
+  private addGenericTypeAlias(name: string, typeParameters: TypeParameterDeclaration[]): void {
     // Create type parameters for the type alias
     const typeParamDeclarations = typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
@@ -142,8 +139,8 @@ export class InterfaceParser extends BaseParser {
       name,
       typeParameters: typeParamDeclarations.map((tp) =>
         this.printer.printNode(ts.EmitHint.Unspecified, tp, this.newSourceFile.compilerNode),
-    ),
-    type: staticType,
+      ),
+      type: staticType,
     })
   }
 }

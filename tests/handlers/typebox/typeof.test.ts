@@ -19,7 +19,7 @@ describe('Typeof expressions', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = myVar;
 
@@ -39,7 +39,7 @@ describe('Typeof expressions', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = MyNamespace_config;
 
@@ -59,7 +59,7 @@ describe('Typeof expressions', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = myVar;
 
@@ -79,7 +79,7 @@ describe('Typeof expressions', () => {
         `,
       )
 
-      expect(generateFormattedCode(sourceFile)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).toBe(
         formatWithPrettier(`
           export const A = MyNamespace_config;
 

@@ -31,11 +31,6 @@ export class TypeAliasParser extends BaseParser {
       ],
     })
 
-    addStaticTypeAlias(
-      this.newSourceFile,
-      typeName,
-      this.newSourceFile.compilerNode,
-      this.printer,
-    )
+    addStaticTypeAlias(this.newSourceFile, typeName, this.newSourceFile.compilerNode, this.printer)
   }
 }

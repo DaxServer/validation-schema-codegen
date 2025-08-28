@@ -2,6 +2,7 @@ import { EnumParser } from '@daxserver/validation-schema-codegen/parsers/parse-e
 import { FunctionDeclarationParser } from '@daxserver/validation-schema-codegen/parsers/parse-function-declarations'
 import { InterfaceParser } from '@daxserver/validation-schema-codegen/parsers/parse-interfaces'
 import { TypeAliasParser } from '@daxserver/validation-schema-codegen/parsers/parse-type-aliases'
+import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
 import { Node, SourceFile, ts } from 'ts-morph'
 
 export interface PrinterOptions {
@@ -35,7 +36,7 @@ export class TypeBoxPrinter {
     this.functionParser = new FunctionDeclarationParser(parserOptions)
   }
 
-  printNode(traversedNode: { node: Node; isImported?: boolean }): void {
+  printNode(traversedNode: TraversedNode): void {
     const { node } = traversedNode
 
     switch (true) {

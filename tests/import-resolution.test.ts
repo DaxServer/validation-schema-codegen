@@ -35,7 +35,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const ExternalType = Type.Object({
             value: Type.String(),
@@ -80,7 +80,7 @@ describe('ts-morph codegen with imports', () => {
       `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const ExternalType = Type.Object({
             value: Type.String(),
@@ -136,7 +136,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
@@ -210,7 +210,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),
@@ -269,7 +269,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const ExternalType = Type.Object({
             value: Type.String(),
@@ -314,7 +314,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const ExternalType = Type.Object({
             value: Type.String(),
@@ -370,7 +370,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
@@ -444,7 +444,7 @@ describe('ts-morph codegen with imports', () => {
         `,
       )
 
-      expect(generateFormattedCode(userFile)).resolves.toBe(
+      expect(generateFormattedCode(userFile)).toBe(
         formatWithPrettier(`
           export const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),

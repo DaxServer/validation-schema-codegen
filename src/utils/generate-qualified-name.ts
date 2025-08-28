@@ -1,4 +1,4 @@
-import { basename } from 'path'
+import { basename } from 'node:path'
 import type { SourceFile } from 'ts-morph'
 
 /**
@@ -9,9 +9,9 @@ const hashString = (str: string): string => {
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i)
     hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32-bit integer
+    hash |= 0 // force signed 32-bit
   }
-  return Math.abs(hash).toString(36)
+  return (hash >>> 0).toString(36) // unsigned 32-bit
 }
 
 /**

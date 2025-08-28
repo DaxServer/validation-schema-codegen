@@ -14,7 +14,7 @@ describe('Function types', () => {
       test('simple function type', () => {
         const sourceFile = createSourceFile(project, `type A = () => string`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([], Type.String());
 
@@ -26,7 +26,7 @@ describe('Function types', () => {
       test('function type with parameters', () => {
         const sourceFile = createSourceFile(project, `type A = (x: number, y: string) => boolean`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
@@ -38,7 +38,7 @@ describe('Function types', () => {
       test('function type with optional parameters', () => {
         const sourceFile = createSourceFile(project, `type A = (x: number, y?: string) => void`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
@@ -52,7 +52,7 @@ describe('Function types', () => {
       test('simple function type', () => {
         const sourceFile = createSourceFile(project, `export type A = () => string`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([], Type.String());
 
@@ -67,7 +67,7 @@ describe('Function types', () => {
           `export type A = (x: number, y: string) => boolean`,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
@@ -82,7 +82,7 @@ describe('Function types', () => {
           `export type A = (x: number, y?: string) => void`,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
@@ -98,7 +98,7 @@ describe('Function types', () => {
       test('simple function declaration', () => {
         const sourceFile = createSourceFile(project, `function A(): string { return '' }`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([], Type.String());
 
@@ -113,7 +113,7 @@ describe('Function types', () => {
           `function A(x: number, y: string): boolean { return true }`,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
@@ -125,7 +125,7 @@ describe('Function types', () => {
       test('function declaration with optional parameters', () => {
         const sourceFile = createSourceFile(project, `function A(x: number, y?: string): void { }`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 
@@ -139,7 +139,7 @@ describe('Function types', () => {
       test('simple function declaration', () => {
         const sourceFile = createSourceFile(project, `export function A(): string { return '' }`)
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([], Type.String());
 
@@ -154,7 +154,7 @@ describe('Function types', () => {
           `export function A(x: number, y: string): boolean { return true }`,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.String()], Type.Boolean());
 
@@ -169,7 +169,7 @@ describe('Function types', () => {
           `export function A(x: number, y?: string): void { }`,
         )
 
-        expect(generateFormattedCode(sourceFile)).resolves.toBe(
+        expect(generateFormattedCode(sourceFile)).toBe(
           formatWithPrettier(`
             export const A = Type.Function([Type.Number(), Type.Optional(Type.String())], Type.Void());
 

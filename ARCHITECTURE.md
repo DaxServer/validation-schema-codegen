@@ -80,6 +80,7 @@ The parser system is built around a base class architecture in <mcfile name="par
 #### Base Parser
 
 The <mcfile name="base-parser.ts" path="src/parsers/base-parser.ts"></mcfile> provides:
+
 - Common interface for all parsers
 - Shared access to output `SourceFile`, TypeScript printer, and processed types tracking
 - Abstract `parse` method for implementation by specific parsers
@@ -111,6 +112,7 @@ The handler system in <mcfile name="handlers/typebox" path="src/handlers/typebox
 #### Handler Management
 
 The <mcfile name="typebox-type-handlers.ts" path="src/handlers/typebox/typebox-type-handlers.ts"></mcfile> class orchestrates all handlers through:
+
 - **Handler Caching**: Caches handler instances for performance optimization
 - **Fallback System**: Provides fallback handlers for complex cases
 
@@ -211,10 +213,12 @@ The <mcfile name="utils" path="src/utils"></mcfile> directory provides essential
 1.  **Input**: A TypeScript source file containing `enum`, `type alias`, `interface`, and `function` declarations.
 2.  **Parsing**: `ts-morph` parses the input TypeScript file into an Abstract Syntax Tree (AST).
 3.  **Centralized Dependency Traversal**: The `DependencyTraversal.startTraversal()` method orchestrates the complete dependency collection and ordering process:
-   - Collects local types from the main source file
-   - Recursively traverses import chains to gather all dependencies
-   - Establishes dependency relationships between all types
-   - Returns topologically sorted nodes for processing
+
+- Collects local types from the main source file
+- Recursively traverses import chains to gather all dependencies
+- Establishes dependency relationships between all types
+- Returns topologically sorted nodes for processing
+
 4.  **Sequential Node Processing**: The sorted nodes are processed sequentially using specialized parsers, ensuring dependencies are handled before dependent types.
 5.  **TypeBox Schema Generation**: For each node, the corresponding TypeBox schema is constructed using appropriate `Type` methods (e.g., `Type.Enum`, `Type.Object`, `Type.Function`, etc.). This process involves sophisticated mapping of TypeScript types to their TypeBox equivalents.
 6.  **Static Type Generation**: Alongside each TypeBox schema, a TypeScript `type` alias is generated using `Static<typeof ...>` to provide compile-time type safety and seamless integration with existing TypeScript code.
@@ -223,7 +227,7 @@ The <mcfile name="utils" path="src/utils"></mcfile> directory provides essential
 ## Basic Usage
 
 ```typescript
-const result = await generateCode({
+const result = generateCode({
   sourceCode: sourceFile.getFullText(),
   callerFile: sourceFile.getFilePath(),
 })
@@ -232,7 +236,7 @@ const result = await generateCode({
 ### Using File Path
 
 ```typescript
-const result = await generateCode({
+const result = generateCode({
   filePath: './types.ts',
 })
 ```

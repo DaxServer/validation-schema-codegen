@@ -21,7 +21,7 @@ describe('Dependency Ordering Bug', () => {
       `,
     )
 
-    expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+    expect(generateFormattedCode(sourceFile, true)).toBe(
       formatWithPrettier(`
         export const StringSnakDataValue = Type.Object({
           value: Type.String(),
@@ -57,7 +57,7 @@ describe('Dependency Ordering Bug', () => {
       `,
     )
 
-    expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+    expect(generateFormattedCode(sourceFile, true)).toBe(
       formatWithPrettier(`
         export const StringSnakDataValue = Type.Object({
           value: Type.String(),
