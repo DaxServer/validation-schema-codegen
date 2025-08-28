@@ -1,4 +1,4 @@
-import { generateCode } from '@daxserver/validation-schema-codegen/ts-morph-codegen'
+import { generateCode } from '@daxserver/validation-schema-codegen'
 import synchronizedPrettier from '@prettier/sync'
 import { Project, SourceFile } from 'ts-morph'
 
@@ -25,12 +25,10 @@ export const formatWithPrettier = (
 
 export const generateFormattedCode = async (
   sourceFile: SourceFile,
-  exportEverything: boolean = false,
   withTSchema: boolean = false,
 ): Promise<string> => {
   const code = await generateCode({
     sourceCode: sourceFile.getFullText(),
-    exportEverything,
     callerFile: sourceFile.getFilePath(),
     project: sourceFile.getProject(),
   })

@@ -15,11 +15,11 @@ describe('Object types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Object({
+          export const A = Type.Object({
             a: Type.String(),
           });
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -29,9 +29,9 @@ describe('Object types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const T = Type.Tuple([Type.Number(), Type.Null()]);
+          export const T = Type.Tuple([Type.Number(), Type.Null()]);
 
-          type T = Static<typeof T>;
+          export type T = Static<typeof T>;
         `),
       )
     })

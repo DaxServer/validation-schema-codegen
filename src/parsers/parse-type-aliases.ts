@@ -6,17 +6,11 @@ import { ts, TypeAliasDeclaration, VariableDeclarationKind } from 'ts-morph'
 
 export class TypeAliasParser extends BaseParser {
   parse(typeAlias: TypeAliasDeclaration): void {
-    this.parseWithImportFlag(typeAlias, false)
+    this.parseWithImportFlag(typeAlias)
   }
 
-  parseWithImportFlag(typeAlias: TypeAliasDeclaration, isImported: boolean): void {
+  parseWithImportFlag(typeAlias: TypeAliasDeclaration): void {
     const typeName = typeAlias.getName()
-
-    if (this.processedTypes.has(typeName)) {
-      return
-    }
-
-    this.processedTypes.add(typeName)
 
     const typeNode = typeAlias.getTypeNode()
     const typeboxTypeNode = typeNode ? getTypeBoxType(typeNode) : makeTypeCall('Any')
@@ -26,10 +20,8 @@ export class TypeAliasParser extends BaseParser {
       this.newSourceFile.compilerNode,
     )
 
-    const isExported = this.getIsExported(typeAlias, isImported)
-
     this.newSourceFile.addVariableStatement({
-      isExported,
+      isExported: true,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
@@ -44,7 +36,6 @@ export class TypeAliasParser extends BaseParser {
       typeName,
       this.newSourceFile.compilerNode,
       this.printer,
-      isExported,
     )
   }
 }

@@ -15,9 +15,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.String();
+          export const A = Type.String();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -27,9 +27,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Number();
+          export const A = Type.Number();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -39,9 +39,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Boolean();
+          export const A = Type.Boolean();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -51,9 +51,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Any();
+          export const A = Type.Any();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -63,9 +63,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Unknown();
+          export const A = Type.Unknown();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -75,9 +75,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Never();
+          export const A = Type.Never();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -87,9 +87,9 @@ describe('Primitive types', () => {
 
       expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
-          const A = Type.Null();
+          export const A = Type.Null();
 
-          type A = Static<typeof A>;
+          export type A = Static<typeof A>;
         `),
       )
     })
@@ -99,7 +99,7 @@ describe('Primitive types', () => {
     test('string', () => {
       const sourceFile = createSourceFile(project, `export type A = string`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.String();
 
@@ -111,7 +111,7 @@ describe('Primitive types', () => {
     test('number', () => {
       const sourceFile = createSourceFile(project, `export type A = number`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Number();
 
@@ -123,7 +123,7 @@ describe('Primitive types', () => {
     test('boolean', () => {
       const sourceFile = createSourceFile(project, `export type A = boolean`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Boolean();
 
@@ -135,7 +135,7 @@ describe('Primitive types', () => {
     test('any', () => {
       const sourceFile = createSourceFile(project, `export type A = any`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Any();
 
@@ -147,7 +147,7 @@ describe('Primitive types', () => {
     test('unknown', () => {
       const sourceFile = createSourceFile(project, `export type A = unknown`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Unknown();
 
@@ -159,7 +159,7 @@ describe('Primitive types', () => {
     test('never', () => {
       const sourceFile = createSourceFile(project, `export type A = never`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Never();
 
@@ -171,7 +171,7 @@ describe('Primitive types', () => {
     test('null', () => {
       const sourceFile = createSourceFile(project, `export type A = null`)
 
-      expect(generateFormattedCode(sourceFile, true)).resolves.toBe(
+      expect(generateFormattedCode(sourceFile)).resolves.toBe(
         formatWithPrettier(`
           export const A = Type.Null();
 

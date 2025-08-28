@@ -4,28 +4,36 @@ import { EnumDeclaration, VariableDeclarationKind } from 'ts-morph'
 
 export class EnumParser extends BaseParser {
   parse(enumDeclaration: EnumDeclaration): void {
-    const typeName = enumDeclaration.getName()
-    const enumText = enumDeclaration.getText()
-    const isExported = this.getIsExported(enumDeclaration)
-    this.newSourceFile.addStatements(isExported ? `export ${enumText}` : enumText)
+    const enumName = enumDeclaration.getName()
+
+    this.newSourceFile.addEnum({
+      name: enumName,
+      isExported: true,
+      members: enumDeclaration.getMembers().map((member) => ({
+        name: member.getName(),
+        value: member.hasInitializer() ? member.getValue() : undefined,
+      })),
+    })
+
+    // Generate TypeBox type
+    const typeboxType = `Type.Enum(${enumName})`
 
     this.newSourceFile.addVariableStatement({
-      isExported,
+      isExported: true,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
-          name: typeName,
-          initializer: `Type.Enum(${typeName})`,
+          name: enumName,
+          initializer: typeboxType,
         },
       ],
     })
 
     addStaticTypeAlias(
       this.newSourceFile,
-      typeName,
+      enumName,
       this.newSourceFile.compilerNode,
       this.printer,
-      isExported,
     )
   }
 }

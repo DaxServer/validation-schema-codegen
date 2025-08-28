@@ -37,20 +37,20 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const ExternalType = Type.Object({
+          export const ExternalType = Type.Object({
             value: Type.String(),
           })
 
-          type ExternalType = Static<typeof ExternalType>
+          export type ExternalType = Static<typeof ExternalType>
 
-          const User = Type.Object({
+          export const User = Type.Object({
             id: Type.String(),
             name: Type.String(),
             local: Type.String(),
             external: ExternalType,
           })
 
-          type User = Static<typeof User>
+          export type User = Static<typeof User>
         `),
       )
     })
@@ -82,20 +82,20 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const ExternalType = Type.Object({
+          export const ExternalType = Type.Object({
             value: Type.String(),
           })
 
-          type ExternalType = Static<typeof ExternalType>
+          export type ExternalType = Static<typeof ExternalType>
 
-          const User = Type.Object({
+          export const User = Type.Object({
             id: Type.String(),
             name: Type.String(),
             local: Type.String(),
             external: ExternalType,
           })
 
-          type User = Static<typeof User>
+          export type User = Static<typeof User>
         `),
       )
     })
@@ -138,25 +138,25 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const DeeplyNestedType = Type.Object({
+          export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
           })
 
-          type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          export type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-          const IntermediateType = Type.Object({
+          export const IntermediateType = Type.Object({
             id: Type.String(),
             nested: DeeplyNestedType,
           })
 
-          type IntermediateType = Static<typeof IntermediateType>
+          export type IntermediateType = Static<typeof IntermediateType>
 
-          const FinalUser = Type.Object({
+          export const FinalUser = Type.Object({
             name: Type.String(),
             data: IntermediateType,
           })
 
-          type FinalUser = Static<typeof FinalUser>
+          export type FinalUser = Static<typeof FinalUser>
         `),
       )
     })
@@ -212,32 +212,32 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const VeryDeeplyNestedType = Type.Object({
+          export const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),
           })
 
-          type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
+          export type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
 
-          const DeeplyNestedType = Type.Object({
+          export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
             veryDeep: VeryDeeplyNestedType,
           })
 
-          type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          export type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-          const IntermediateType = Type.Object({
+          export const IntermediateType = Type.Object({
             id: Type.String(),
             nested: DeeplyNestedType,
           })
 
-          type IntermediateType = Static<typeof IntermediateType>
+          export type IntermediateType = Static<typeof IntermediateType>
 
-          const UltimateUser = Type.Object({
+          export const UltimateUser = Type.Object({
             name: Type.String(),
             data: IntermediateType,
           })
 
-          type UltimateUser = Static<typeof UltimateUser>
+          export type UltimateUser = Static<typeof UltimateUser>
         `),
       )
     })
@@ -271,11 +271,11 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const ExternalType = Type.Object({
+          export const ExternalType = Type.Object({
             value: Type.String(),
           })
 
-          type ExternalType = Static<typeof ExternalType>
+          export type ExternalType = Static<typeof ExternalType>
 
           export const User = Type.Object({
             id: Type.String(),
@@ -316,11 +316,11 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const ExternalType = Type.Object({
+          export const ExternalType = Type.Object({
             value: Type.String(),
           })
 
-          type ExternalType = Static<typeof ExternalType>
+          export type ExternalType = Static<typeof ExternalType>
 
           export const User = Type.Object({
             id: Type.String(),
@@ -372,18 +372,18 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const DeeplyNestedType = Type.Object({
+          export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
           })
 
-          type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          export type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-          const IntermediateType = Type.Object({
+          export const IntermediateType = Type.Object({
             id: Type.String(),
             nested: DeeplyNestedType,
           })
 
-          type IntermediateType = Static<typeof IntermediateType>
+          export type IntermediateType = Static<typeof IntermediateType>
 
           export const FinalUser = Type.Object({
             name: Type.String(),
@@ -446,25 +446,25 @@ describe('ts-morph codegen with imports', () => {
 
       expect(generateFormattedCode(userFile)).resolves.toBe(
         formatWithPrettier(`
-          const VeryDeeplyNestedType = Type.Object({
+          export const VeryDeeplyNestedType = Type.Object({
             core: Type.String(),
           })
 
-          type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
+          export type VeryDeeplyNestedType = Static<typeof VeryDeeplyNestedType>
 
-          const DeeplyNestedType = Type.Object({
+          export const DeeplyNestedType = Type.Object({
             value: Type.Boolean(),
             veryDeep: VeryDeeplyNestedType,
           })
 
-          type DeeplyNestedType = Static<typeof DeeplyNestedType>
+          export type DeeplyNestedType = Static<typeof DeeplyNestedType>
 
-          const IntermediateType = Type.Object({
+          export const IntermediateType = Type.Object({
             id: Type.String(),
             nested: DeeplyNestedType,
           })
 
-          type IntermediateType = Static<typeof IntermediateType>
+          export type IntermediateType = Static<typeof IntermediateType>
 
           export const UltimateUser = Type.Object({
             name: Type.String(),

@@ -6,16 +6,15 @@ import { FunctionDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class FunctionDeclarationParser extends BaseParser {
   parse(functionDecl: FunctionDeclaration): void {
-    this.parseWithImportFlag(functionDecl, false)
+    this.parseWithImportFlag(functionDecl)
   }
 
-  parseWithImportFlag(functionDecl: FunctionDeclaration, isImported: boolean): void {
-    this.parseFunctionWithImportFlag(functionDecl, isImported)
+  parseWithImportFlag(functionDecl: FunctionDeclaration): void {
+    this.parseFunctionWithImportFlag(functionDecl)
   }
 
   private parseFunctionWithImportFlag(
     functionDecl: FunctionDeclaration,
-    isImported: boolean,
   ): void {
     const functionName = functionDecl.getName()
     if (!functionName) {
@@ -70,10 +69,8 @@ export class FunctionDeclarationParser extends BaseParser {
       this.newSourceFile.compilerNode,
     )
 
-    const isExported = this.getIsExported(functionDecl, isImported)
-
     this.newSourceFile.addVariableStatement({
-      isExported,
+      isExported: true,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
@@ -88,7 +85,6 @@ export class FunctionDeclarationParser extends BaseParser {
       functionName,
       this.newSourceFile.compilerNode,
       this.printer,
-      isExported,
     )
   }
 }
