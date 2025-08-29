@@ -8,7 +8,7 @@ const getNodeName = (traversedNode: TraversedNode): string => {
   return traversedNode.originalName
 }
 
-describe('DependencyCollector', () => {
+describe('Dependency Traversal', () => {
   let project: Project
   let traverser: DependencyTraversal
 

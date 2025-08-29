@@ -1,8 +1,17 @@
 {
   "name": "@daxserver/validation-schema-codegen",
   "version": "0.1.0",
+  "description": "Codegen for validation schemas",
+  "private": true,
   "main": "src/index.ts",
   "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "graphology": "^0.26.0",
+    "graphology-dag": "^0.4.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "graphology-traversal": "^0.3.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
     "@prettier/sync": "^0.6.1",
@@ -26,17 +35,9 @@
   "peerDependencies": {
     "typescript": "~5.9.2"
   },
-  "description": "Codegen for validation schemas",
-  "private": true,
   "scripts": {
     "format": "prettier --cache --write .",
     "typecheck": "tsc --noEmit",
     "lint": "eslint"
-  },
-  "type": "module",
-  "dependencies": {
-    "graphology": "^0.26.0",
-    "graphology-dag": "^0.4.1",
-    "graphology-traversal": "^0.3.1"
   }
 }

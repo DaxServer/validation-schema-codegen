@@ -2,14 +2,20 @@ import { FileGraph } from '@daxserver/validation-schema-codegen/traverse/file-gr
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
 import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
 import { generateQualifiedNodeName } from '@daxserver/validation-schema-codegen/utils/generate-qualified-name'
-import { topologicalSort } from 'graphology-dag'
 import {
+  GraphVisualizer,
+  type VisualizationOptions,
+} from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
+import { hasCycle, topologicalSort } from 'graphology-dag'
+import {
+  EnumDeclaration,
+  FunctionDeclaration,
   ImportDeclaration,
   InterfaceDeclaration,
   Node,
   SourceFile,
+  SyntaxKind,
   TypeAliasDeclaration,
-  TypeReferenceNode,
 } from 'ts-morph'
 
 /**
@@ -113,32 +119,29 @@ export class DependencyTraversal {
    * Extract dependencies for all nodes in the graph
    */
   extractDependencies(): void {
-    // Extract dependencies for all nodes in the graph
     for (const nodeId of this.nodeGraph.nodes()) {
       const nodeData = this.nodeGraph.getNode(nodeId)
 
+      let nodeToAnalyze: Node | undefined
+
       if (nodeData.type === 'typeAlias') {
         const typeAlias = nodeData.node as TypeAliasDeclaration
-        const typeNode = typeAlias.getTypeNode()
-        if (!typeNode) continue
-
-        const typeReferences = this.extractTypeReferences(typeNode)
-
-        // Add edges for dependencies
-        for (const referencedType of typeReferences) {
-          if (this.nodeGraph.hasNode(referencedType)) {
-            this.nodeGraph.addDependency(referencedType, nodeId)
-          }
-        }
+        nodeToAnalyze = typeAlias.getTypeNode()
       } else if (nodeData.type === 'interface') {
-        const interfaceDecl = nodeData.node as InterfaceDeclaration
-        const typeReferences = this.extractTypeReferences(interfaceDecl)
+        nodeToAnalyze = nodeData.node as InterfaceDeclaration
+      } else if (nodeData.type === 'enum') {
+        nodeToAnalyze = nodeData.node as EnumDeclaration
+      } else if (nodeData.type === 'function') {
+        nodeToAnalyze = nodeData.node as FunctionDeclaration
+      }
 
-        // Add edges for dependencies
-        for (const referencedType of typeReferences) {
-          if (this.nodeGraph.hasNode(referencedType)) {
-            this.nodeGraph.addDependency(referencedType, nodeId)
-          }
+      if (!nodeToAnalyze) continue
+
+      const typeReferences = this.extractTypeReferences(nodeToAnalyze)
+
+      for (const referencedType of typeReferences) {
+        if (this.nodeGraph.hasNode(referencedType)) {
+          this.nodeGraph.addDependency(referencedType, nodeId)
         }
       }
     }
@@ -229,21 +232,29 @@ export class DependencyTraversal {
   }
 
   /**
-   * Get nodes in dependency order (dependencies first)
-   * Retrieved from the graph, not from SourceFile
+   * Get nodes in dependency order from graph
+   * Handles circular dependencies gracefully by falling back to simple node order
    */
   getNodesToPrint(): TraversedNode[] {
-    try {
-      // Use topological sort to ensure dependencies are printed first
-      const sortedNodeIds = topologicalSort(this.nodeGraph)
-      return sortedNodeIds.map((nodeId: string) => this.nodeGraph.getNodeAttributes(nodeId))
-    } catch {
-      // Handle circular dependencies by returning nodes in insertion order
-      // This ensures dependencies are still processed before dependents when possible
-      return Array.from(this.nodeGraph.nodes()).map((nodeId: string) =>
-        this.nodeGraph.getNodeAttributes(nodeId),
-      )
-    }
+    const nodes = hasCycle(this.nodeGraph)
+      ? Array.from(this.nodeGraph.nodes())
+      : topologicalSort(this.nodeGraph)
+
+    return nodes.map((nodeId: string) => this.nodeGraph.getNode(nodeId))
+  }
+
+  /**
+   * Generate HTML visualization of the dependency graph
+   */
+  async visualizeGraph(options: VisualizationOptions = {}): Promise<string> {
+    return GraphVisualizer.generateVisualization(this.nodeGraph, options)
+  }
+
+  /**
+   * Get the node graph for debugging purposes
+   */
+  getNodeGraph(): NodeGraph {
+    return this.nodeGraph
   }
 
   private extractTypeReferences(node: Node): string[] {
@@ -255,8 +266,7 @@ export class DependencyTraversal {
       visited.add(node)
 
       if (Node.isTypeReference(node)) {
-        const typeRefNode = node as TypeReferenceNode
-        const typeName = typeRefNode.getTypeName().getText()
+        const typeName = node.getTypeName().getText()
 
         for (const qualifiedName of this.nodeGraph.nodes()) {
           const nodeData = this.nodeGraph.getNode(qualifiedName)
@@ -265,8 +275,44 @@ export class DependencyTraversal {
             break
           }
         }
+      }
 
-        return
+      // Handle typeof expressions (TypeQuery nodes)
+      if (Node.isTypeQuery(node)) {
+        const exprName = node.getExprName()
+
+        if (Node.isIdentifier(exprName) || Node.isQualifiedName(exprName)) {
+          const typeName = exprName.getText()
+
+          for (const qualifiedName of this.nodeGraph.nodes()) {
+            const nodeData = this.nodeGraph.getNode(qualifiedName)
+            if (nodeData.originalName === typeName) {
+              references.push(qualifiedName)
+              break
+            }
+          }
+        }
+      }
+
+      // Handle interface inheritance (extends clauses)
+      if (Node.isInterfaceDeclaration(node)) {
+        const heritageClauses = node.getHeritageClauses()
+
+        for (const heritageClause of heritageClauses) {
+          if (heritageClause.getToken() !== SyntaxKind.ExtendsKeyword) continue
+
+          for (const typeNode of heritageClause.getTypeNodes()) {
+            const typeName = typeNode.getText()
+
+            for (const qualifiedName of this.nodeGraph.nodes()) {
+              const nodeData = this.nodeGraph.getNode(qualifiedName)
+              if (nodeData.originalName === typeName) {
+                references.push(qualifiedName)
+                break
+              }
+            }
+          }
+        }
       }
 
       node.forEachChild(traverse)

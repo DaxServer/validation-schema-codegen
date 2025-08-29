@@ -70,8 +70,34 @@ The dependency system consists of three main components:
 
 1. **Local Type Collection**: Adds all types from the main source file
 2. **Import Processing**: Recursively processes import declarations
-3. **Dependency Extraction**: Analyzes type references to build dependency graph
+3. **Dependency Extraction**: Analyzes type references to build dependency graph for all supported TypeScript constructs:
+   - **Type Aliases**: Extracts dependencies from type alias declarations
+   - **Interfaces**: Analyzes interface property types and heritage clauses
+   - **Enums**: Processes enum member value dependencies
+   - **Functions**: Extracts dependencies from parameter types, return types, and type parameters
 4. **Topological Sorting**: Returns nodes in proper dependency order
+
+#### Graph Visualization
+
+The system includes interactive graph visualization capabilities through the `GraphVisualizer` utility:
+
+- **Sigma.js Integration**: Uses ES6 modules with unpkg CDN for interactive HTML-based graph visualization
+- **Custom Node Shapes**: Implements WebGL-based custom node programs for different TypeScript constructs:
+  - **Diamond**: Interface types (rotated square program)
+  - **Square**: Type alias declarations
+  - **Triangle**: Enum declarations
+  - **Star**: Function declarations
+  - **Circle**: Default/other types
+- **ForceAtlas2 Layout**: Single optimized layout algorithm for automatic node positioning with gravity and scaling controls
+- **Enhanced Node Differentiation**:
+  - **Size Variation**: Different node sizes based on type and importance (main code vs imported)
+  - **Color Coding**: Type-specific colors with intensity variation based on import nesting level
+  - **Shape Mapping**: Direct visual shape differentiation using custom WebGL node programs
+  - **Visual Legend**: CSS-styled legend showing actual shape representations
+- **Import Nesting Visualization**: Color intensity reflects import depth, with main code having brightest colors
+- **Interactive Features**: Click events for node details, zoom/pan capabilities, and hover tooltips
+- **Export Options**: Generates standalone HTML files with embedded visualization and complete styling
+- **WebGL Programs**: Custom node renderers extending `@sigma/node-square` and `@sigma/node-border` packages
 
 ### Parser System
 

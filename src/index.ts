@@ -5,6 +5,7 @@ import {
 import { TypeBoxPrinter } from '@daxserver/validation-schema-codegen/printer/typebox-printer'
 import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
 import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
+import type { VisualizationOptions } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
 import { Node, Project, SourceFile, ts } from 'ts-morph'
 
 const createOutputFile = (hasGenericInterfaces: boolean) => {
@@ -50,13 +51,25 @@ const printSortedNodes = (sortedTraversedNodes: TraversedNode[], newSourceFile: 
   return newSourceFile.getFullText()
 }
 
-export const generateCode = ({ sourceCode, filePath, ...options }: InputOptions): string => {
+export interface CodeGenerationOptions extends InputOptions {
+  visualizationOptions?: VisualizationOptions
+}
+
+export const generateVisualization = async (options: CodeGenerationOptions): Promise<string> => {
   // Create source file from input
-  const sourceFile = createSourceFileFromInput({
-    sourceCode,
-    filePath,
-    ...options,
-  })
+  const sourceFile = createSourceFileFromInput(options)
+
+  // Create dependency traversal and start traversal
+  const dependencyTraversal = new DependencyTraversal()
+  dependencyTraversal.startTraversal(sourceFile)
+
+  // Generate visualization
+  return await dependencyTraversal.visualizeGraph(options.visualizationOptions)
+}
+
+export const generateCode = (options: InputOptions): string => {
+  // Create source file from input
+  const sourceFile = createSourceFileFromInput(options)
 
   // Create dependency traversal and start traversal
   const dependencyTraversal = new DependencyTraversal()
