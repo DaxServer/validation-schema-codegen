@@ -33,8 +33,7 @@ describe('Interface Inheritance Dependencies', () => {
       `,
     )
 
-    traverser.startTraversal(sourceFile)
-    const dependencies = traverser.getNodesToPrint()
+    const dependencies = traverser.startTraversal(sourceFile)
 
     // Should have all three types
     expect(dependencies).toHaveLength(3)
@@ -68,8 +67,7 @@ describe('Interface Inheritance Dependencies', () => {
       `,
     )
 
-    traverser.startTraversal(sourceFile)
-    const dependencies = traverser.getNodesToPrint()
+    const dependencies = traverser.startTraversal(sourceFile)
 
     expect(dependencies).toHaveLength(3)
 
@@ -97,8 +95,7 @@ describe('Interface Inheritance Dependencies', () => {
       `,
     )
 
-    traverser.startTraversal(sourceFile)
-    const dependencies = traverser.getNodesToPrint()
+    const dependencies = traverser.startTraversal(sourceFile)
 
     expect(dependencies).toHaveLength(3)
 

@@ -92,8 +92,6 @@ describe('Dependency ordering', () => {
   })
 
   test('should order dependencies correctly - referenced types before referencing types', () => {
-    const project = new Project()
-
     // Create a simple test case where TypeB depends on TypeA
     const sourceFile = project.createSourceFile(
       'test.ts',
@@ -116,8 +114,6 @@ describe('Dependency ordering', () => {
   })
 
   test('should handle complex dependency chains', () => {
-    const project = new Project()
-
     // Create a more complex dependency chain
     const sourceFile = project.createSourceFile(
       'test.ts',
@@ -149,6 +145,6 @@ describe('Dependency ordering', () => {
 
     expect(entityIdIndex).toBeLessThan(entityInfoIndex)
     expect(entityInfoIndex).toBeLessThan(entityIndex)
-    expect(entityIdIndex).toBeLessThan(entitiesIndex)
+    expect(entityIndex).toBeLessThan(entitiesIndex)
   })
 })

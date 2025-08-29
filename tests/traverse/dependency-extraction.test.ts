@@ -103,7 +103,10 @@ describe('Dependency Extraction', () => {
     // User should come before createUser in topological order
     const userIndex = dependencies.findIndex((d) => getNodeName(d) === 'User')
     const createUserIndex = dependencies.findIndex((d) => getNodeName(d) === 'createUser')
+    const userFactoryIndex = dependencies.findIndex((d) => getNodeName(d) === 'UserFactory')
+
     expect(userIndex).toBeLessThan(createUserIndex)
+    expect(createUserIndex).toBeLessThan(userFactoryIndex)
   })
 
   test('should extract dependencies from enum with type references', () => {

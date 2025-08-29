@@ -29,6 +29,7 @@ export class NodeGraph extends DirectedGraph<TraversedNode> {
     if (
       !this.hasNode(fromNode) ||
       !this.hasNode(toNode) ||
+      fromNode === toNode ||
       this.hasDirectedEdge(fromNode, toNode)
     ) {
       return

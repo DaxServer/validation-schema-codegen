@@ -2,6 +2,8 @@ import type { TraversedNode } from '@daxserver/validation-schema-codegen/travers
 import type { DirectedGraph } from 'graphology'
 import Graph from 'graphology'
 import forceAtlas2 from 'graphology-layout-forceatlas2'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 
 export interface VisualizationOptions {
   outputPath?: string
@@ -43,12 +45,15 @@ export class GraphVisualizer {
     const { nodes, edges } = this.convertGraphToSigmaData(nodeGraph)
 
     // Always apply ForceAtlas2 layout
-    this.applyForceAtlas2Layout(nodes)
+    this.applyForceAtlas2Layout(nodes, edges)
 
     const htmlContent = this.generateHTMLContent(nodes, edges, title)
 
     const file = Bun.file(outputPath)
     await file.write(htmlContent)
+
+    mkdirSync(dirname(outputPath), { recursive: true })
+    writeFileSync(outputPath, htmlContent, 'utf8')
 
     return outputPath
   }
@@ -96,7 +101,7 @@ export class GraphVisualizer {
   /**
    * Apply ForceAtlas2 layout to nodes
    */
-  private static applyForceAtlas2Layout(nodes: GraphNode[]): void {
+  private static applyForceAtlas2Layout(nodes: GraphNode[], edges: GraphEdge[]): void {
     // Create a temporary graph for layout calculation
     const tempGraph = new Graph()
 
@@ -112,6 +117,16 @@ export class GraphVisualizer {
         y,
         size: node.size,
       })
+    })
+
+    // Add edges to influence layout
+    edges.forEach((e) => {
+      if (tempGraph.hasNode(e.source) && tempGraph.hasNode(e.target)) {
+        const key = `${e.source}->${e.target}`
+        if (!tempGraph.hasEdge(key)) {
+          tempGraph.addEdgeWithKey(key, e.source, e.target)
+        }
+      }
     })
 
     // Apply ForceAtlas2 layout
@@ -202,13 +217,6 @@ export class GraphVisualizer {
   private static calculateImportNestingLevel(nodeData: TraversedNode): number {
     if (nodeData.isMainCode) {
       return 4 // Highest intensity for main code
-    }
-
-    if (nodeData.isImported) {
-      // Simple heuristic: count path depth
-      const filePath = nodeData.node.getSourceFile().getFilePath()
-      const pathDepth = filePath.split('/').length
-      return Math.max(1, Math.min(3, pathDepth - 3))
     }
 
     return 2 // Default level

@@ -6,7 +6,7 @@ import {
   GraphVisualizer,
   type VisualizationOptions,
 } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
-import { topologicalSort } from 'graphology-dag'
+import { hasCycle, topologicalSort } from 'graphology-dag'
 import {
   EnumDeclaration,
   FunctionDeclaration,
@@ -16,7 +16,6 @@ import {
   SourceFile,
   SyntaxKind,
   TypeAliasDeclaration,
-  TypeReferenceNode,
 } from 'ts-morph'
 
 /**
@@ -237,17 +236,11 @@ export class DependencyTraversal {
    * Handles circular dependencies gracefully by falling back to simple node order
    */
   getNodesToPrint(): TraversedNode[] {
-    try {
-      return topologicalSort(this.nodeGraph).map((nodeId: string) => this.nodeGraph.getNode(nodeId))
-    } catch (error) {
-      // Handle circular dependencies by returning nodes in insertion order
-      if (error instanceof Error && error.message.includes('not acyclic')) {
-        return Array.from(this.nodeGraph.nodes()).map((nodeId: string) =>
-          this.nodeGraph.getNode(nodeId),
-        )
-      }
-      throw error
-    }
+    const nodes = hasCycle(this.nodeGraph)
+      ? Array.from(this.nodeGraph.nodes())
+      : topologicalSort(this.nodeGraph)
+
+    return nodes.map((nodeId: string) => this.nodeGraph.getNode(nodeId))
   }
 
   /**
@@ -273,8 +266,7 @@ export class DependencyTraversal {
       visited.add(node)
 
       if (Node.isTypeReference(node)) {
-        const typeRefNode = node as TypeReferenceNode
-        const typeName = typeRefNode.getTypeName().getText()
+        const typeName = node.getTypeName().getText()
 
         for (const qualifiedName of this.nodeGraph.nodes()) {
           const nodeData = this.nodeGraph.getNode(qualifiedName)
@@ -283,14 +275,28 @@ export class DependencyTraversal {
             break
           }
         }
+      }
 
-        // Continue traversing to find type arguments
+      // Handle typeof expressions (TypeQuery nodes)
+      if (Node.isTypeQuery(node)) {
+        const exprName = node.getExprName()
+
+        if (Node.isIdentifier(exprName) || Node.isQualifiedName(exprName)) {
+          const typeName = exprName.getText()
+
+          for (const qualifiedName of this.nodeGraph.nodes()) {
+            const nodeData = this.nodeGraph.getNode(qualifiedName)
+            if (nodeData.originalName === typeName) {
+              references.push(qualifiedName)
+              break
+            }
+          }
+        }
       }
 
       // Handle interface inheritance (extends clauses)
       if (Node.isInterfaceDeclaration(node)) {
-        const interfaceDecl = node as InterfaceDeclaration
-        const heritageClauses = interfaceDecl.getHeritageClauses()
+        const heritageClauses = node.getHeritageClauses()
 
         for (const heritageClause of heritageClauses) {
           if (heritageClause.getToken() !== SyntaxKind.ExtendsKeyword) continue

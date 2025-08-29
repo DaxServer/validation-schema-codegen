@@ -52,7 +52,6 @@ const printSortedNodes = (sortedTraversedNodes: TraversedNode[], newSourceFile: 
 }
 
 export interface CodeGenerationOptions extends InputOptions {
-  visualize?: boolean
   visualizationOptions?: VisualizationOptions
 }
 
