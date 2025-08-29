@@ -8,19 +8,30 @@ import type { TraversedNode } from '@daxserver/validation-schema-codegen/travers
 import type { VisualizationOptions } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
 import { Node, Project, SourceFile, ts } from 'ts-morph'
 
-const createOutputFile = (hasGenericInterfaces: boolean) => {
+const createOutputFile = (hasGenericInterfaces: boolean, hasReadonly: boolean) => {
   const newSourceFile = new Project().createSourceFile('output.ts', '', {
     overwrite: true,
   })
 
   // Add imports
-  const namedImports = [
-    'Type',
+  const namedImports: { name: string; isTypeOnly: boolean }[] = [
     {
-      name: 'Static',
-      isTypeOnly: true,
+      name: 'Type',
+      isTypeOnly: false,
     },
   ]
+
+  if (hasReadonly) {
+    namedImports.push({
+      name: 'Readonly',
+      isTypeOnly: false,
+    })
+  }
+
+  namedImports.push({
+    name: 'Static',
+    isTypeOnly: true,
+  })
 
   if (hasGenericInterfaces) {
     namedImports.push({
@@ -75,13 +86,27 @@ export const generateCode = (options: InputOptions): string => {
   const dependencyTraversal = new DependencyTraversal()
   const traversedNodes = dependencyTraversal.startTraversal(sourceFile)
 
-  // Check if any interfaces have generic type parameters
+  // Check if any interfaces or type aliases have generic type parameters
   const hasGenericInterfaces = traversedNodes.some(
-    (t) => Node.isInterfaceDeclaration(t.node) && t.node.getTypeParameters().length > 0,
+    (t) =>
+      (Node.isInterfaceDeclaration(t.node) && t.node.getTypeParameters().length > 0) ||
+      (Node.isTypeAliasDeclaration(t.node) && t.node.getTypeParameters().length > 0),
   )
 
+  // Check if any nodes use Readonly type operator
+  const hasReadonly = traversedNodes.some((t) => {
+    // Use ts-morph's built-in method to get all TypeReference descendants
+    return t.node
+      .getDescendants()
+      .filter(Node.isTypeReference)
+      .some((typeRef) => {
+        const typeName = typeRef.getTypeName()
+        return Node.isIdentifier(typeName) && typeName.getText() === 'Readonly'
+      })
+  })
+
   // Create output file with proper imports
-  const newSourceFile = createOutputFile(hasGenericInterfaces)
+  const newSourceFile = createOutputFile(hasGenericInterfaces, hasReadonly)
 
   // Print sorted nodes to output
   const result = printSortedNodes(traversedNodes, newSourceFile)

@@ -41,7 +41,7 @@ export class TypeBoxPrinter {
 
     switch (true) {
       case Node.isTypeAliasDeclaration(node):
-        this.typeAliasParser.parseWithImportFlag(node)
+        this.typeAliasParser.parse(node)
         break
 
       case Node.isInterfaceDeclaration(node):

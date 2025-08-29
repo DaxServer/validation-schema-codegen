@@ -1,15 +1,31 @@
 import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
 import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { ts, TypeAliasDeclaration, VariableDeclarationKind } from 'ts-morph'
+import { ts, TypeAliasDeclaration } from 'ts-morph'
 
 export class TypeAliasParser extends BaseParser {
   parse(typeAlias: TypeAliasDeclaration): void {
-    this.parseWithImportFlag(typeAlias)
+    const typeName = typeAlias.getName()
+
+    if (this.processedTypes.has(typeName)) {
+      return
+    }
+
+    this.processedTypes.add(typeName)
+
+    const typeParameters = typeAlias.getTypeParameters()
+
+    // Check if type alias has type parameters (generic)
+    if (typeParameters.length > 0) {
+      this.parseGenericTypeAlias(typeAlias)
+    } else {
+      this.parseRegularTypeAlias(typeAlias)
+    }
   }
 
-  parseWithImportFlag(typeAlias: TypeAliasDeclaration): void {
+  private parseRegularTypeAlias(typeAlias: TypeAliasDeclaration): void {
     const typeName = typeAlias.getName()
 
     const typeNode = typeAlias.getTypeNode()
@@ -20,17 +36,39 @@ export class TypeAliasParser extends BaseParser {
       this.newSourceFile.compilerNode,
     )
 
-    this.newSourceFile.addVariableStatement({
-      isExported: true,
-      declarationKind: VariableDeclarationKind.Const,
-      declarations: [
-        {
-          name: typeName,
-          initializer: typeboxType,
-        },
-      ],
-    })
+    GenericTypeUtils.addTypeBoxVariableStatement(this.newSourceFile, typeName, typeboxType)
 
     addStaticTypeAlias(this.newSourceFile, typeName, this.newSourceFile.compilerNode, this.printer)
+  }
+
+  private parseGenericTypeAlias(typeAlias: TypeAliasDeclaration): void {
+    const typeName = typeAlias.getName()
+    const typeParameters = typeAlias.getTypeParameters()
+
+    // Generate TypeBox function definition
+    const typeNode = typeAlias.getTypeNode()
+    const typeboxTypeNode = typeNode ? getTypeBoxType(typeNode) : makeTypeCall('Any')
+
+    // Create the function expression using shared utilities
+    const functionExpression = GenericTypeUtils.createGenericArrowFunction(
+      typeParameters,
+      typeboxTypeNode,
+    )
+
+    const functionExpressionText = this.printer.printNode(
+      ts.EmitHint.Expression,
+      functionExpression,
+      this.newSourceFile.compilerNode,
+    )
+
+    // Add the function declaration
+    GenericTypeUtils.addTypeBoxVariableStatement(
+      this.newSourceFile,
+      typeName,
+      functionExpressionText,
+    )
+
+    // Add generic type alias using shared utility
+    GenericTypeUtils.addGenericTypeAlias(this.newSourceFile, typeName, typeParameters, this.printer)
   }
 }

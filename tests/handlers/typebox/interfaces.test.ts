@@ -300,6 +300,67 @@ describe('Interfaces', () => {
           ),
         )
       })
+
+      test('generics with complexity', () => {
+        const sourceFile = createSourceFile(
+          project,
+          `
+            export type LanguageCode = string;
+            type LanguageRecord<V> = Partial<Readonly<Record<LanguageCode, V>>>;
+          `,
+        )
+
+        expect(generateFormattedCode(sourceFile)).toBe(
+          formatWithPrettier(
+            `
+              export const LanguageCode = Type.String()
+
+              export type LanguageCode = Static<typeof LanguageCode>
+
+              export const LanguageRecord = <V extends TSchema>(V: V) => Type.Partial(Readonly(Type.Record(LanguageCode, V)))
+
+              export type LanguageRecord<V extends TSchema> = Static<ReturnType<typeof LanguageRecord<V>>>
+            `,
+            true,
+            true,
+            true,
+          ),
+        )
+      })
+
+      test('multiple generic parameters with constraints', () => {
+        const sourceFile = createSourceFile(
+          project,
+          `
+            type ApiResponse<T, E> = {
+              data?: T;
+              error?: E;
+              status: number;
+            };
+            type UserResponse<T> = ApiResponse<T, string>;
+          `,
+        )
+
+        expect(generateFormattedCode(sourceFile)).toBe(
+          formatWithPrettier(
+            `
+              export const ApiResponse = <T extends TSchema, E extends TSchema>(T: T, E: E) => Type.Object({
+                data: Type.Optional(T),
+                error: Type.Optional(E),
+                status: Type.Number()
+              })
+
+              export type ApiResponse<T extends TSchema, E extends TSchema> = Static<ReturnType<typeof ApiResponse<T, E>>>
+
+              export const UserResponse = <T extends TSchema>(T: T) => ApiResponse(T, Type.String())
+
+              export type UserResponse<T extends TSchema> = Static<ReturnType<typeof UserResponse<T>>>
+            `,
+            true,
+            true,
+          ),
+        )
+      })
     })
   })
 })

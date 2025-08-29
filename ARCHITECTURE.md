@@ -24,7 +24,7 @@
 ### Supported TypeScript Constructs
 
 - **Type Definitions**: Type aliases, interfaces, enums, and function declarations
-- **Generic Types**: Generic interfaces and type parameters with proper constraint handling
+- **Generic Types**: Generic interfaces and type aliases with type parameters and proper constraint handling
 - **Complex Types**: Union and intersection types, nested object structures, template literal types
 - **Utility Types**: Built-in support for Pick, Omit, Partial, Required, Record, and other TypeScript utility types
 - **Advanced Features**: Conditional types, mapped types, keyof operators, indexed access types
@@ -39,7 +39,7 @@ The main logic for code generation resides in the <mcfile name="index.ts" path="
 The `generateCode` function in <mcfile name="index.ts" path="src/index.ts"></mcfile> orchestrates the entire code generation process:
 
 1.  **Input Processing**: Creates a `SourceFile` from input using `createSourceFileFromInput`
-2.  **Generic Interface Detection**: Checks for generic interfaces to determine required TypeBox imports
+2.  **Generic Type Detection**: Checks for generic interfaces and type aliases to determine required TypeBox imports (including `TSchema`)
 3.  **Output File Creation**: Creates a new output file with necessary `@sinclair/typebox` imports using `createOutputFile`
 4.  **Dependency Traversal**: Uses `DependencyTraversal` to analyze and sort all type dependencies
 5.  **Code Generation**: Processes sorted nodes using `TypeBoxPrinter` in `printSortedNodes`
@@ -114,7 +114,7 @@ The <mcfile name="base-parser.ts" path="src/parsers/base-parser.ts"></mcfile> pr
 #### Specialized Parsers
 
 1. **InterfaceParser**: <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile> - Handles both regular and generic interfaces
-2. **TypeAliasParser**: <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile> - Processes type alias declarations
+2. **TypeAliasParser**: <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile> - Processes both regular and generic type alias declarations
 3. **EnumParser**: <mcfile name="parse-enums.ts" path="src/parsers/parse-enums.ts"></mcfile> - Handles enum declarations
 4. **FunctionParser**: <mcfile name="parse-function-declarations.ts" path="src/parsers/parse-function-declarations.ts"></mcfile> - Processes function declarations
 5. **ImportParser**: <mcfile name="parse-imports.ts" path="src/parsers/parse-imports.ts"></mcfile> - Handles import resolution
@@ -180,6 +180,36 @@ export interface InputOptions {
 - **File Path Input**: Automatically resolves and loads TypeScript files from disk
 - **Source Code Input**: Processes TypeScript code directly from strings with validation
 - **Project Context**: Enables proper relative import resolution when working with in-memory source files
+
+### Generic Type Support
+
+The codebase provides comprehensive support for both generic interfaces and generic type aliases, enabling complex type transformations and reusable type definitions.
+
+#### Generic Type Aliases
+
+The `TypeAliasParser` handles both regular and generic type aliases through specialized processing:
+
+1. **Type Parameter Detection**: Automatically detects type parameters using `typeAlias.getTypeParameters()`
+2. **Function Generation**: Creates TypeBox functions for generic type aliases with proper parameter constraints
+3. **TSchema Constraints**: Applies `TSchema` constraints to all type parameters for TypeBox compatibility
+4. **Static Type Generation**: Generates corresponding TypeScript type aliases using `Static<ReturnType<typeof TypeName<T>>>`
+
+#### Generic Interface Support
+
+Generic interfaces are processed similarly through the `InterfaceParser`:
+
+1. **Parameter Constraint Handling**: Converts TypeScript type parameter constraints to `TSchema` constraints
+2. **Function-Based Schema Generation**: Creates TypeBox schema functions that accept type parameters
+3. **Type Safety Preservation**: Maintains full TypeScript type safety through proper static type aliases
+
+#### Complex Generic Scenarios
+
+The system supports advanced generic patterns including:
+
+- **Multiple Type Parameters**: Functions with multiple generic parameters (e.g., `ApiResponse<T, E>`)
+- **Nested Generic Types**: Generic types that reference other generic types
+- **Utility Type Combinations**: Complex combinations like `Partial<Readonly<Record<K, V>>>`
+- **Type Parameter Propagation**: Proper handling of type parameters across nested type references
 
 ### Interface Inheritance
 
