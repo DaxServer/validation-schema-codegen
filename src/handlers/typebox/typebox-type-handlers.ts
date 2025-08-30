@@ -3,6 +3,7 @@ import { ArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/
 import { IntersectionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/intersection-type-handler'
 import { TupleTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/tuple-type-handler'
 import { UnionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/union-type-handler'
+import { DateTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/date-type-handler'
 import { FunctionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/function-type-handler'
 import { IndexedAccessTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/indexed-access-type-handler'
 import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-type-handler'
@@ -52,6 +53,7 @@ export class TypeBoxTypeHandlers {
     const typeofTypeHandler = new TypeofTypeHandler()
     const readonlyTypeHandler = new ReadonlyTypeHandler()
     const readonlyArrayTypeHandler = new ReadonlyArrayTypeHandler()
+    const dateTypeHandler = new DateTypeHandler()
 
     // O(1) lookup by SyntaxKind
     this.syntaxKindHandlers.set(SyntaxKind.AnyKeyword, simpleTypeHandler)
@@ -83,6 +85,7 @@ export class TypeBoxTypeHandlers {
     this.typeReferenceHandlers.set('Omit', omitTypeHandler)
     this.typeReferenceHandlers.set('Required', requiredTypeHandler)
     this.typeReferenceHandlers.set('Readonly', readonlyTypeHandler)
+    this.typeReferenceHandlers.set('Date', dateTypeHandler)
 
     // Fallback handlers for complex cases
     this.fallbackHandlers = [

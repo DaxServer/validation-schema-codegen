@@ -28,6 +28,7 @@
 - **Complex Types**: Union and intersection types, nested object structures, template literal types
 - **Utility Types**: Built-in support for Pick, Omit, Partial, Required, Record, Readonly, and other TypeScript utility types
 - **Advanced Features**: Conditional types, mapped types, keyof operators, indexed access types
+- **JavaScript Built-in Types**: Native support for Date type using TypeBox's JavaScript type system
 - **Import Resolution**: Cross-file type dependencies with qualified naming and circular dependency handling
 
 ## Core Components
@@ -133,8 +134,9 @@ The handler system in <mcfile name="handlers/typebox" path="src/handlers/typebox
 6. **Simple Handlers**: <mcfile name="simple-type-handler.ts" path="src/handlers/typebox/simple-type-handler.ts"></mcfile>, <mcfile name="literal-type-handler.ts" path="src/handlers/typebox/literal-type-handler.ts"></mcfile>
 7. **Advanced Handlers**: <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>, <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>, <mcfile name="keyof-type-handler.ts" path="src/handlers/typebox/keyof-type-handler.ts"></mcfile>
 8. **Function Handlers**: <mcfile name="function-type-handler.ts" path="src/handlers/typebox/function-type-handler.ts"></mcfile>
-9. **Type Query Handlers**: <mcfile name="type-query-handler.ts" path="src/handlers/typebox/type-query-handler.ts"></mcfile>, <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>
-10. **Access Handlers**: <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>, <mcfile name="type-reference-handler.ts" path="src/handlers/typebox/type-reference-handler.ts"></mcfile>
+9. **JavaScript Type Handlers**: <mcfile name="date-type-handler.ts" path="src/handlers/typebox/date-type-handler.ts"></mcfile> - Handles JavaScript built-in types like Date using TypeBox's extended type system
+10. **Type Query Handlers**: <mcfile name="type-query-handler.ts" path="src/handlers/typebox/type-query-handler.ts"></mcfile>, <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>
+11. **Access Handlers**: <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>, <mcfile name="type-reference-handler.ts" path="src/handlers/typebox/type-reference-handler.ts"></mcfile>
 
 #### Readonly Type Handling
 
@@ -157,11 +159,20 @@ This dual approach ensures proper handling of both TypeScript readonly construct
 - `type ReadonlyArray = readonly string[]` (array modifier)
 - `type ReadonlyTuple = readonly [string, number]` (tuple modifier)
 
+#### JavaScript Built-in Type Support
+
+The system provides comprehensive support for JavaScript built-in types through specialized handlers:
+
+- **Date Type Handler**: The <mcfile name="date-type-handler.ts" path="src/handlers/typebox/date-type-handler.ts"></mcfile> handles TypeScript's `Date` type references and converts them to TypeBox's `Type.Date()` schema
+- **Type Reference Registration**: JavaScript built-in types are registered in the `typeReferenceHandlers` map for O(1) lookup performance
+- **Extended Type System**: Leverages TypeBox's JavaScript type system for types that extend beyond standard JSON Schema
+
 #### Handler Management
 
 The <mcfile name="typebox-type-handlers.ts" path="src/handlers/typebox/typebox-type-handlers.ts"></mcfile> class orchestrates all handlers through:
 
 - **Handler Caching**: Caches handler instances for performance optimization
+- **Type Reference Mapping**: O(1) lookup for built-in types like Date, utility types like Partial, and other type references
 - **Fallback System**: Provides fallback handlers for complex cases including readonly array modifiers
 
 ### Import Resolution
