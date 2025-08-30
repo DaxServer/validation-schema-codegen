@@ -1,12 +1,16 @@
-import { TypeOperatorBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-operator-base-handler'
+import { TypeReferenceBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/type-reference-base-handler'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { SyntaxKind, ts } from 'ts-morph'
+import { Node, ts } from 'ts-morph'
 
-export class ReadonlyTypeHandler extends TypeOperatorBaseHandler {
-  protected readonly operatorKind = SyntaxKind.ReadonlyKeyword
-  protected readonly typeBoxMethod = 'Readonly'
+export class ReadonlyTypeHandler extends TypeReferenceBaseHandler {
+  protected readonly supportedTypeNames = ['Readonly']
+  protected readonly expectedArgumentCount = 1
 
-  protected createTypeBoxCall(innerType: ts.Expression): ts.Expression {
-    return makeTypeCall('Readonly', [innerType])
+  handle(node: Node): ts.Expression {
+    const typeRef = this.validateTypeReference(node)
+    const [innerType] = this.extractTypeArguments(typeRef)
+
+    return makeTypeCall('Readonly', [getTypeBoxType(innerType)])
   }
 }

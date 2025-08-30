@@ -8,7 +8,7 @@ import type { TraversedNode } from '@daxserver/validation-schema-codegen/travers
 import type { VisualizationOptions } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
 import { Node, Project, SourceFile, ts } from 'ts-morph'
 
-const createOutputFile = (hasGenericInterfaces: boolean, hasReadonly: boolean) => {
+const createOutputFile = (hasGenericInterfaces: boolean) => {
   const newSourceFile = new Project().createSourceFile('output.ts', '', {
     overwrite: true,
   })
@@ -19,19 +19,11 @@ const createOutputFile = (hasGenericInterfaces: boolean, hasReadonly: boolean) =
       name: 'Type',
       isTypeOnly: false,
     },
+    {
+      name: 'Static',
+      isTypeOnly: true,
+    },
   ]
-
-  if (hasReadonly) {
-    namedImports.push({
-      name: 'Readonly',
-      isTypeOnly: false,
-    })
-  }
-
-  namedImports.push({
-    name: 'Static',
-    isTypeOnly: true,
-  })
 
   if (hasGenericInterfaces) {
     namedImports.push({
@@ -93,20 +85,8 @@ export const generateCode = (options: InputOptions): string => {
       (Node.isTypeAliasDeclaration(t.node) && t.node.getTypeParameters().length > 0),
   )
 
-  // Check if any nodes use Readonly type operator
-  const hasReadonly = traversedNodes.some((t) => {
-    // Use ts-morph's built-in method to get all TypeReference descendants
-    return t.node
-      .getDescendants()
-      .filter(Node.isTypeReference)
-      .some((typeRef) => {
-        const typeName = typeRef.getTypeName()
-        return Node.isIdentifier(typeName) && typeName.getText() === 'Readonly'
-      })
-  })
-
   // Create output file with proper imports
-  const newSourceFile = createOutputFile(hasGenericInterfaces, hasReadonly)
+  const newSourceFile = createOutputFile(hasGenericInterfaces)
 
   // Print sorted nodes to output
   const result = printSortedNodes(traversedNodes, newSourceFile)

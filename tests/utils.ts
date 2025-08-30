@@ -3,11 +3,10 @@ import synchronizedPrettier from '@prettier/sync'
 import { Project, SourceFile } from 'ts-morph'
 
 const prettierOptions = { parser: 'typescript' as const }
-const typeboxImport = (withTSchema: boolean, withReadonly: boolean) => {
-  const readonly = withReadonly ? ' Readonly,' : ''
+const typeboxImport = (withTSchema: boolean) => {
   const tschema = withTSchema ? ', type TSchema' : ''
 
-  return `import { Type,${readonly} type Static${tschema} } from "@sinclair/typebox";\n`
+  return `import { Type, type Static${tschema} } from "@sinclair/typebox";\n`
 }
 
 export const createSourceFile = (project: Project, code: string, filePath: string = 'test.ts') => {
@@ -18,9 +17,8 @@ export const formatWithPrettier = (
   input: string,
   addImport: boolean = true,
   withTSchema: boolean = false,
-  withReadonly: boolean = false,
 ): string => {
-  const code = addImport ? `${typeboxImport(withTSchema, withReadonly)}${input}` : input
+  const code = addImport ? `${typeboxImport(withTSchema)}${input}` : input
 
   return synchronizedPrettier.format(code, prettierOptions)
 }
@@ -28,7 +26,6 @@ export const formatWithPrettier = (
 export const generateFormattedCode = (
   sourceFile: SourceFile,
   withTSchema: boolean = false,
-  withReadonly: boolean = false,
 ): string => {
   const code = generateCode({
     sourceCode: sourceFile.getFullText(),
@@ -36,5 +33,5 @@ export const generateFormattedCode = (
     project: sourceFile.getProject(),
   })
 
-  return formatWithPrettier(code, false, withTSchema, withReadonly)
+  return formatWithPrettier(code, false, withTSchema)
 }

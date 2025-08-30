@@ -9,6 +9,7 @@ import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/
 import { LiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/literal-type-handler'
 import { InterfaceTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/interface-type-handler'
 import { ObjectTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-type-handler'
+import { ReadonlyArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/readonly-array-type-handler'
 import { ReadonlyTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/readonly-type-handler'
 import { OmitTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/omit-type-handler'
 import { PartialTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/partial-type-handler'
@@ -50,6 +51,7 @@ export class TypeBoxTypeHandlers {
     const templateLiteralTypeHandler = new TemplateLiteralTypeHandler()
     const typeofTypeHandler = new TypeofTypeHandler()
     const readonlyTypeHandler = new ReadonlyTypeHandler()
+    const readonlyArrayTypeHandler = new ReadonlyArrayTypeHandler()
 
     // O(1) lookup by SyntaxKind
     this.syntaxKindHandlers.set(SyntaxKind.AnyKeyword, simpleTypeHandler)
@@ -80,13 +82,14 @@ export class TypeBoxTypeHandlers {
     this.typeReferenceHandlers.set('Pick', pickTypeHandler)
     this.typeReferenceHandlers.set('Omit', omitTypeHandler)
     this.typeReferenceHandlers.set('Required', requiredTypeHandler)
+    this.typeReferenceHandlers.set('Readonly', readonlyTypeHandler)
 
     // Fallback handlers for complex cases
     this.fallbackHandlers = [
       typeReferenceHandler,
       keyOfTypeHandler,
       typeofTypeHandler,
-      readonlyTypeHandler,
+      readonlyArrayTypeHandler,
     ]
   }
 

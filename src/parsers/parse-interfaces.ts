@@ -49,16 +49,27 @@ export class InterfaceParser extends BaseParser {
     const interfaceName = interfaceDecl.getName()
     const typeParameters = interfaceDecl.getTypeParameters()
 
-    // Generate TypeBox function definition
+    // Generate TypeBox function definition using the same flow as type aliases
     const typeboxTypeNode = getTypeBoxType(interfaceDecl)
-    const typeboxType = this.printer.printNode(
-      ts.EmitHint.Expression,
+
+    // Create the function expression using shared utilities (mirrors type-alias flow)
+    const functionExpression = GenericTypeUtils.createGenericArrowFunction(
+      typeParameters,
       typeboxTypeNode,
+    )
+
+    const functionExpressionText = this.printer.printNode(
+      ts.EmitHint.Expression,
+      functionExpression,
       this.newSourceFile.compilerNode,
     )
 
     // Add the function declaration
-    GenericTypeUtils.addTypeBoxVariableStatement(this.newSourceFile, interfaceName, typeboxType)
+    GenericTypeUtils.addTypeBoxVariableStatement(
+      this.newSourceFile,
+      interfaceName,
+      functionExpressionText,
+    )
 
     // Add generic type alias using shared utility
     GenericTypeUtils.addGenericTypeAlias(

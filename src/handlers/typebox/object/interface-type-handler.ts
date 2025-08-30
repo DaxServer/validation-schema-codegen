@@ -1,6 +1,6 @@
 import { ObjectLikeBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-like-base-handler'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { HeritageClause, InterfaceDeclaration, Node, ts, TypeParameterDeclaration } from 'ts-morph'
+import { HeritageClause, InterfaceDeclaration, Node, ts } from 'ts-morph'
 
 export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
   canHandle(node: Node): boolean {
@@ -12,11 +12,26 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     const heritageClauses = node.getHeritageClauses()
     const baseObjectType = this.createObjectType(this.processProperties(node.getProperties()))
 
-    // If interface has type parameters, generate a function
+    // For generic interfaces, return raw TypeBox expression
+    // The parser will handle wrapping it in an arrow function using GenericTypeUtils
     if (typeParameters.length > 0) {
-      return this.createGenericInterfaceFunction(typeParameters, baseObjectType, heritageClauses)
+      // For generic interfaces, handle inheritance here and return raw expression
+      if (heritageClauses.length === 0) {
+        return baseObjectType
+      }
+
+      const extendedTypes = this.collectExtendedTypes(heritageClauses)
+
+      if (extendedTypes.length === 0) {
+        return baseObjectType
+      }
+
+      // Create composite with extended types first, then the current interface
+      const allTypes = [...extendedTypes, baseObjectType]
+      return makeTypeCall('Composite', [ts.factory.createArrayLiteralExpression(allTypes, true)])
     }
 
+    // For non-generic interfaces, handle as before
     if (heritageClauses.length === 0) {
       return baseObjectType
     }
@@ -31,64 +46,6 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     const allTypes = [...extendedTypes, baseObjectType]
 
     return makeTypeCall('Composite', [ts.factory.createArrayLiteralExpression(allTypes, true)])
-  }
-
-  private createGenericInterfaceFunction(
-    typeParameters: TypeParameterDeclaration[],
-    baseObjectType: ts.Expression,
-    heritageClauses: HeritageClause[],
-  ): ts.Expression {
-    // Create function parameters for each type parameter
-    const functionParams = typeParameters.map((typeParam) => {
-      const paramName = typeParam.getName()
-
-      return ts.factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        ts.factory.createIdentifier(paramName),
-        undefined,
-        ts.factory.createTypeReferenceNode(paramName, undefined),
-        undefined,
-      )
-    })
-
-    // Create function body
-    let functionBody: ts.Expression = baseObjectType
-
-    // Handle heritage clauses for generic interfaces
-    const extendedTypes = this.collectExtendedTypes(heritageClauses)
-
-    if (extendedTypes.length > 0) {
-      const allTypes = [...extendedTypes, baseObjectType]
-      functionBody = makeTypeCall('Composite', [
-        ts.factory.createArrayLiteralExpression(allTypes, true),
-      ])
-    }
-
-    // Create type parameters for the function
-    const functionTypeParams = typeParameters.map((typeParam) => {
-      const paramName = typeParam.getName()
-
-      // Use TSchema as the constraint for TypeBox compatibility
-      const constraintNode = ts.factory.createTypeReferenceNode('TSchema', undefined)
-
-      return ts.factory.createTypeParameterDeclaration(
-        undefined,
-        ts.factory.createIdentifier(paramName),
-        constraintNode,
-        undefined,
-      )
-    })
-
-    // Create arrow function
-    return ts.factory.createArrowFunction(
-      undefined,
-      ts.factory.createNodeArray(functionTypeParams),
-      functionParams,
-      undefined,
-      ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-      functionBody,
-    )
   }
 
   private parseGenericTypeCall(typeText: string): ts.Expression | null {
