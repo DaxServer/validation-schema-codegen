@@ -42,6 +42,7 @@ export abstract class BaseTypeHandler {
 
 - `TemplateLiteralTypeHandler` - `template ${string}`
 - `KeyofTypeHandler` - keyof T
+- `KeyOfTypeofHandler` - keyof typeof obj
 - `IndexedAccessTypeHandler` - T[K]
 
 ## Handler Management

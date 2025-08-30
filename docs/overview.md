@@ -11,6 +11,7 @@ Transforms TypeScript types to TypeBox schemas.
 - Union/intersection types
 - Utility types (Pick, Omit, Partial, Required, Record, Readonly)
 - Template literal types
+- keyof typeof expressions
 - Date type
 
 ## Usage
