@@ -1,26 +1,68 @@
-# TypeBox Codegen Fork
+`@daxserver/validation-schema-codegen` transforms TypeScript type definitions into TypeBox validation schemas. It handles complex type relationships and manages dependencies through graph-based analysis.
 
-This project is a code generation tool designed to automate the creation of TypeBox schemas from existing TypeScript source files. It leverages the `ts-morph` library to parse TypeScript code and extract structural information from various constructs, including:
+## Usage
 
-- **Type Aliases**: Converts TypeScript type aliases into corresponding TypeBox definitions.
-- **Enums**: Transforms TypeScript enums into TypeBox enum schemas.
-- **Interfaces**: Processes TypeScript interfaces to generate TypeBox object schemas.
-- **Function Declarations**: Analyzes function signatures to create TypeBox schemas for their parameters and return types.
+```typescript
+import { generateCode } from '@daxserver/validation-schema-codegen'
 
-The primary goal is to streamline the process of defining data validation and serialization schemas by generating them directly from your TypeScript types, ensuring type safety and consistency across your application.
+// Using source code string
+const result = generateCode({
+  sourceCode: `
+    interface User {
+      id: string;
+      name: string;
+      email?: string;
+    }
+  `,
+  callerFile: './src/types.ts',
+})
 
-## Installation
-
-To get started with this project, first ensure you have Bun installed. Then, install the project dependencies by running:
-
-```bash
-bun install
+// Using file path
+const result = generateCode({
+  filePath: './types.ts',
+})
 ```
 
-## Scripts
+### Generated Output
 
-This project includes several utility scripts to help with development and maintenance:
+```typescript
+import { Type, Static } from '@sinclair/typebox'
 
-- `bun run format`: This script uses Prettier to automatically format all code files, ensuring consistent code style across the project.
-- `bun run typecheck`: Runs the TypeScript compiler (`tsc`) with the `--noEmit` flag to perform a type check on the entire codebase. This helps catch type-related errors early in the development process.
-- `bun run lint`: Executes ESLint to analyze the code for potential errors, stylistic issues, and adherence to best practices. This helps maintain code quality and consistency.
+export const User = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  email: Type.Optional(Type.String()),
+})
+
+export type User = Static<typeof User>
+```
+
+## Development Workflow
+
+### Testing
+
+```bash
+# Run all tests
+bun test
+
+# Run specific test file
+bun test tests/handlers/typebox/function-types.test.ts
+
+# Type checking
+bun typecheck
+
+# Linting
+bun lint
+
+# Formatting
+bun format
+```
+
+## Contributing
+
+When contributing to the project:
+
+1. Read the relevant documentation sections for the area you're working on
+2. Follow the TDD workflow outlined in [Testing Strategy](./docs/testing.md)
+3. Ensure your changes align with the architectural patterns described in the documentation
+4. Update documentation as needed for new features or changes
