@@ -37,8 +37,7 @@ export class GenericTypeUtils {
         undefined,
         ts.factory.createIdentifier(paramName),
         undefined,
-        ts.factory.createTypeReferenceNode(paramName, undefined),
-        undefined,
+        ts.factory.createTypeReferenceNode(paramName),
       )
     })
   }
@@ -51,13 +50,12 @@ export class GenericTypeUtils {
   ): ts.TypeParameterDeclaration[] {
     return typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
-      const constraintNode = ts.factory.createTypeReferenceNode('TSchema', undefined)
+      const constraintNode = ts.factory.createTypeReferenceNode('TSchema')
 
       return ts.factory.createTypeParameterDeclaration(
         undefined,
         ts.factory.createIdentifier(paramName),
         constraintNode,
-        undefined,
       )
     })
   }
@@ -74,7 +72,7 @@ export class GenericTypeUtils {
 
     return ts.factory.createArrowFunction(
       undefined,
-      ts.factory.createNodeArray(functionTypeParams),
+      functionTypeParams,
       functionParams,
       undefined,
       ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
@@ -96,20 +94,19 @@ export class GenericTypeUtils {
     const typeParamDeclarations = typeParameters.map((typeParam) => {
       const paramName = typeParam.getName()
       // Use TSchema as the constraint for TypeBox compatibility
-      const constraintNode = ts.factory.createTypeReferenceNode('TSchema', undefined)
+      const constraintNode = ts.factory.createTypeReferenceNode('TSchema')
 
       return ts.factory.createTypeParameterDeclaration(
         undefined,
         ts.factory.createIdentifier(paramName),
         constraintNode,
-        undefined,
       )
     })
 
     // Create the type: Static<ReturnType<typeof A<T>>>
     const typeParamNames = typeParameters.map((tp) => tp.getName())
     const typeArguments = typeParamNames.map((paramName) =>
-      ts.factory.createTypeReferenceNode(paramName, undefined),
+      ts.factory.createTypeReferenceNode(paramName),
     )
 
     // Create typeof A<T> expression - we need to create a type reference with type arguments

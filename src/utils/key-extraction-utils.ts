@@ -39,7 +39,6 @@ export const createTypeBoxKeys = (keys: string[]): ts.Expression => {
   return makeTypeCall('Union', [
     ts.factory.createArrayLiteralExpression(
       keys.map((k) => makeTypeCall('Literal', [ts.factory.createStringLiteral(k)])),
-      false,
     ),
   ])
 }
