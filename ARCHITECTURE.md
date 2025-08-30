@@ -24,9 +24,9 @@
 ### Supported TypeScript Constructs
 
 - **Type Definitions**: Type aliases, interfaces, enums, and function declarations
-- **Generic Types**: Generic interfaces and type parameters with proper constraint handling
+- **Generic Types**: Generic interfaces and type aliases with type parameters and proper constraint handling
 - **Complex Types**: Union and intersection types, nested object structures, template literal types
-- **Utility Types**: Built-in support for Pick, Omit, Partial, Required, Record, and other TypeScript utility types
+- **Utility Types**: Built-in support for Pick, Omit, Partial, Required, Record, Readonly, and other TypeScript utility types
 - **Advanced Features**: Conditional types, mapped types, keyof operators, indexed access types
 - **Import Resolution**: Cross-file type dependencies with qualified naming and circular dependency handling
 
@@ -39,7 +39,7 @@ The main logic for code generation resides in the <mcfile name="index.ts" path="
 The `generateCode` function in <mcfile name="index.ts" path="src/index.ts"></mcfile> orchestrates the entire code generation process:
 
 1.  **Input Processing**: Creates a `SourceFile` from input using `createSourceFileFromInput`
-2.  **Generic Interface Detection**: Checks for generic interfaces to determine required TypeBox imports
+2.  **Generic Type Detection**: Checks for generic interfaces and type aliases to determine required TypeBox imports (including `TSchema`)
 3.  **Output File Creation**: Creates a new output file with necessary `@sinclair/typebox` imports using `createOutputFile`
 4.  **Dependency Traversal**: Uses `DependencyTraversal` to analyze and sort all type dependencies
 5.  **Code Generation**: Processes sorted nodes using `TypeBoxPrinter` in `printSortedNodes`
@@ -113,8 +113,8 @@ The <mcfile name="base-parser.ts" path="src/parsers/base-parser.ts"></mcfile> pr
 
 #### Specialized Parsers
 
-1. **InterfaceParser**: <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile> - Handles both regular and generic interfaces
-2. **TypeAliasParser**: <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile> - Processes type alias declarations
+1. **InterfaceParser**: <mcfile name="parse-interfaces.ts" path="src/parsers/parse-interfaces.ts"></mcfile> - Handles both regular and generic interfaces using the unified `GenericTypeUtils` flow for consistency with type aliases
+2. **TypeAliasParser**: <mcfile name="parse-type-aliases.ts" path="src/parsers/parse-type-aliases.ts"></mcfile> - Processes both regular and generic type alias declarations using `GenericTypeUtils.createGenericArrowFunction`
 3. **EnumParser**: <mcfile name="parse-enums.ts" path="src/parsers/parse-enums.ts"></mcfile> - Handles enum declarations
 4. **FunctionParser**: <mcfile name="parse-function-declarations.ts" path="src/parsers/parse-function-declarations.ts"></mcfile> - Processes function declarations
 5. **ImportParser**: <mcfile name="parse-imports.ts" path="src/parsers/parse-imports.ts"></mcfile> - Handles import resolution
@@ -127,20 +127,42 @@ The handler system in <mcfile name="handlers/typebox" path="src/handlers/typebox
 
 1. **Base Handlers**: Foundation classes including <mcfile name="base-type-handler.ts" path="src/handlers/typebox/base-type-handler.ts"></mcfile> and specialized base classes
 2. **Collection Handlers**: <mcfile name="array-type-handler.ts" path="src/handlers/typebox/collection/array-type-handler.ts"></mcfile>, <mcfile name="intersection-type-handler.ts" path="src/handlers/typebox/collection/intersection-type-handler.ts"></mcfile>, <mcfile name="tuple-type-handler.ts" path="src/handlers/typebox/collection/tuple-type-handler.ts"></mcfile>, <mcfile name="union-type-handler.ts" path="src/handlers/typebox/collection/union-type-handler.ts"></mcfile>
-3. **Object Handlers**: <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile>, <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object/object-type-handler.ts"></mcfile>
+3. **Object Handlers**: <mcfile name="interface-type-handler.ts" path="src/handlers/typebox/object/interface-type-handler.ts"></mcfile> (returns raw TypeBox expressions for generic interfaces, allowing parser-level arrow function wrapping), <mcfile name="object-type-handler.ts" path="src/handlers/typebox/object/object-type-handler.ts"></mcfile>
 4. **Reference Handlers**: <mcfile name="omit-type-handler.ts" path="src/handlers/typebox/reference/omit-type-handler.ts"></mcfile>, <mcfile name="partial-type-handler.ts" path="src/handlers/typebox/reference/partial-type-handler.ts"></mcfile>, <mcfile name="pick-type-handler.ts" path="src/handlers/typebox/reference/pick-type-handler.ts"></mcfile>, <mcfile name="record-type-handler.ts" path="src/handlers/typebox/reference/record-type-handler.ts"></mcfile>, <mcfile name="required-type-handler.ts" path="src/handlers/typebox/reference/required-type-handler.ts"></mcfile>
-5. **Simple Handlers**: <mcfile name="simple-type-handler.ts" path="src/handlers/typebox/simple-type-handler.ts"></mcfile>, <mcfile name="literal-type-handler.ts" path="src/handlers/typebox/literal-type-handler.ts"></mcfile>
-6. **Advanced Handlers**: <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>, <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>, <mcfile name="keyof-type-handler.ts" path="src/handlers/typebox/keyof-type-handler.ts"></mcfile>, <mcfile name="readonly-type-handler.ts" path="src/handlers/typebox/readonly-type-handler.ts"></mcfile>
-7. **Function Handlers**: <mcfile name="function-type-handler.ts" path="src/handlers/typebox/function-type-handler.ts"></mcfile>
-8. **Type Query Handlers**: <mcfile name="type-query-handler.ts" path="src/handlers/typebox/type-query-handler.ts"></mcfile>, <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>
-9. **Access Handlers**: <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>, <mcfile name="type-reference-handler.ts" path="src/handlers/typebox/type-reference-handler.ts"></mcfile>
+5. **Readonly Handlers**: <mcfile name="readonly-type-handler.ts" path="src/handlers/typebox/readonly-type-handler.ts"></mcfile>, <mcfile name="readonly-array-type-handler.ts" path="src/handlers/typebox/readonly-array-type-handler.ts"></mcfile>
+6. **Simple Handlers**: <mcfile name="simple-type-handler.ts" path="src/handlers/typebox/simple-type-handler.ts"></mcfile>, <mcfile name="literal-type-handler.ts" path="src/handlers/typebox/literal-type-handler.ts"></mcfile>
+7. **Advanced Handlers**: <mcfile name="template-literal-type-handler.ts" path="src/handlers/typebox/template-literal-type-handler.ts"></mcfile>, <mcfile name="type-operator-handler.ts" path="src/handlers/typebox/type-operator-handler.ts"></mcfile>, <mcfile name="keyof-type-handler.ts" path="src/handlers/typebox/keyof-type-handler.ts"></mcfile>
+8. **Function Handlers**: <mcfile name="function-type-handler.ts" path="src/handlers/typebox/function-type-handler.ts"></mcfile>
+9. **Type Query Handlers**: <mcfile name="type-query-handler.ts" path="src/handlers/typebox/type-query-handler.ts"></mcfile>, <mcfile name="typeof-type-handler.ts" path="src/handlers/typebox/typeof-type-handler.ts"></mcfile>
+10. **Access Handlers**: <mcfile name="indexed-access-type-handler.ts" path="src/handlers/typebox/indexed-access-type-handler.ts"></mcfile>, <mcfile name="type-reference-handler.ts" path="src/handlers/typebox/type-reference-handler.ts"></mcfile>
+
+#### Readonly Type Handling
+
+The system provides comprehensive support for TypeScript's two distinct readonly constructs through a dual-handler approach:
+
+1. **Readonly Utility Type**: `Readonly<T>` - Handled by <mcfile name="readonly-type-handler.ts" path="src/handlers/typebox/readonly-type-handler.ts"></mcfile>
+   - Registered as a type reference handler for `Readonly` type references
+   - Processes `TypeReferenceNode` with identifier "Readonly"
+   - Generates `Type.Readonly(innerType)` for utility type syntax
+
+2. **Readonly Array Modifier**: `readonly T[]` - Handled by <mcfile name="readonly-array-type-handler.ts" path="src/handlers/typebox/readonly-array-type-handler.ts"></mcfile>
+   - Extends `TypeOperatorBaseHandler` for `ReadonlyKeyword` operator
+   - Processes `TypeOperatorTypeNode` with `SyntaxKind.ReadonlyKeyword`
+   - Generates `Type.Readonly(innerType)` for array modifier syntax
+   - Registered as a fallback handler to handle complex readonly patterns
+
+This dual approach ensures proper handling of both TypeScript readonly constructs:
+
+- `type ReadonlyUser = Readonly<User>` (utility type)
+- `type ReadonlyArray = readonly string[]` (array modifier)
+- `type ReadonlyTuple = readonly [string, number]` (tuple modifier)
 
 #### Handler Management
 
 The <mcfile name="typebox-type-handlers.ts" path="src/handlers/typebox/typebox-type-handlers.ts"></mcfile> class orchestrates all handlers through:
 
 - **Handler Caching**: Caches handler instances for performance optimization
-- **Fallback System**: Provides fallback handlers for complex cases
+- **Fallback System**: Provides fallback handlers for complex cases including readonly array modifiers
 
 ### Import Resolution
 
@@ -180,6 +202,39 @@ export interface InputOptions {
 - **File Path Input**: Automatically resolves and loads TypeScript files from disk
 - **Source Code Input**: Processes TypeScript code directly from strings with validation
 - **Project Context**: Enables proper relative import resolution when working with in-memory source files
+
+### Generic Type Support
+
+The codebase provides comprehensive support for both generic interfaces and generic type aliases, enabling complex type transformations and reusable type definitions.
+
+#### Generic Type Aliases
+
+The `TypeAliasParser` handles both regular and generic type aliases through specialized processing:
+
+1. **Type Parameter Detection**: Automatically detects type parameters using `typeAlias.getTypeParameters()`
+2. **Function Generation**: Creates TypeBox functions for generic type aliases with proper parameter constraints
+3. **TSchema Constraints**: Applies `TSchema` constraints to all type parameters for TypeBox compatibility
+4. **Static Type Generation**: Generates corresponding TypeScript type aliases using `Static<ReturnType<typeof TypeName<T>>>`
+
+#### Generic Interface Support
+
+Generic interfaces are processed through the `InterfaceParser` using a consistent architectural pattern that mirrors the type alias flow:
+
+1. **Unified Generic Processing**: The interface parser now uses the same `GenericTypeUtils.createGenericArrowFunction` flow as type aliases for consistency
+2. **Raw Expression Handling**: The `InterfaceTypeHandler` returns raw TypeBox expressions for generic interfaces, allowing the parser to handle arrow function wrapping
+3. **Parameter Constraint Handling**: Converts TypeScript type parameter constraints to `TSchema` constraints using shared utilities
+4. **Function-Based Schema Generation**: Creates TypeBox schema functions that accept type parameters through the standardized generic arrow function pattern
+5. **Type Safety Preservation**: Maintains full TypeScript type safety through proper static type aliases using `Static<ReturnType<typeof TypeName<T>>>`
+6. **Architectural Consistency**: Both generic interfaces and type aliases now follow the same code generation pattern, improving maintainability and reducing duplication
+
+#### Complex Generic Scenarios
+
+The system supports advanced generic patterns including:
+
+- **Multiple Type Parameters**: Functions with multiple generic parameters (e.g., `ApiResponse<T, E>`)
+- **Nested Generic Types**: Generic types that reference other generic types
+- **Utility Type Combinations**: Complex combinations like `Partial<Readonly<Record<K, V>>>`
+- **Type Parameter Propagation**: Proper handling of type parameters across nested type references
 
 ### Interface Inheritance
 
@@ -233,6 +288,16 @@ The <mcfile name="utils" path="src/utils"></mcfile> directory provides essential
 - **String Key Extraction**: Extracts string literal keys from union types and object type literals for use in utility type handlers
 - **TypeBox Expression Generation**: Converts extracted keys into appropriate TypeBox array expressions
 - **Shared Utilities**: Provides reusable key extraction logic for Pick, Omit, and other utility type handlers to avoid code duplication
+
+#### Generic Type Utilities
+
+The <mcfile name="generic-type-utils.ts" path="src/utils/generic-type-utils.ts"></mcfile> module provides shared utilities for consistent generic type handling across parsers:
+
+- **Generic Arrow Function Creation**: `createGenericArrowFunction` creates standardized arrow functions for generic types with proper type parameter constraints
+- **Type Parameter Processing**: Converts TypeScript type parameters to TypeBox-compatible function parameters with `TSchema` constraints
+- **Variable Statement Generation**: `addTypeBoxVariableStatement` creates consistent variable declarations for TypeBox schemas
+- **Generic Type Alias Generation**: `addGenericTypeAlias` creates standardized static type aliases using `Static<ReturnType<typeof TypeName<T>>>`
+- **Architectural Consistency**: Ensures both interface and type alias parsers follow the same generic type processing pattern
 
 ## Process Overview
 

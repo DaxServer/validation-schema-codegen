@@ -14,8 +14,11 @@ const createOutputFile = (hasGenericInterfaces: boolean) => {
   })
 
   // Add imports
-  const namedImports = [
-    'Type',
+  const namedImports: { name: string; isTypeOnly: boolean }[] = [
+    {
+      name: 'Type',
+      isTypeOnly: false,
+    },
     {
       name: 'Static',
       isTypeOnly: true,
@@ -75,9 +78,11 @@ export const generateCode = (options: InputOptions): string => {
   const dependencyTraversal = new DependencyTraversal()
   const traversedNodes = dependencyTraversal.startTraversal(sourceFile)
 
-  // Check if any interfaces have generic type parameters
+  // Check if any interfaces or type aliases have generic type parameters
   const hasGenericInterfaces = traversedNodes.some(
-    (t) => Node.isInterfaceDeclaration(t.node) && t.node.getTypeParameters().length > 0,
+    (t) =>
+      (Node.isInterfaceDeclaration(t.node) && t.node.getTypeParameters().length > 0) ||
+      (Node.isTypeAliasDeclaration(t.node) && t.node.getTypeParameters().length > 0),
   )
 
   // Create output file with proper imports
