@@ -1,0 +1,1 @@
+../../docs/interface-inheritance.md
