@@ -48,4 +48,5 @@ export type User = Static<typeof User>
 - [handler-system.md](./handler-system.md) - Type conversion
 - [compiler-configuration.md](./compiler-configuration.md) - Compiler options and script targets
 - [dependency-management.md](./dependency-management.md) - Dependency analysis
+- [maincode-filtering.md](./maincode-filtering.md) - Filtering output to maincode and dependencies
 - [testing.md](./testing.md) - Testing
