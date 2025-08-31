@@ -273,7 +273,8 @@ describe('Input Handler', () => {
         export type Test = {
           id: number
           name: string
-        }`
+        }
+      `
       writeFileSync(testFilePath, code)
 
       const sourceFile = createSourceFileFromInput({ filePath: testFilePath })

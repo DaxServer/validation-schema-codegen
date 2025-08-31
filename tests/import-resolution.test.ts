@@ -77,7 +77,7 @@ describe('ts-morph codegen with imports', () => {
             local: string;
             external: ExternalType;
           };
-      `,
+        `,
       )
 
       expect(generateFormattedCode(userFile)).toBe(

@@ -54,8 +54,6 @@ describe('Interface Generic Consistency with Type Aliases', () => {
   })
 
   test('complex generic interface should use GenericTypeUtils flow', () => {
-    // This test is designed to fail if the interface parser doesn't use
-    // the same GenericTypeUtils.createGenericArrowFunction flow as type aliases
     const sourceFile = createSourceFile(
       project,
       `

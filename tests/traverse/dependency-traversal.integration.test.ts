@@ -115,11 +115,7 @@ describe('Dependency Traversal', () => {
     })
 
     test('should handle missing module specifier source file', () => {
-      const mainFile = createSourceFile(
-        project,
-        'import { NonExistent } from "./non-existent";',
-        'main.ts',
-      )
+      const mainFile = createSourceFile(project, 'import { NonExistent } from "./non-existent";')
 
       traverser.startTraversal(mainFile)
       const dependencies = traverser.getNodesToPrint()

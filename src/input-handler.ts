@@ -1,6 +1,7 @@
 import { existsSync, statSync } from 'fs'
 import { dirname, isAbsolute, resolve } from 'path'
 import { Project, SourceFile } from 'ts-morph'
+import { initializeCompilerConfig } from '@daxserver/validation-schema-codegen/utils/compiler-config'
 
 export interface InputOptions {
   filePath?: string
@@ -65,6 +66,10 @@ export const createSourceFileFromInput = (options: InputOptions): SourceFile => 
   validateInputOptions(options)
 
   const project = options.project || new Project()
+  
+  // Initialize compiler configuration from the project
+  initializeCompilerConfig(project)
+  
   const { filePath, sourceCode, callerFile } = options
 
   if (sourceCode) {

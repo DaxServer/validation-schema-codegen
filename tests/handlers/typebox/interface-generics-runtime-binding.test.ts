@@ -9,27 +9,21 @@ describe('Interface Generic Runtime Binding', () => {
     project = new Project()
   })
 
-  test('generic interface should generate arrow function wrapper for runtime bindings', () => {
+  test('generic interface with single generic type', () => {
     const sourceFile = createSourceFile(
       project,
       `
         interface Container<T> {
           value: T;
-          id: string;
         }
       `,
     )
 
-    const result = generateFormattedCode(sourceFile, true)
-
-    // The generated code should be an arrow function that takes type parameters
-    // and returns the TypeBox expression, not just the raw TypeBox expression
-    expect(result).toBe(
+    expect(generateFormattedCode(sourceFile, true)).toBe(
       formatWithPrettier(
         `
           export const Container = <T extends TSchema>(T: T) => Type.Object({
             value: T,
-            id: Type.String(),
           });
 
           export type Container<T extends TSchema> = Static<ReturnType<typeof Container<T>>>;
@@ -40,27 +34,23 @@ describe('Interface Generic Runtime Binding', () => {
     )
   })
 
-  test('generic interface with multiple type parameters should generate proper arrow function', () => {
+  test('generic interface with multiple type parameters', () => {
     const sourceFile = createSourceFile(
       project,
       `
         interface Response<T, E> {
           data: T;
           error: E;
-          timestamp: number;
         }
       `,
     )
 
-    const result = generateFormattedCode(sourceFile, true)
-
-    expect(result).toBe(
+    expect(generateFormattedCode(sourceFile, true)).toBe(
       formatWithPrettier(
         `
           export const Response = <T extends TSchema, E extends TSchema>(T: T, E: E) => Type.Object({
             data: T,
             error: E,
-            timestamp: Type.Number(),
           });
 
           export type Response<T extends TSchema, E extends TSchema> = Static<ReturnType<typeof Response<T, E>>>;
@@ -71,9 +61,7 @@ describe('Interface Generic Runtime Binding', () => {
     )
   })
 
-  test('should fail with current implementation - demonstrates the issue', () => {
-    // This test is designed to fail with the current implementation
-    // to show that we need to fix the generic interface handling
+  test('generic interface with multiple generics and non-generics', () => {
     const sourceFile = createSourceFile(
       project,
       `
@@ -88,15 +76,7 @@ describe('Interface Generic Runtime Binding', () => {
       `,
     )
 
-    const result = generateFormattedCode(sourceFile, true)
-
-    // This should generate an arrow function, but if the current implementation
-    // is broken, it might generate something like:
-    // export const GenericContainer = Type.Object({...})
-    // instead of:
-    // export const GenericContainer = <T extends TSchema, U extends TSchema>(T: T, U: U) => Type.Object({...})
-
-    expect(result).toBe(
+    expect(generateFormattedCode(sourceFile, true)).toBe(
       formatWithPrettier(
         `
           export const GenericContainer = <T extends TSchema, U extends TSchema>(T: T, U: U) => Type.Object({

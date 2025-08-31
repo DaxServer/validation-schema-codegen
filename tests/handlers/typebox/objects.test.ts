@@ -52,6 +52,37 @@ describe('Object types', () => {
       )
     })
 
+    test('object with various property name formats', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          export type ComplexProps = {
+            identifier: string;
+            'single-quoted': number;
+            "double-quoted": boolean;
+            'with spaces': string;
+            123: number;
+            'normal': string;
+          }
+        `,
+      )
+
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const ComplexProps = Type.Object({
+            identifier: Type.String(),
+            'single-quoted': Type.Number(),
+            'double-quoted': Type.Boolean(),
+            'with spaces': Type.String(),
+            123: Type.Number(),
+            normal: Type.String(),
+          });
+
+          export type ComplexProps = Static<typeof ComplexProps>;
+        `),
+      )
+    })
+
     test('Tuple', () => {
       const sourceFile = createSourceFile(project, `export type T = [number, null];`)
 
