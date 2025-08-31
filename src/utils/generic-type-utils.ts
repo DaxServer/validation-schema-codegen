@@ -23,6 +23,7 @@ export class GenericTypeUtils {
       ],
     })
   }
+
   /**
    * Creates function parameters for generic type parameters
    */

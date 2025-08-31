@@ -9,10 +9,7 @@ export class TypeAliasParser extends BaseParser {
   parse(typeAlias: TypeAliasDeclaration): void {
     const typeName = typeAlias.getName()
 
-    if (this.processedTypes.has(typeName)) {
-      return
-    }
-
+    if (this.processedTypes.has(typeName)) return
     this.processedTypes.add(typeName)
 
     const typeParameters = typeAlias.getTypeParameters()

@@ -15,11 +15,11 @@ export class FileGraph extends DirectedGraph<FileNodeAttributes> {
    * Add a file to the graph
    */
   addFile(filePath: string, sourceFile: SourceFile): void {
-    if (this.hasNode(filePath)) return
-
-    this.addNode(filePath, {
-      type: 'file',
-      sourceFile,
-    })
+    if (!this.hasNode(filePath)) {
+      this.addNode(filePath, {
+        type: 'file',
+        sourceFile,
+      })
+    }
   }
 }

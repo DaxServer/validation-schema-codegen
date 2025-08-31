@@ -26,13 +26,11 @@ export class TemplateLiteralTypeHandler extends BaseTypeHandler {
       const compilerNode = span.compilerNode as ts.TemplateLiteralTypeSpan
 
       // Add the type from the substitution
-      if (compilerNode.type) {
-        const processedType = TemplateLiteralTypeProcessor.processType(compilerNode.type)
-        parts.push(processedType)
-      }
+      const processedType = TemplateLiteralTypeProcessor.processType(compilerNode.type)
+      parts.push(processedType)
 
       // Add the literal part after the substitution
-      const literalText = compilerNode.literal?.text
+      const literalText = compilerNode.literal.text
       if (literalText) {
         parts.push(makeTypeCall('Literal', [ts.factory.createStringLiteral(literalText)]))
       }

@@ -15,9 +15,7 @@ export class PickTypeHandler extends TypeReferenceBaseHandler {
     const typeRef = this.validateTypeReference(node)
     const [objectType, keysType] = this.extractTypeArguments(typeRef)
 
-    if (!keysType) {
-      return makeTypeCall('Any')
-    }
+    if (!keysType) return makeTypeCall('Any')
 
     const typeboxObjectType = getTypeBoxType(objectType)
     const pickKeys = extractStringKeys(keysType)

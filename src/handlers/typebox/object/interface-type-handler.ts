@@ -8,44 +8,19 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
   }
 
   handle(node: InterfaceDeclaration): ts.Expression {
-    const typeParameters = node.getTypeParameters()
     const heritageClauses = node.getHeritageClauses()
     const baseObjectType = this.createObjectType(this.processProperties(node.getProperties()))
 
-    // For generic interfaces, return raw TypeBox expression
-    // The parser will handle wrapping it in an arrow function using GenericTypeUtils
-    if (typeParameters.length > 0) {
-      // For generic interfaces, handle inheritance here and return raw expression
-      if (heritageClauses.length === 0) {
-        return baseObjectType
-      }
-
-      const extendedTypes = this.collectExtendedTypes(heritageClauses)
-
-      if (extendedTypes.length === 0) {
-        return baseObjectType
-      }
-
-      // Create composite with extended types first, then the current interface
-      const allTypes = [...extendedTypes, baseObjectType]
-      return makeTypeCall('Composite', [ts.factory.createArrayLiteralExpression(allTypes, true)])
-    }
-
-    // For non-generic interfaces, handle as before
-    if (heritageClauses.length === 0) {
-      return baseObjectType
-    }
+    if (heritageClauses.length === 0) return baseObjectType
 
     const extendedTypes = this.collectExtendedTypes(heritageClauses)
-
-    if (extendedTypes.length === 0) {
-      return baseObjectType
-    }
+    if (extendedTypes.length === 0) return baseObjectType
 
     // Create composite with extended types first, then the current interface
     const allTypes = [...extendedTypes, baseObjectType]
+    const expression = ts.factory.createArrayLiteralExpression(allTypes, true)
 
-    return makeTypeCall('Composite', [ts.factory.createArrayLiteralExpression(allTypes, true)])
+    return makeTypeCall('Composite', [expression])
   }
 
   private parseGenericTypeCall(typeText: string): ts.Expression | null {
@@ -82,9 +57,7 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     const extendedTypes: ts.Expression[] = []
 
     for (const heritageClause of heritageClauses) {
-      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) {
-        continue
-      }
+      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) continue
 
       for (const typeNode of heritageClause.getTypeNodes()) {
         const typeText = typeNode.getText()

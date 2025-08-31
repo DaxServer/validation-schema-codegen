@@ -1,14 +1,12 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { Node, SyntaxKind, TypeReferenceNode } from 'ts-morph'
+import { Node, SyntaxKind, TypeNode, TypeReferenceNode } from 'ts-morph'
 
 export abstract class TypeReferenceBaseHandler extends BaseTypeHandler {
   protected abstract readonly supportedTypeNames: string[]
   protected abstract readonly expectedArgumentCount: number
 
   canHandle(node: Node): boolean {
-    if (node.getKind() !== SyntaxKind.TypeReference) {
-      return false
-    }
+    if (node.getKind() !== SyntaxKind.TypeReference) return false
 
     const typeRef = node as TypeReferenceNode
     const typeName = typeRef.getTypeName().getText()
@@ -24,8 +22,8 @@ export abstract class TypeReferenceBaseHandler extends BaseTypeHandler {
     return node as TypeReferenceNode
   }
 
-  protected extractTypeArguments(typeRef: TypeReferenceNode): Node[] {
-    const typeArgs = typeRef.getTypeArguments()
+  protected extractTypeArguments(node: TypeReferenceNode): TypeNode[] {
+    const typeArgs = node.getTypeArguments()
 
     if (typeArgs.length !== this.expectedArgumentCount) {
       throw new Error(
@@ -36,7 +34,7 @@ export abstract class TypeReferenceBaseHandler extends BaseTypeHandler {
     return typeArgs
   }
 
-  protected getTypeName(typeRef: TypeReferenceNode): string {
-    return typeRef.getTypeName().getText()
+  protected getTypeName(node: TypeReferenceNode): string {
+    return node.getTypeName().getText()
   }
 }

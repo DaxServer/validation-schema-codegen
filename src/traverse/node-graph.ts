@@ -10,9 +10,9 @@ export class NodeGraph extends DirectedGraph<TraversedNode> {
    * Add a type node to the graph
    */
   addTypeNode(qualifiedName: string, node: TraversedNode): void {
-    if (this.hasNode(qualifiedName)) return
-
-    this.addNode(qualifiedName, node)
+    if (!this.hasNode(qualifiedName)) {
+      this.addNode(qualifiedName, node)
+    }
   }
 
   /**
@@ -27,14 +27,12 @@ export class NodeGraph extends DirectedGraph<TraversedNode> {
    */
   addDependency(fromNode: string, toNode: string): void {
     if (
-      !this.hasNode(fromNode) ||
-      !this.hasNode(toNode) ||
-      fromNode === toNode ||
-      this.hasDirectedEdge(fromNode, toNode)
+      this.hasNode(fromNode) &&
+      this.hasNode(toNode) &&
+      fromNode !== toNode &&
+      !this.hasDirectedEdge(fromNode, toNode)
     ) {
-      return
+      this.addDirectedEdge(fromNode, toNode)
     }
-
-    this.addDirectedEdge(fromNode, toNode)
   }
 }

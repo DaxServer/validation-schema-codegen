@@ -1,6 +1,6 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { isValidIdentifier } from '@daxserver/validation-schema-codegen/utils/identifier-utils'
+import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, PropertySignature, ts } from 'ts-morph'
 
@@ -10,7 +10,6 @@ export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
 
     for (const prop of properties) {
       const propTypeNode = prop.getTypeNode()
-
       if (!propTypeNode) continue
 
       const outputNameNode = this.extractPropertyNameInfo(prop)

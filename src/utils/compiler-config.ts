@@ -7,8 +7,6 @@ export class CompilerConfig {
   private static instance: CompilerConfig | null = null
   private scriptTarget: ts.ScriptTarget = ts.ScriptTarget.Latest
 
-  private constructor() {}
-
   /**
    * Gets the singleton instance of CompilerConfig
    */
@@ -23,15 +21,7 @@ export class CompilerConfig {
    * Initializes the compiler configuration from a ts-morph Project
    */
   initializeFromProject(project: Project): void {
-    const compilerOptions = project.getCompilerOptions()
-    this.scriptTarget = this.determineScriptTarget(compilerOptions)
-  }
-
-  /**
-   * Initializes the compiler configuration from TypeScript compiler options
-   */
-  initializeFromCompilerOptions(compilerOptions: ts.CompilerOptions): void {
-    this.scriptTarget = this.determineScriptTarget(compilerOptions)
+    this.scriptTarget = project.getCompilerOptions().target ?? ts.ScriptTarget.Latest
   }
 
   /**
@@ -46,20 +36,6 @@ export class CompilerConfig {
    */
   setScriptTarget(target: ts.ScriptTarget): void {
     this.scriptTarget = target
-  }
-
-  /**
-   * Determines the appropriate script target from compiler options
-   */
-  private determineScriptTarget(compilerOptions: ts.CompilerOptions): ts.ScriptTarget {
-    // If target is explicitly set in compiler options, use it
-    if (compilerOptions.target !== undefined) {
-      return compilerOptions.target
-    }
-
-    // Default fallback based on common configurations
-    // ESNext maps to Latest, ES2022+ maps to ES2022, etc.
-    return ts.ScriptTarget.Latest
   }
 
   /**

@@ -9,8 +9,7 @@ export class DateTypeHandler extends BaseTypeHandler {
     return Node.isIdentifier(typeName) && typeName.getText() === 'Date'
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle(_node: TypeReferenceNode): ts.Expression {
+  handle(): ts.Expression {
     return makeTypeCall('Date')
   }
 }

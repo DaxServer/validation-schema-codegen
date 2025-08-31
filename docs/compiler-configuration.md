@@ -18,9 +18,9 @@ The validation respects the detected script target to ensure compatibility:
 ```typescript
 // With ES5 target
 interface Example {
-  validName: string;        // → validName: Type.String()
-  "invalid-name": number;   // → "invalid-name": Type.Number()
-  "123invalid": boolean;    // → "123invalid": Type.Boolean()
+  validName: string // → validName: Type.String()
+  'invalid-name': number // → 'invalid-name': Type.Number()
+  '123invalid': boolean // → '123invalid': Type.Boolean()
 }
 ```
 

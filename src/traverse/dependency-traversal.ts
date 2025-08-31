@@ -159,7 +159,6 @@ export class DependencyTraversal {
 
       // Prevent infinite loops by tracking visited files
       if (this.fileGraph.hasNode(filePath)) continue
-
       this.fileGraph.addFile(filePath, moduleSourceFile)
 
       const imports = moduleSourceFile.getImportDeclarations()

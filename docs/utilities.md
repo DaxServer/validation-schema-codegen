@@ -50,6 +50,18 @@ NodeTypeUtils.isTypeReference(node, 'Partial') // Check if node is Partial<T>
 NodeTypeUtils.isReadonlyArrayType(node) // Check if readonly T[]
 ```
 
+### Identifier Validation
+
+`src/utils/identifier-utils.ts` - JavaScript identifier validation:
+
+```typescript
+isValidIdentifier('validName') // true
+isValidIdentifier('123invalid') // false
+isValidIdentifier('𝒜') // true - supports Unicode characters
+```
+
+Validates JavaScript identifiers using TypeScript's built-in utilities with full Unicode support, including characters outside the Basic Multilingual Plane.
+
 ### Template Literal Processing
 
 `src/utils/template-literal-type-processor.ts` - Processes template literal types:

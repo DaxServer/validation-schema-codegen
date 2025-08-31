@@ -1,7 +1,7 @@
-import { describe, expect, beforeEach, afterEach, test } from 'bun:test'
-import { ts } from 'ts-morph'
-import { isValidIdentifier } from '@daxserver/validation-schema-codegen/utils/identifier-utils'
 import { CompilerConfig } from '@daxserver/validation-schema-codegen/utils/compiler-config'
+import { isValidIdentifier } from '@daxserver/validation-schema-codegen/utils/identifier-utils'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { ts } from 'ts-morph'
 
 describe('identifier-utils', () => {
   let compilerConfig: CompilerConfig
@@ -39,13 +39,6 @@ describe('identifier-utils', () => {
       expect(isValidIdentifier('test_123')).toBe(true)
     })
 
-    test('should handle Unicode identifiers based on script target', () => {
-      // Test with explicit script target
-      expect(isValidIdentifier('validName', ts.ScriptTarget.ES5)).toBe(true)
-      expect(isValidIdentifier('validName', ts.ScriptTarget.ES2015)).toBe(true)
-      expect(isValidIdentifier('validName', ts.ScriptTarget.Latest)).toBe(true)
-    })
-
     test('should use runtime script target when no explicit target provided', () => {
       // Set a specific script target
       compilerConfig.setScriptTarget(ts.ScriptTarget.ES2015)
@@ -55,21 +48,15 @@ describe('identifier-utils', () => {
       expect(isValidIdentifier('123invalid')).toBe(false)
     })
 
-    test('should override runtime target when explicit target provided', () => {
-      // Set a different runtime target
-      compilerConfig.setScriptTarget(ts.ScriptTarget.ES5)
-
-      // Should use the explicit target instead of runtime target
-      expect(isValidIdentifier('validName', ts.ScriptTarget.Latest)).toBe(true)
-      expect(isValidIdentifier('123invalid', ts.ScriptTarget.Latest)).toBe(false)
-    })
-
     test('should handle edge cases', () => {
       expect(isValidIdentifier('a')).toBe(true)
       expect(isValidIdentifier('_')).toBe(true)
       expect(isValidIdentifier('$')).toBe(true)
       expect(isValidIdentifier('__proto__')).toBe(true)
       expect(isValidIdentifier('constructor')).toBe(true)
+      expect(isValidIdentifier('𝒜')).toBe(true)
+      expect(isValidIdentifier('A𝒜')).toBe(true)
+      expect(isValidIdentifier('𝒜A')).toBe(true)
     })
 
     test('should reject reserved words as identifiers', () => {

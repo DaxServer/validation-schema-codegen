@@ -21,19 +21,20 @@ export class FunctionDeclarationParser extends BaseParser {
       const paramTypeNode = param.getTypeNode()
       const paramType = paramTypeNode ? getTypeBoxType(paramTypeNode) : makeTypeCall('Any')
 
-      // Check if parameter is optional
-      if (param.hasQuestionToken()) {
-        return ts.factory.createCallExpression(
-          ts.factory.createPropertyAccessExpression(
-            ts.factory.createIdentifier('Type'),
-            ts.factory.createIdentifier('Optional'),
-          ),
-          undefined,
-          [paramType],
-        )
+      // Check if parameter is optional or required
+      if (!param.hasQuestionToken()) {
+        return paramType
       }
 
-      return paramType
+      // Parameter is optional
+      return ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('Type'),
+          ts.factory.createIdentifier('Optional'),
+        ),
+        undefined,
+        [paramType],
+      )
     })
 
     // Convert return type to TypeBox type

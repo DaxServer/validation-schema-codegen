@@ -1,7 +1,7 @@
-import { describe, expect, beforeEach, afterEach, test } from 'bun:test'
-import { Project, ts } from 'ts-morph'
 import { CompilerConfig } from '@daxserver/validation-schema-codegen/utils/compiler-config'
 import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { Project, ts } from 'ts-morph'
 
 describe('Script Target Integration', () => {
   let compilerConfig: CompilerConfig
@@ -18,11 +18,12 @@ describe('Script Target Integration', () => {
   test('should use project compiler options for script target', () => {
     const project = new Project({
       compilerOptions: {
-        target: ts.ScriptTarget.ES2015
-      }
+        target: ts.ScriptTarget.ES2015,
+      },
     })
 
-    const sourceFile = createSourceFile(project,
+    const sourceFile = createSourceFile(
+      project,
       `
         interface TestInterface {
           validName: string;
@@ -30,10 +31,12 @@ describe('Script Target Integration', () => {
           "valid_identifier": string;
           "invalid-property": string;
         }
-      `)
+      `,
+    )
 
-    expect(generateFormattedCode(sourceFile)).toBe(formatWithPrettier(
-      `
+    expect(generateFormattedCode(sourceFile)).toBe(
+      formatWithPrettier(
+        `
         export const TestInterface = Type.Object({
           validName: Type.String(),
           "quoted-property": Type.Number(),
@@ -42,8 +45,9 @@ describe('Script Target Integration', () => {
         })
 
         export type TestInterface = Static<typeof TestInterface>
-      `
-    ))
+      `,
+      ),
+    )
   })
 
   test('should work with different script targets', () => {
@@ -51,46 +55,52 @@ describe('Script Target Integration', () => {
       ts.ScriptTarget.ES5,
       ts.ScriptTarget.ES2015,
       ts.ScriptTarget.ES2020,
-      ts.ScriptTarget.Latest
+      ts.ScriptTarget.Latest,
     ]
 
     for (const target of testCases) {
       const project = new Project({
         compilerOptions: {
-          target
-        }
+          target,
+        },
       })
 
-      const sourceFile = createSourceFile(project,
+      const sourceFile = createSourceFile(
+        project,
         `
           interface TestInterface {
             validName: string;
             "invalid-name": number;
+            π: boolean;
           }
-        `
+        `,
       )
 
-      expect(generateFormattedCode(sourceFile)).toBe(formatWithPrettier(
-        `
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(
+          `
           export const TestInterface = Type.Object({
             validName: Type.String(),
             "invalid-name": Type.Number(),
+            π: Type.Boolean(),
           })
 
           export type TestInterface = Static<typeof TestInterface>
-        `
-      ))
+        `,
+        ),
+      )
     }
   })
 
   test('should handle numeric property names correctly', () => {
     const project = new Project({
       compilerOptions: {
-        target: ts.ScriptTarget.Latest
-      }
+        target: ts.ScriptTarget.Latest,
+      },
     })
 
-    const sourceFile = createSourceFile(project,
+    const sourceFile = createSourceFile(
+      project,
       `
         interface T {
           123: string;
@@ -98,11 +108,12 @@ describe('Script Target Integration', () => {
           validName: boolean;
           "valid_name": string;
         }
-      `
+      `,
     )
 
-    expect(generateFormattedCode(sourceFile)).toBe(formatWithPrettier(
-      `
+    expect(generateFormattedCode(sourceFile)).toBe(
+      formatWithPrettier(
+        `
         export const T = Type.Object({
           123: Type.String(),
           "456": Type.Number(),
@@ -111,7 +122,8 @@ describe('Script Target Integration', () => {
         })
 
         export type T = Static<typeof T>
-      `
-    ))
+      `,
+      ),
+    )
   })
 })

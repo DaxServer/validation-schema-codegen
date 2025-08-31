@@ -8,10 +8,7 @@ export class InterfaceParser extends BaseParser {
   parse(interfaceDecl: InterfaceDeclaration): void {
     const interfaceName = interfaceDecl.getName()
 
-    if (this.processedTypes.has(interfaceName)) {
-      return
-    }
-
+    if (this.processedTypes.has(interfaceName)) return
     this.processedTypes.add(interfaceName)
 
     const typeParameters = interfaceDecl.getTypeParameters()

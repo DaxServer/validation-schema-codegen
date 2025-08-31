@@ -1,6 +1,10 @@
-import { describe, expect, beforeEach, afterEach, test } from 'bun:test'
+import {
+  CompilerConfig,
+  getScriptTarget,
+  initializeCompilerConfig,
+} from '@daxserver/validation-schema-codegen/utils/compiler-config'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { Project, ts } from 'ts-morph'
-import { CompilerConfig, getScriptTarget, initializeCompilerConfig } from '@daxserver/validation-schema-codegen/utils/compiler-config'
 
 describe('compiler-config', () => {
   let compilerConfig: CompilerConfig
@@ -41,27 +45,11 @@ describe('compiler-config', () => {
       expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.Latest)
     })
 
-    test('should initialize from compiler options with explicit target', () => {
-      const compilerOptions: ts.CompilerOptions = {
-        target: ts.ScriptTarget.ES2015
-      }
-
-      compilerConfig.initializeFromCompilerOptions(compilerOptions)
-      expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.ES2015)
-    })
-
-    test('should use default target when compiler options have no target', () => {
-      const compilerOptions: ts.CompilerOptions = {}
-
-      compilerConfig.initializeFromCompilerOptions(compilerOptions)
-      expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.Latest)
-    })
-
     test('should initialize from ts-morph Project', () => {
       const project = new Project({
         compilerOptions: {
-          target: ts.ScriptTarget.ES2020
-        }
+          target: ts.ScriptTarget.ES2020,
+        },
       })
 
       compilerConfig.initializeFromProject(project)
@@ -86,8 +74,8 @@ describe('compiler-config', () => {
     test('initializeCompilerConfig should initialize from project', () => {
       const project = new Project({
         compilerOptions: {
-          target: ts.ScriptTarget.ES2017
-        }
+          target: ts.ScriptTarget.ES2017,
+        },
       })
 
       initializeCompilerConfig(project)

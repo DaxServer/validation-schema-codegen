@@ -1,4 +1,3 @@
-import { TypeBoxStatic } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { SourceFile, ts } from 'ts-morph'
 
 export const addStaticTypeAlias = (
@@ -7,10 +6,9 @@ export const addStaticTypeAlias = (
   compilerNode: ts.SourceFile,
   printer: ts.Printer,
 ) => {
-  const staticTypeNode = ts.factory.createTypeReferenceNode(
-    ts.factory.createIdentifier(TypeBoxStatic),
-    [ts.factory.createTypeQueryNode(ts.factory.createIdentifier(name))],
-  )
+  const staticTypeNode = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Static'), [
+    ts.factory.createTypeQueryNode(ts.factory.createIdentifier(name)),
+  ])
 
   const staticType = printer.printNode(ts.EmitHint.Unspecified, staticTypeNode, compilerNode)
 
