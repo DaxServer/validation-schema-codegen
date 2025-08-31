@@ -7,10 +7,9 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { Project, ts } from 'ts-morph'
 
 describe('compiler-config', () => {
-  let compilerConfig: CompilerConfig
+  const compilerConfig = CompilerConfig.getInstance()
 
   beforeEach(() => {
-    compilerConfig = CompilerConfig.getInstance()
     compilerConfig.reset()
   })
 
@@ -25,8 +24,12 @@ describe('compiler-config', () => {
       expect(instance1).toBe(instance2)
     })
 
-    test('should have default script target', () => {
-      expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.Latest)
+    test('should have environment-detected script target as default', () => {
+      // Should detect target based on TypeScript version, not use Latest
+      const target = compilerConfig.getScriptTarget()
+      expect(target).not.toBe(ts.ScriptTarget.Latest)
+      expect(target).toBeGreaterThanOrEqual(ts.ScriptTarget.ES5)
+      expect(target).toBeLessThan(ts.ScriptTarget.Latest)
     })
 
     test('should allow setting script target explicitly', () => {
@@ -37,12 +40,14 @@ describe('compiler-config', () => {
       expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.ES5)
     })
 
-    test('should reset to defaults', () => {
+    test('should reset to environment-detected defaults', () => {
+      const originalTarget = compilerConfig.getScriptTarget()
       compilerConfig.setScriptTarget(ts.ScriptTarget.ES5)
       expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.ES5)
 
       compilerConfig.reset()
-      expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.Latest)
+      expect(compilerConfig.getScriptTarget()).toBe(originalTarget)
+      expect(compilerConfig.getScriptTarget()).not.toBe(ts.ScriptTarget.Latest)
     })
 
     test('should initialize from ts-morph Project', () => {
@@ -60,8 +65,33 @@ describe('compiler-config', () => {
       const project = new Project()
 
       compilerConfig.initializeFromProject(project)
-      // Should use default
-      expect(compilerConfig.getScriptTarget()).toBe(ts.ScriptTarget.Latest)
+      // Should use environment-detected target, not Latest
+      const target = compilerConfig.getScriptTarget()
+      expect(target).not.toBe(ts.ScriptTarget.Latest)
+      expect(target).toBeGreaterThanOrEqual(ts.ScriptTarget.ES5)
+      expect(target).toBeLessThan(ts.ScriptTarget.Latest)
+    })
+  })
+
+  describe('environment detection', () => {
+    test('should detect appropriate target based on TypeScript version', () => {
+      const target = compilerConfig.getScriptTarget()
+
+      // For TypeScript 5.9.2, should detect ES2023 or higher
+      expect(target).toBeGreaterThanOrEqual(ts.ScriptTarget.ES2020)
+      expect(target).toBeLessThan(ts.ScriptTarget.Latest)
+    })
+
+    test('should use environment target when project has no explicit options', () => {
+      const project = new Project()
+      const originalTarget = compilerConfig.getScriptTarget()
+
+      // Set to a different target first
+      compilerConfig.setScriptTarget(ts.ScriptTarget.ES5)
+
+      // Initialize from project should use environment target
+      compilerConfig.initializeFromProject(project)
+      expect(compilerConfig.getScriptTarget()).toBe(originalTarget)
     })
   })
 
