@@ -1,12 +1,7 @@
 import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
-import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
-import { createSourceFile } from '@test-fixtures/utils'
+import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
-
-const getNodeName = (traversedNode: TraversedNode): string => {
-  return traversedNode.originalName
-}
 
 describe('Dependency Traversal', () => {
   let project: Project
@@ -30,14 +25,34 @@ describe('Dependency Traversal', () => {
         'external.ts',
       )
 
-      const mainFile = createSourceFile(project, 'import { User } from "./external";', 'main.ts')
+      const sourceFile = createSourceFile(
+        project,
+        `
+          import { User } from "./external";
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
+          type LocalType = {
+            user: User;
+          };
+        `,
+        'main.ts',
+      )
 
-      expect(dependencies).toHaveLength(1)
-      expect(getNodeName(dependencies[0]!)).toBe('User')
-      expect(dependencies[0]!.isImported).toBe(true)
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type User = Static<typeof User>;
+          
+          export const LocalType = Type.Object({
+            user: User,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
 
     test('should collect dependencies from multiple imports', () => {
@@ -63,22 +78,44 @@ describe('Dependency Traversal', () => {
         'product.ts',
       )
 
-      const mainFile = createSourceFile(
+      const sourceFile = createSourceFile(
         project,
         `
           import { User } from "./user";
           import { Product } from "./product";
+
+          type LocalType = {
+            user: User;
+            product: Product;
+          };
         `,
         'main.ts',
       )
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(2)
-      const typeNames = dependencies.map((d) => getNodeName(d))
-      expect(typeNames).toContain('User')
-      expect(typeNames).toContain('Product')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type User = Static<typeof User>;
+          
+          export const Product = Type.Object({
+            id: Type.String(),
+            title: Type.String(),
+          });
+          
+          export type Product = Static<typeof Product>;
+          
+          export const LocalType = Type.Object({
+            user: User,
+            product: Product,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
 
     test('should handle nested imports', () => {
@@ -103,21 +140,48 @@ describe('Dependency Traversal', () => {
         'user.ts',
       )
 
-      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
+      const sourceFile = createSourceFile(
+        project,
+        `
+          import { User } from "./user";
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
+          type LocalType = {
+            user: User;
+          };
+        `,
+        'main.ts',
+      )
 
-      expect(dependencies).toHaveLength(2)
-      const typeNames = dependencies.map((d) => getNodeName(d))
-      expect(typeNames).toContain('BaseType')
-      expect(typeNames).toContain('User')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const BaseType = Type.Object({
+            id: Type.String(),
+          });
+          
+          export type BaseType = Static<typeof BaseType>;
+          
+          export const User = Type.Intersect([
+            BaseType,
+            Type.Object({
+              name: Type.String(),
+            }),
+          ]);
+          
+          export type User = Static<typeof User>;
+          
+          export const LocalType = Type.Object({
+            user: User,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
 
     test('should handle missing module specifier source file', () => {
-      const mainFile = createSourceFile(project, 'import { NonExistent } from "./non-existent";')
+      const sourceFile = createSourceFile(project, 'import { NonExistent } from "./non-existent";')
 
-      traverser.startTraversal(mainFile)
+      traverser.startTraversal(sourceFile)
       const dependencies = traverser.getNodesToPrint()
 
       expect(dependencies).toHaveLength(0)
@@ -135,20 +199,37 @@ describe('Dependency Traversal', () => {
         'user.ts',
       )
 
-      const mainFile = createSourceFile(
+      const sourceFile = createSourceFile(
         project,
         `
           import { User } from "./user";
           import { User as UserAlias } from "./user";
+
+          type LocalType = {
+            user: User;
+            userAlias: UserAlias;
+          };
         `,
         'main.ts',
       )
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(1)
-      expect(getNodeName(dependencies[0]!)).toBe('User')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type User = Static<typeof User>;
+          
+          export const LocalType = Type.Object({
+            user: User,
+            userAlias: UserAlias,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
   })
 
@@ -169,17 +250,23 @@ describe('Dependency Traversal', () => {
         `,
       )
 
-      traverser.startTraversal(sourceFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(2)
-      const typeNames = dependencies.map((d) => getNodeName(d))
-      expect(typeNames).toContain('LocalUser')
-      expect(typeNames).toContain('LocalProduct')
-
-      dependencies.forEach((dep) => {
-        expect(dep!.isImported).toBe(false)
-      })
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const LocalUser = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type LocalUser = Static<typeof LocalUser>;
+          
+          export const LocalProduct = Type.Object({
+            id: Type.String(),
+            title: Type.String(),
+          });
+          
+          export type LocalProduct = Static<typeof LocalProduct>;
+        `),
+      )
     })
 
     test('should not duplicate existing types', () => {
@@ -193,12 +280,16 @@ describe('Dependency Traversal', () => {
         `,
       )
 
-      traverser.addLocalTypes(sourceFile)
-      traverser.addLocalTypes(sourceFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(1)
-      expect(getNodeName(dependencies[0]!)).toBe('User')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const User = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type User = Static<typeof User>;
+        `),
+      )
     })
   })
 
@@ -225,14 +316,42 @@ describe('Dependency Traversal', () => {
         'user.ts',
       )
 
-      const mainFile = createSourceFile(project, 'import { User } from "./user";', 'main.ts')
+      const sourceFile = createSourceFile(
+        project,
+        `
+          import { User } from "./user";
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
+          type LocalType = {
+            user: User;
+          };
+        `,
+        'main.ts',
+      )
 
-      expect(dependencies).toHaveLength(2)
-      expect(getNodeName(dependencies[0]!)).toBe('BaseType')
-      expect(getNodeName(dependencies[1]!)).toBe('User')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const BaseType = Type.Object({
+            id: Type.String(),
+          });
+          
+          export type BaseType = Static<typeof BaseType>;
+          
+          export const User = Type.Intersect([
+            BaseType,
+            Type.Object({
+              name: Type.String(),
+            }),
+          ]);
+          
+          export type User = Static<typeof User>;
+          
+          export const LocalType = Type.Object({
+            user: User,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
 
     test('should handle complex dependency chains', () => {
@@ -270,15 +389,47 @@ describe('Dependency Traversal', () => {
         'c.ts',
       )
 
-      const mainFile = createSourceFile(project, 'import { C } from "./c";', 'main.ts')
+      const sourceFile = createSourceFile(
+        project,
+        `
+          import { C } from "./c";
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
+          type LocalType = {
+            c: C;
+          };
+        `,
+        'main.ts',
+      )
 
-      expect(dependencies).toHaveLength(3)
-      expect(getNodeName(dependencies[0]!)).toBe('A')
-      expect(getNodeName(dependencies[1]!)).toBe('B')
-      expect(getNodeName(dependencies[2]!)).toBe('C')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const A = Type.Object({
+            value: Type.String(),
+          });
+          
+          export type A = Static<typeof A>;
+          
+          export const B = Type.Object({
+            a: A,
+            name: Type.String(),
+          });
+          
+          export type B = Static<typeof B>;
+          
+          export const C = Type.Object({
+            b: B,
+            id: Type.Number(),
+          });
+          
+          export type C = Static<typeof C>;
+          
+          export const LocalType = Type.Object({
+            c: C,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
 
     test('should handle circular dependencies gracefully', () => {
@@ -306,7 +457,7 @@ describe('Dependency Traversal', () => {
         'b.ts',
       )
 
-      const mainFile = createSourceFile(
+      const sourceFile = createSourceFile(
         project,
         `
           import { A } from "./a";
@@ -315,13 +466,23 @@ describe('Dependency Traversal', () => {
         'main.ts',
       )
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(2)
-      const typeNames = dependencies.map((d) => getNodeName(d))
-      expect(typeNames).toContain('A')
-      expect(typeNames).toContain('B')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const A = Type.Object({
+            b: Type.Optional(B),
+            value: Type.String(),
+          });
+          
+          export type A = Static<typeof A>;
+          
+          export const B = Type.Object({
+            a: Type.Optional(A),
+            name: Type.String(),
+          });
+          
+          export type B = Static<typeof B>;
+        `),
+      )
     })
 
     test('should handle types with no dependencies', () => {
@@ -336,17 +497,34 @@ describe('Dependency Traversal', () => {
         'simple.ts',
       )
 
-      const mainFile = createSourceFile(
+      const sourceFile = createSourceFile(
         project,
-        'import { SimpleType } from "./simple";',
+        `
+          import { SimpleType } from "./simple";
+
+          type LocalType = {
+            simple: SimpleType;
+          };
+        `,
         'main.ts',
       )
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(1)
-      expect(getNodeName(dependencies[0]!)).toBe('SimpleType')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const SimpleType = Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          });
+          
+          export type SimpleType = Static<typeof SimpleType>;
+          
+          export const LocalType = Type.Object({
+            simple: SimpleType,
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
   })
 
@@ -362,7 +540,7 @@ describe('Dependency Traversal', () => {
         'external.ts',
       )
 
-      const mainFile = createSourceFile(
+      const sourceFile = createSourceFile(
         project,
         `
           import { ExternalType } from "./external";
@@ -375,19 +553,22 @@ describe('Dependency Traversal', () => {
         'main.ts',
       )
 
-      traverser.startTraversal(mainFile)
-      const dependencies = traverser.getNodesToPrint()
-
-      expect(dependencies).toHaveLength(2)
-
-      const externalDep = dependencies.find((d) => getNodeName(d) === 'ExternalType')
-      const localDep = dependencies.find((d) => getNodeName(d) === 'LocalType')
-
-      expect(externalDep!.isImported).toBe(true)
-      expect(localDep!.isImported).toBe(false)
-
-      expect(getNodeName(dependencies[0]!)).toBe('ExternalType')
-      expect(getNodeName(dependencies[1]!)).toBe('LocalType')
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export const ExternalType = Type.Object({
+            id: Type.String(),
+          });
+          
+          export type ExternalType = Static<typeof ExternalType>;
+          
+          export const LocalType = Type.Object({
+            external: ExternalType,
+            local: Type.String(),
+          });
+          
+          export type LocalType = Static<typeof LocalType>;
+        `),
+      )
     })
   })
 })
