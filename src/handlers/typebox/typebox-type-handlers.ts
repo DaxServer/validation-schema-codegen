@@ -7,6 +7,7 @@ import { DateTypeHandler } from '@daxserver/validation-schema-codegen/handlers/t
 import { FunctionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/function-type-handler'
 import { IndexedAccessTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/indexed-access-type-handler'
 import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-type-handler'
+import { KeyOfTypeofHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-typeof-handler'
 import { LiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/literal-type-handler'
 import { InterfaceTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/interface-type-handler'
 import { ObjectTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-type-handler'
@@ -45,6 +46,7 @@ export class TypeBoxTypeHandlers {
     const requiredTypeHandler = new RequiredTypeHandler()
     const typeReferenceHandler = new TypeReferenceHandler()
     const keyOfTypeHandler = new KeyOfTypeHandler()
+    const keyOfTypeofHandler = new KeyOfTypeofHandler()
     const indexedAccessTypeHandler = new IndexedAccessTypeHandler()
     const interfaceTypeHandler = new InterfaceTypeHandler()
     const functionTypeHandler = new FunctionTypeHandler()
@@ -89,6 +91,7 @@ export class TypeBoxTypeHandlers {
 
     // Fallback handlers for complex cases
     this.fallbackHandlers = [
+      keyOfTypeofHandler, // Must come before keyOfTypeHandler
       typeReferenceHandler,
       keyOfTypeHandler,
       typeofTypeHandler,
