@@ -1,7 +1,7 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
-import { IndexedAccessTypeNode, Node, ts } from 'ts-morph'
+import { IndexedAccessTypeNode, Node, ts, TypeNode } from 'ts-morph'
 
 export class IndexedAccessTypeHandler extends BaseTypeHandler {
   canHandle(node: Node): boolean {
@@ -14,8 +14,8 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
 
     // Handle special case: typeof A[number] where A is a readonly tuple
     if (
-      objectType?.isKind(ts.SyntaxKind.TypeQuery) &&
-      indexType?.isKind(ts.SyntaxKind.NumberKeyword)
+      objectType.isKind(ts.SyntaxKind.TypeQuery) &&
+      indexType.isKind(ts.SyntaxKind.NumberKeyword)
     ) {
       return this.handleTypeofArrayAccess(objectType, node)
     }
@@ -42,31 +42,28 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
       const typeAlias = sourceFile.getTypeAlias(typeName)
       if (typeAlias) {
         const tupleUnion = this.extractTupleUnion(typeAlias.getTypeNode())
-        if (tupleUnion) {
-          return tupleUnion
-        }
+        if (tupleUnion) return tupleUnion
       }
 
       // Then try to find a variable declaration
       const variableDeclaration = sourceFile.getVariableDeclaration(typeName)
       if (variableDeclaration) {
         const tupleUnion = this.extractTupleUnion(variableDeclaration.getTypeNode())
-        if (tupleUnion) {
-          return tupleUnion
-        }
+        if (tupleUnion) return tupleUnion
       }
     }
 
     // Fallback to default Index behavior
     const typeboxObjectType = getTypeBoxType(typeQuery)
     const typeboxIndexType = getTypeBoxType(indexedAccessType.getIndexTypeNode())
+
     return makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
   }
 
-  private extractTupleUnion(typeNode: Node | undefined): ts.Expression | null {
+  private extractTupleUnion(typeNode: TypeNode | undefined): ts.Expression | null {
     if (!typeNode) return null
 
-    let actualTupleType: Node | undefined = typeNode
+    let actualTupleType: TypeNode = typeNode
 
     // Handle readonly modifier (TypeOperator)
     if (typeNode.isKind(ts.SyntaxKind.TypeOperator)) {
@@ -75,7 +72,7 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
     }
 
     // Check if it's a tuple type
-    if (actualTupleType?.isKind(ts.SyntaxKind.TupleType)) {
+    if (actualTupleType.isKind(ts.SyntaxKind.TupleType)) {
       const tupleType = actualTupleType.asKindOrThrow(ts.SyntaxKind.TupleType)
       const elements = tupleType.getElements()
 

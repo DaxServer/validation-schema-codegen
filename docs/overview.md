@@ -46,5 +46,6 @@ export type User = Static<typeof User>
 - [architecture.md](./architecture.md) - System architecture
 - [parser-system.md](./parser-system.md) - TypeScript parsing
 - [handler-system.md](./handler-system.md) - Type conversion
+- [compiler-configuration.md](./compiler-configuration.md) - Compiler options and script targets
 - [dependency-management.md](./dependency-management.md) - Dependency analysis
 - [testing.md](./testing.md) - Testing

@@ -5,11 +5,16 @@ import {
 import { TypeBoxPrinter } from '@daxserver/validation-schema-codegen/printer/typebox-printer'
 import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
 import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
+import { initializeCompilerConfig } from '@daxserver/validation-schema-codegen/utils/compiler-config'
 import type { VisualizationOptions } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
 import { Node, Project, SourceFile, ts } from 'ts-morph'
 
 const createOutputFile = (hasGenericInterfaces: boolean) => {
-  const newSourceFile = new Project().createSourceFile('output.ts', '', {
+  const project = new Project()
+
+  initializeCompilerConfig(project)
+
+  const newSourceFile = project.createSourceFile('output.ts', '', {
     overwrite: true,
   })
 

@@ -59,6 +59,31 @@ describe('Enum types', () => {
         `),
       )
     })
+
+    test('with and without value', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          enum A {
+            B,
+            C = 'c',
+          }
+        `,
+      )
+
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export enum A {
+            B,
+            C = 'c',
+          }
+
+          export const ASchema = Type.Enum(A);
+
+          export type ASchema = Static<typeof ASchema>;
+        `),
+      )
+    })
   })
 
   describe('with exports', () => {
@@ -102,6 +127,31 @@ describe('Enum types', () => {
         formatWithPrettier(`
           export enum A {
             B = 'b',
+            C = 'c',
+          }
+
+          export const ASchema = Type.Enum(A);
+
+          export type ASchema = Static<typeof ASchema>;
+        `),
+      )
+    })
+
+    test('with and without value', () => {
+      const sourceFile = createSourceFile(
+        project,
+        `
+          export enum A {
+            B,
+            C = 'c',
+          }
+        `,
+      )
+
+      expect(generateFormattedCode(sourceFile)).toBe(
+        formatWithPrettier(`
+          export enum A {
+            B,
             C = 'c',
           }
 

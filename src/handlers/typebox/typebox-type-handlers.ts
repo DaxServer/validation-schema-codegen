@@ -6,22 +6,22 @@ import { UnionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/
 import { DateTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/date-type-handler'
 import { FunctionTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/function-type-handler'
 import { IndexedAccessTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/indexed-access-type-handler'
-import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-type-handler'
 import { KeyOfTypeofHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/keyof-typeof-handler'
 import { LiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/literal-type-handler'
 import { InterfaceTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/interface-type-handler'
 import { ObjectTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-type-handler'
-import { ReadonlyArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/readonly-array-type-handler'
-import { ReadonlyTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/readonly-type-handler'
 import { OmitTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/omit-type-handler'
 import { PartialTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/partial-type-handler'
 import { PickTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/pick-type-handler'
+import { ReadonlyTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/readonly-type-handler'
 import { RecordTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/record-type-handler'
 import { RequiredTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/reference/required-type-handler'
 import { SimpleTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/simple-type-handler'
 import { TemplateLiteralTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/template-literal-type-handler'
 import { TypeQueryHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-query-handler'
 import { TypeReferenceHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type-reference-handler'
+import { KeyOfTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type/keyof-type-handler'
+import { ReadonlyArrayTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/type/readonly-array-type-handler'
 import { TypeofTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/typeof-type-handler'
 import { Node, SyntaxKind } from 'ts-morph'
 
@@ -107,9 +107,7 @@ export class TypeBoxTypeHandlers {
     const cacheKey = `${nodeKind}-${nodeText}`
 
     const cachedHandler = this.handlerCache.get(cacheKey)
-    if (cachedHandler) {
-      return cachedHandler
-    }
+    if (cachedHandler) return cachedHandler
 
     let handler: BaseTypeHandler | undefined
 

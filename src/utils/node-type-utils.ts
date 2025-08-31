@@ -1,4 +1,4 @@
-import { Node, SyntaxKind, TypeReferenceNode } from 'ts-morph'
+import { Node, SyntaxKind } from 'ts-morph'
 
 /**
  * Utility functions for common Node type checks used in canHandle methods
@@ -29,12 +29,9 @@ export const isTypeOperatorWithOperator = (node: Node, operator: SyntaxKind): bo
  * Checks if a node is a TypeReference with a specific type name
  */
 export const isTypeReferenceWithName = (node: Node, typeName: string): boolean => {
-  if (!Node.isTypeReference(node)) {
-    return false
-  }
+  if (!Node.isTypeReference(node)) return false
 
-  const typeRefNode = node as TypeReferenceNode
-  const typeNameNode = typeRefNode.getTypeName()
+  const typeNameNode = node.getTypeName()
 
   return Node.isIdentifier(typeNameNode) && typeNameNode.getText() === typeName
 }
@@ -43,28 +40,9 @@ export const isTypeReferenceWithName = (node: Node, typeName: string): boolean =
  * Checks if a node is a TypeReference with any of the specified type names
  */
 export const isTypeReferenceWithAnyName = (node: Node, typeNames: string[]): boolean => {
-  if (!Node.isTypeReference(node)) {
-    return false
-  }
+  if (!Node.isTypeReference(node)) return false
 
-  const typeRefNode = node as TypeReferenceNode
-  const typeNameNode = typeRefNode.getTypeName()
+  const typeNameNode = node.getTypeName()
 
   return Node.isIdentifier(typeNameNode) && typeNames.includes(typeNameNode.getText())
 }
-
-/**
- * Utility type operators
- */
-export const UTILITY_TYPE_NAMES = [
-  'Partial',
-  'Required',
-  'Readonly',
-  'Pick',
-  'Omit',
-  'Exclude',
-  'Extract',
-  'NonNullable',
-  'ReturnType',
-  'InstanceType',
-] as const

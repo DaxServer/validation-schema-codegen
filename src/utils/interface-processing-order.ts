@@ -9,8 +9,8 @@ export const getInterfaceProcessingOrder = (
   const processingOrder: InterfaceDeclaration[] = []
 
   // Build interface map
-  interfaces.forEach((iface) => {
-    interfaceMap.set(iface.getName(), iface)
+  interfaces.forEach((i) => {
+    interfaceMap.set(i.getName(), i)
   })
 
   const visit = (interfaceName: string): void => {
@@ -19,18 +19,14 @@ export const getInterfaceProcessingOrder = (
     }
 
     const iface = interfaceMap.get(interfaceName)
-    if (!iface) {
-      return
-    }
+    if (!iface) return
 
     visiting.add(interfaceName)
 
     // Process heritage clauses (extends)
     const heritageClauses = iface.getHeritageClauses()
     heritageClauses.forEach((heritageClause) => {
-      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) {
-        return
-      }
+      if (heritageClause.getToken() !== ts.SyntaxKind.ExtendsKeyword) return
 
       heritageClause.getTypeNodes().forEach((typeNode) => {
         const baseInterfaceName = typeNode.getText()
@@ -46,8 +42,8 @@ export const getInterfaceProcessingOrder = (
   }
 
   // Visit all interfaces
-  interfaces.forEach((iface) => {
-    visit(iface.getName())
+  interfaces.forEach((i) => {
+    visit(i.getName())
   })
 
   return processingOrder

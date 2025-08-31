@@ -1,6 +1,7 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
 import { isTypeOperatorWithOperator } from '@daxserver/validation-schema-codegen/utils/node-type-utils'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
+import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, SyntaxKind, ts, TypeOperatorTypeNode } from 'ts-morph'
 
 /**
@@ -17,9 +18,8 @@ export abstract class TypeOperatorBaseHandler extends BaseTypeHandler {
 
   handle(node: TypeOperatorTypeNode): ts.Expression {
     const innerType = node.getTypeNode()
-    const typeboxInnerType = getTypeBoxType(innerType)
-    return this.createTypeBoxCall(typeboxInnerType)
-  }
+    const typeboxType = getTypeBoxType(innerType)
 
-  protected abstract createTypeBoxCall(innerType: ts.Expression): ts.Expression
+    return makeTypeCall(this.typeBoxMethod, [typeboxType])
+  }
 }

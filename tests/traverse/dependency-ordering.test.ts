@@ -80,11 +80,11 @@ describe('Dependency ordering', () => {
         export type GeoShapeSnakDataValue = Static<typeof GeoShapeSnakDataValue>;
 
         export const DataValueByDataType = Type.Object({
-           "'string'": StringSnakDataValue,
-           "'commonsMedia'": CommonsMediaSnakDataValue,
-           "'external-id'": ExternalIdSnakDataValue,
-           "'geo-shape'": GeoShapeSnakDataValue,
-         });
+          string: StringSnakDataValue,
+          commonsMedia: CommonsMediaSnakDataValue,
+          'external-id': ExternalIdSnakDataValue,
+          'geo-shape': GeoShapeSnakDataValue,
+        });
 
         export type DataValueByDataType = Static<typeof DataValueByDataType>;
       `),
@@ -96,9 +96,9 @@ describe('Dependency ordering', () => {
     const sourceFile = project.createSourceFile(
       'test.ts',
       `
-      export type TypeB = TypeA
-      export type TypeA = string
-    `,
+        export type TypeB = TypeA
+        export type TypeA = string
+      `,
     )
 
     const traversal = new DependencyTraversal()
@@ -118,20 +118,20 @@ describe('Dependency ordering', () => {
     const sourceFile = project.createSourceFile(
       'test.ts',
       `
-      export type EntityInfo = {
-        id: EntityId
-        name: string
-      }
+        export type EntityInfo = {
+          id: EntityId
+          name: string
+        }
 
-      export type EntityId = string
+        export type EntityId = string
 
-      export type Entities = Record<EntityId, Entity>
+        export type Entities = Record<EntityId, Entity>
 
-      export type Entity = {
-        info: EntityInfo
-        type: string
-      }
-    `,
+        export type Entity = {
+          info: EntityInfo
+          type: string
+        }
+      `,
     )
 
     const traversal = new DependencyTraversal()

@@ -15,9 +15,7 @@ export class OmitTypeHandler extends TypeReferenceBaseHandler {
     const typeRef = this.validateTypeReference(node)
     const [objectType, keysType] = this.extractTypeArguments(typeRef)
 
-    if (!keysType) {
-      return makeTypeCall('Any')
-    }
+    if (!keysType) return makeTypeCall('Any')
 
     const typeboxObjectType = getTypeBoxType(objectType)
     const omitKeys = extractStringKeys(keysType)
