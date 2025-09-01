@@ -3,8 +3,8 @@ import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/a
 import { EnumDeclaration, VariableDeclarationKind } from 'ts-morph'
 
 export class EnumParser extends BaseParser {
-  parse(enumDeclaration: EnumDeclaration): void {
-    const enumName = enumDeclaration.getName()
+  parse(enumDeclaration: EnumDeclaration, aliasName?: string): void {
+    const enumName = aliasName || enumDeclaration.getName()
     const schemaName = `${enumName}Schema`
 
     this.newSourceFile.addEnum({

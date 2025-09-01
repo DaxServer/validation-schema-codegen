@@ -1,4 +1,5 @@
 import { DependencyTraversal } from '@daxserver/validation-schema-codegen/traverse/dependency-traversal'
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
@@ -10,6 +11,7 @@ describe('Dependency Traversal', () => {
   beforeEach(() => {
     project = new Project()
     traverser = new DependencyTraversal()
+    resolverStore.clear()
   })
 
   describe('collectFromImports', () => {

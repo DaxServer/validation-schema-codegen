@@ -1,4 +1,5 @@
 import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import type { DirectedGraph } from 'graphology'
 import Graph from 'graphology'
 import forceAtlas2 from 'graphology-layout-forceatlas2'
@@ -68,18 +69,22 @@ export class GraphVisualizer {
     const nodes: GraphNode[] = []
     const edges: GraphEdge[] = []
 
-    // Convert nodes
-    for (const nodeId of graph.nodes()) {
-      const nodeData = graph.getNodeAttributes(nodeId)
+    // Convert nodes using resolver store to get all qualified names
+    const allQualifiedNames = resolverStore.getAllQualifiedNames()
+    for (const nodeId of allQualifiedNames) {
+      // Only include nodes that exist in the graph
+      if (graph.hasNode(nodeId)) {
+        const nodeData = graph.getNodeAttributes(nodeId)
 
-      const node: GraphNode = {
-        key: nodeId,
-        label: `${nodeData.type}: ${nodeData.originalName}`,
-        size: this.getNodeSize(nodeData),
-        color: this.getEnhancedNodeColor(nodeData),
+        const node: GraphNode = {
+          key: nodeId,
+          label: `${nodeData.type}: ${nodeData.originalName}`,
+          size: this.getNodeSize(nodeData),
+          color: this.getEnhancedNodeColor(nodeData),
+        }
+
+        nodes.push(node)
       }
-
-      nodes.push(node)
     }
 
     // Convert edges

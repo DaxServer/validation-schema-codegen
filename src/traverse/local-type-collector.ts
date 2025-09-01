@@ -1,5 +1,5 @@
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
-import { generateQualifiedNodeName } from '@daxserver/validation-schema-codegen/utils/generate-qualified-name'
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import { SourceFile } from 'ts-morph'
 
 export const addLocalTypes = (
@@ -27,7 +27,7 @@ export const addLocalTypes = (
         const importName = namedImport.getName()
         const importSourceFile = importDecl.getModuleSpecifierSourceFile()
         if (importSourceFile) {
-          const qualifiedName = generateQualifiedNodeName(importName, importSourceFile)
+          const qualifiedName = resolverStore.generateQualifiedName(importName, importSourceFile)
           requiredNodeIds.add(qualifiedName)
         }
       }
@@ -39,7 +39,7 @@ export const addLocalTypes = (
   // Collect type aliases
   for (const typeAlias of typeAliases) {
     const typeName = typeAlias.getName()
-    const qualifiedName = generateQualifiedNodeName(typeName, typeAlias.getSourceFile())
+    const qualifiedName = resolverStore.generateQualifiedName(typeName, typeAlias.getSourceFile())
     maincodeNodeIds.add(qualifiedName)
     requiredNodeIds.add(qualifiedName)
     nodeGraph.addTypeNode(qualifiedName, {
@@ -50,12 +50,21 @@ export const addLocalTypes = (
       isImported: false,
       isMainCode: true,
     })
+
+    // Add to ResolverStore during traversal
+    resolverStore.addTypeMapping({
+      originalName: typeName,
+      sourceFile,
+    })
   }
 
   // Collect interfaces
   for (const interfaceDecl of interfaces) {
     const interfaceName = interfaceDecl.getName()
-    const qualifiedName = generateQualifiedNodeName(interfaceName, interfaceDecl.getSourceFile())
+    const qualifiedName = resolverStore.generateQualifiedName(
+      interfaceName,
+      interfaceDecl.getSourceFile(),
+    )
     maincodeNodeIds.add(qualifiedName)
     requiredNodeIds.add(qualifiedName)
     nodeGraph.addTypeNode(qualifiedName, {
@@ -66,12 +75,18 @@ export const addLocalTypes = (
       isImported: false,
       isMainCode: true,
     })
+
+    // Add to ResolverStore during traversal
+    resolverStore.addTypeMapping({
+      originalName: interfaceName,
+      sourceFile: interfaceDecl.getSourceFile(),
+    })
   }
 
   // Collect enums
   for (const enumDecl of enums) {
     const enumName = enumDecl.getName()
-    const qualifiedName = generateQualifiedNodeName(enumName, enumDecl.getSourceFile())
+    const qualifiedName = resolverStore.generateQualifiedName(enumName, enumDecl.getSourceFile())
     maincodeNodeIds.add(qualifiedName)
     requiredNodeIds.add(qualifiedName)
     nodeGraph.addTypeNode(qualifiedName, {
@@ -82,6 +97,12 @@ export const addLocalTypes = (
       isImported: false,
       isMainCode: true,
     })
+
+    // Add to ResolverStore during traversal
+    resolverStore.addTypeMapping({
+      originalName: enumName,
+      sourceFile: enumDecl.getSourceFile(),
+    })
   }
 
   // Collect functions
@@ -89,7 +110,10 @@ export const addLocalTypes = (
     const functionName = functionDecl.getName()
     if (!functionName) continue
 
-    const qualifiedName = generateQualifiedNodeName(functionName, functionDecl.getSourceFile())
+    const qualifiedName = resolverStore.generateQualifiedName(
+      functionName,
+      functionDecl.getSourceFile(),
+    )
     maincodeNodeIds.add(qualifiedName)
     requiredNodeIds.add(qualifiedName)
     nodeGraph.addTypeNode(qualifiedName, {
@@ -99,6 +123,12 @@ export const addLocalTypes = (
       qualifiedName,
       isImported: false,
       isMainCode: true,
+    })
+
+    // Add to ResolverStore during traversal
+    resolverStore.addTypeMapping({
+      originalName: functionName,
+      sourceFile: functionDecl.getSourceFile(),
     })
   }
 }

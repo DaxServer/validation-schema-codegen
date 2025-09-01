@@ -37,23 +37,23 @@ export class TypeBoxPrinter {
   }
 
   printNode(traversedNode: TraversedNode): void {
-    const { node } = traversedNode
+    const { node, aliasName } = traversedNode
 
     switch (true) {
       case Node.isTypeAliasDeclaration(node):
-        this.typeAliasParser.parse(node)
+        this.typeAliasParser.parse(node, aliasName)
         break
 
       case Node.isInterfaceDeclaration(node):
-        this.interfaceParser.parse(node)
+        this.interfaceParser.parse(node, aliasName)
         break
 
       case Node.isEnumDeclaration(node):
-        this.enumParser.parse(node)
+        this.enumParser.parse(node, aliasName)
         break
 
       case Node.isFunctionDeclaration(node):
-        this.functionParser.parse(node)
+        this.functionParser.parse(node, aliasName)
         break
 
       default:

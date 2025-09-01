@@ -1,5 +1,6 @@
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
 import { TypeReferenceExtractor } from '@daxserver/validation-schema-codegen/traverse/type-reference-extractor'
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import {
   EnumDeclaration,
   FunctionDeclaration,
@@ -11,7 +12,7 @@ import {
 export const extractDependencies = (nodeGraph: NodeGraph, requiredNodeIds: Set<string>): void => {
   const processedNodes = new Set<string>()
   const nodesToProcess = new Set(requiredNodeIds)
-  const typeReferenceExtractor = new TypeReferenceExtractor(nodeGraph)
+  const typeReferenceExtractor = new TypeReferenceExtractor()
 
   // Process nodes iteratively until no new dependencies are found
   while (nodesToProcess.size > 0) {
@@ -44,7 +45,7 @@ export const extractDependencies = (nodeGraph: NodeGraph, requiredNodeIds: Set<s
     const typeReferences = typeReferenceExtractor.extractTypeReferences(nodeToAnalyze)
 
     for (const referencedType of typeReferences) {
-      if (nodeGraph.hasNode(referencedType)) {
+      if (resolverStore.hasQualifiedName(referencedType) && nodeGraph.hasNode(referencedType)) {
         // Only add to required if not already processed
         if (!requiredNodeIds.has(referencedType)) {
           requiredNodeIds.add(referencedType)
