@@ -1,3 +1,4 @@
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import { createSourceFile, formatWithPrettier, generateFormattedCode } from '@test-fixtures/utils'
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { Project } from 'ts-morph'
@@ -7,6 +8,7 @@ describe('Non-transitive dependency filtering', () => {
 
   beforeEach(() => {
     project = new Project()
+    resolverStore.clear()
   })
 
   test('should not include unreferenced types from imported files', () => {

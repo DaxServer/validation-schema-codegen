@@ -5,9 +5,11 @@ import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox
 import { FunctionDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class FunctionDeclarationParser extends BaseParser {
-  parse(functionDecl: FunctionDeclaration): void {
-    const functionName = functionDecl.getName()
-    if (!functionName) return
+  parse(functionDecl: FunctionDeclaration, aliasName?: string): void {
+    const originalFunctionName = functionDecl.getName()
+    if (!originalFunctionName) return
+
+    const functionName = aliasName || originalFunctionName
 
     if (this.processedTypes.has(functionName)) return
     this.processedTypes.add(functionName)

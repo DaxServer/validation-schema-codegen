@@ -7,4 +7,5 @@ export interface TraversedNode {
   qualifiedName: string
   isImported: boolean
   isMainCode: boolean
+  aliasName?: string // The alias name used in import statements (e.g., 'UserType' for 'import { User as UserType }')
 }

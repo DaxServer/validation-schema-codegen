@@ -8,6 +8,7 @@ import {
   GraphVisualizer,
   type VisualizationOptions,
 } from '@daxserver/validation-schema-codegen/utils/graph-visualizer'
+import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
 import { hasCycle, topologicalSort } from 'graphology-dag'
 import { SourceFile } from 'ts-morph'
 
@@ -16,14 +17,17 @@ export class DependencyTraversal {
   private nodeGraph = new NodeGraph()
   private maincodeNodeIds = new Set<string>()
   private requiredNodeIds = new Set<string>()
-  private importCollector = new ImportCollector(this.fileGraph, this.nodeGraph)
+  private importCollector: ImportCollector
+  constructor() {
+    this.importCollector = new ImportCollector(this.fileGraph, this.nodeGraph)
+  }
 
-  startTraversal(mainSourceFile: SourceFile): TraversedNode[] {
+  startTraversal(sourceFile: SourceFile): TraversedNode[] {
     // Mark main source file nodes as main code
-    addLocalTypes(mainSourceFile, this.nodeGraph, this.maincodeNodeIds, this.requiredNodeIds)
+    addLocalTypes(sourceFile, this.nodeGraph, this.maincodeNodeIds, this.requiredNodeIds)
 
     // Start recursive traversal from imports
-    const importDeclarations = mainSourceFile.getImportDeclarations()
+    const importDeclarations = sourceFile.getImportDeclarations()
     this.importCollector.collectFromImports(importDeclarations)
 
     // Extract dependencies for all nodes
@@ -38,23 +42,30 @@ export class DependencyTraversal {
    * Handles circular dependencies gracefully by falling back to simple node order
    */
   getNodesToPrint(): TraversedNode[] {
-    // Get all nodes in topological order, then filter to only required ones
-    const allNodesInOrder = hasCycle(this.nodeGraph)
-      ? Array.from(this.nodeGraph.nodes())
-      : topologicalSort(this.nodeGraph)
+    // Get all qualified names from resolver store, then apply topological ordering
+    const allQualifiedNames = resolverStore.getAllQualifiedNames()
 
-    const filteredNodes = allNodesInOrder
-      .filter((nodeId: string) => this.requiredNodeIds.has(nodeId))
+    // Filter to only required nodes that exist in both resolver store and node graph
+    const requiredQualifiedNames = allQualifiedNames.filter((qualifiedName: string) =>
+      this.requiredNodeIds.has(qualifiedName),
+    )
+
+    // Apply topological ordering only to the required nodes
+    const orderedNodes = hasCycle(this.nodeGraph)
+      ? requiredQualifiedNames
+      : topologicalSort(this.nodeGraph).filter((nodeId: string) =>
+          requiredQualifiedNames.includes(nodeId),
+        )
+
+    // Map to actual node data
+    const filteredNodes = orderedNodes
       .map((nodeId: string) => this.nodeGraph.getNode(nodeId))
+      .filter((node): node is TraversedNode => node !== null)
 
     return filteredNodes
   }
 
   async visualizeGraph(options: VisualizationOptions = {}): Promise<string> {
     return GraphVisualizer.generateVisualization(this.nodeGraph, options)
-  }
-
-  getNodeGraph(): NodeGraph {
-    return this.nodeGraph
   }
 }

@@ -5,8 +5,8 @@ import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typeb
 import { InterfaceDeclaration, ts } from 'ts-morph'
 
 export class InterfaceParser extends BaseParser {
-  parse(interfaceDecl: InterfaceDeclaration): void {
-    const interfaceName = interfaceDecl.getName()
+  parse(interfaceDecl: InterfaceDeclaration, aliasName?: string): void {
+    const interfaceName = aliasName || interfaceDecl.getName()
 
     if (this.processedTypes.has(interfaceName)) return
     this.processedTypes.add(interfaceName)
@@ -15,15 +15,13 @@ export class InterfaceParser extends BaseParser {
 
     // Check if interface has type parameters (generic)
     if (typeParameters.length > 0) {
-      this.parseGenericInterface(interfaceDecl)
+      this.parseGenericInterface(interfaceDecl, interfaceName)
     } else {
-      this.parseRegularInterface(interfaceDecl)
+      this.parseRegularInterface(interfaceDecl, interfaceName)
     }
   }
 
-  private parseRegularInterface(interfaceDecl: InterfaceDeclaration): void {
-    const interfaceName = interfaceDecl.getName()
-
+  private parseRegularInterface(interfaceDecl: InterfaceDeclaration, interfaceName: string): void {
     // Generate TypeBox type definition
     const typeboxTypeNode = getTypeBoxType(interfaceDecl)
     const typeboxType = this.printer.printNode(
@@ -42,8 +40,7 @@ export class InterfaceParser extends BaseParser {
     )
   }
 
-  private parseGenericInterface(interfaceDecl: InterfaceDeclaration): void {
-    const interfaceName = interfaceDecl.getName()
+  private parseGenericInterface(interfaceDecl: InterfaceDeclaration, interfaceName: string): void {
     const typeParameters = interfaceDecl.getTypeParameters()
 
     // Generate TypeBox function definition using the same flow as type aliases

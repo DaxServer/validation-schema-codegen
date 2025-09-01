@@ -6,8 +6,8 @@ import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox
 import { ts, TypeAliasDeclaration } from 'ts-morph'
 
 export class TypeAliasParser extends BaseParser {
-  parse(typeAlias: TypeAliasDeclaration): void {
-    const typeName = typeAlias.getName()
+  parse(typeAlias: TypeAliasDeclaration, aliasName?: string): void {
+    const typeName = aliasName || typeAlias.getName()
 
     if (this.processedTypes.has(typeName)) return
     this.processedTypes.add(typeName)
@@ -16,15 +16,13 @@ export class TypeAliasParser extends BaseParser {
 
     // Check if type alias has type parameters (generic)
     if (typeParameters.length > 0) {
-      this.parseGenericTypeAlias(typeAlias)
+      this.parseGenericTypeAlias(typeAlias, typeName)
     } else {
-      this.parseRegularTypeAlias(typeAlias)
+      this.parseRegularTypeAlias(typeAlias, typeName)
     }
   }
 
-  private parseRegularTypeAlias(typeAlias: TypeAliasDeclaration): void {
-    const typeName = typeAlias.getName()
-
+  private parseRegularTypeAlias(typeAlias: TypeAliasDeclaration, typeName: string): void {
     const typeNode = typeAlias.getTypeNode()
     const typeboxTypeNode = typeNode ? getTypeBoxType(typeNode) : makeTypeCall('Any')
     const typeboxType = this.printer.printNode(
@@ -38,8 +36,7 @@ export class TypeAliasParser extends BaseParser {
     addStaticTypeAlias(this.newSourceFile, typeName, this.newSourceFile.compilerNode, this.printer)
   }
 
-  private parseGenericTypeAlias(typeAlias: TypeAliasDeclaration): void {
-    const typeName = typeAlias.getName()
+  private parseGenericTypeAlias(typeAlias: TypeAliasDeclaration, typeName: string): void {
     const typeParameters = typeAlias.getTypeParameters()
 
     // Generate TypeBox function definition
