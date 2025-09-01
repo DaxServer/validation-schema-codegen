@@ -1,11 +1,35 @@
 {
   "name": "@daxserver/validation-schema-codegen",
-  "version": "0.1.0",
-  "description": "Codegen for validation schemas",
-  "private": true,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "version": "dev",
+  "description": "Code generator for validation schemas for Typebox",
+  "keywords": [
+    "typebox",
+    "codegenerator",
+    "validation"
+  ],
+  "author": {
+    "name": "Srihari Thalla",
+    "email": "daxserver@icloud.com"
+  },
   "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "latest"
+  },
   "dependencies": {
     "graphology": "^0.26.0",
     "graphology-dag": "^0.4.1",
@@ -29,15 +53,17 @@
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
     "ts-morph": "^26.0.0",
-    "typescript-eslint": "^8.41.0",
-    "wikibase-sdk": "^10.2.3"
+    "tsc-alias": "^1.8.16",
+    "typescript-eslint": "^8.41.0"
   },
   "peerDependencies": {
     "typescript": "~5.9.2"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format": "prettier --cache --write .",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prepublishOnly": "bun run build",
+    "typecheck": "tsc --noEmit"
   }
 }
