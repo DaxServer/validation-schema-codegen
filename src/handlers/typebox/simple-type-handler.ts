@@ -1,6 +1,6 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { isAnySyntaxKind } from '@daxserver/validation-schema-codegen/utils/node-type-utils'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, SyntaxKind, ts } from 'ts-morph'
 
 export const TypeBoxType = 'Type'
@@ -34,6 +34,6 @@ export class SimpleTypeHandler extends BaseTypeHandler {
   }
 
   handle(node: Node): ts.Expression {
-    return makeTypeCall(kindToTypeBox[node.getKind() as SimpleKind])
+    return GenericTypeUtils.makeTypeCall(kindToTypeBox[node.getKind() as SimpleKind])
   }
 }

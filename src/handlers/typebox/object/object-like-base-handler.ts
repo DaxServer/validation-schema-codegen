@@ -1,11 +1,15 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { isValidIdentifier } from '@daxserver/validation-schema-codegen/utils/identifier-utils'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, PropertySignature, ts } from 'ts-morph'
 
 export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
-  protected processProperties(properties: PropertySignature[]): ts.PropertyAssignment[] {
+  protected processProperties(
+    properties: PropertySignature[],
+    context?: TypeBoxContext,
+  ): ts.PropertyAssignment[] {
     const propertyAssignments: ts.PropertyAssignment[] = []
 
     for (const prop of properties) {
@@ -13,7 +17,7 @@ export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
       if (!propTypeNode) continue
 
       const outputNameNode = this.extractPropertyNameInfo(prop)
-      const valueExpr = getTypeBoxType(propTypeNode)
+      const valueExpr = getTypeBoxType(propTypeNode, context)
       const isAlreadyOptional =
         ts.isCallExpression(valueExpr) &&
         ts.isPropertyAccessExpression(valueExpr.expression) &&
@@ -21,7 +25,7 @@ export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
 
       const maybeOptional =
         prop.hasQuestionToken() && !isAlreadyOptional
-          ? makeTypeCall('Optional', [valueExpr])
+          ? GenericTypeUtils.makeTypeCall('Optional', [valueExpr])
           : valueExpr
 
       propertyAssignments.push(ts.factory.createPropertyAssignment(outputNameNode, maybeOptional))
@@ -33,7 +37,7 @@ export abstract class ObjectLikeBaseHandler extends BaseTypeHandler {
   protected createObjectType(properties: ts.PropertyAssignment[]): ts.Expression {
     const objectLiteral = ts.factory.createObjectLiteralExpression(properties, true)
 
-    return makeTypeCall('Object', [objectLiteral])
+    return GenericTypeUtils.makeTypeCall('Object', [objectLiteral])
   }
 
   private extractPropertyNameInfo(prop: PropertySignature): ts.PropertyName {

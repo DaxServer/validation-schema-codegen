@@ -45,10 +45,15 @@ const createOutputFile = (hasGenericInterfaces: boolean) => {
   return newSourceFile
 }
 
-const printSortedNodes = (sortedTraversedNodes: TraversedNode[], newSourceFile: SourceFile) => {
+const printSortedNodes = (
+  sortedTraversedNodes: TraversedNode[],
+  newSourceFile: SourceFile,
+  dependencyTraversal: DependencyTraversal,
+) => {
   const printer = new TypeBoxPrinter({
     newSourceFile,
     printer: ts.createPrinter(),
+    nodeGraph: dependencyTraversal.getNodeGraph(),
   })
 
   // Process nodes in topological order
@@ -94,7 +99,7 @@ export const generateCode = (options: InputOptions): string => {
   const newSourceFile = createOutputFile(hasGenericInterfaces)
 
   // Print sorted nodes to output
-  const result = printSortedNodes(traversedNodes, newSourceFile)
+  const result = printSortedNodes(traversedNodes, newSourceFile, dependencyTraversal)
 
   return result
 }

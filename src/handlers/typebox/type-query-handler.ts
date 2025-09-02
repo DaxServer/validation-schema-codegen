@@ -1,5 +1,5 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { Node, ts, TypeQueryNode } from 'ts-morph'
 
 export class TypeQueryHandler extends BaseTypeHandler {
@@ -24,6 +24,6 @@ export class TypeQueryHandler extends BaseTypeHandler {
       return ts.factory.createIdentifier(fullName.replace('.', '_'))
     }
 
-    return makeTypeCall('Any')
+    return GenericTypeUtils.makeTypeCall('Any')
   }
 }

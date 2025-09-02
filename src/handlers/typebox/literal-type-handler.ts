@@ -1,5 +1,5 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { LiteralTypeNode, Node, SyntaxKind, ts } from 'ts-morph'
 
 export class LiteralTypeHandler extends BaseTypeHandler {
@@ -12,19 +12,21 @@ export class LiteralTypeHandler extends BaseTypeHandler {
 
     switch (literal.getKind()) {
       case SyntaxKind.StringLiteral:
-        return makeTypeCall('Literal', [
+        return GenericTypeUtils.makeTypeCall('Literal', [
           ts.factory.createStringLiteral(literal.getText().slice(1, -1)),
         ])
       case SyntaxKind.NumericLiteral:
-        return makeTypeCall('Literal', [ts.factory.createNumericLiteral(literal.getText())])
+        return GenericTypeUtils.makeTypeCall('Literal', [
+          ts.factory.createNumericLiteral(literal.getText()),
+        ])
       case SyntaxKind.TrueKeyword:
-        return makeTypeCall('Literal', [ts.factory.createTrue()])
+        return GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createTrue()])
       case SyntaxKind.FalseKeyword:
-        return makeTypeCall('Literal', [ts.factory.createFalse()])
+        return GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createFalse()])
       case SyntaxKind.NullKeyword:
-        return makeTypeCall('Null')
+        return GenericTypeUtils.makeTypeCall('Null')
       default:
-        return makeTypeCall('Any')
+        return GenericTypeUtils.makeTypeCall('Any')
     }
   }
 }

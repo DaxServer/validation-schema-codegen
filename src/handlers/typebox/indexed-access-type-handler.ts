@@ -1,6 +1,7 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { IndexedAccessTypeNode, Node, ts, TypeNode } from 'ts-morph'
 
 export class IndexedAccessTypeHandler extends BaseTypeHandler {
@@ -8,7 +9,7 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
     return node.isKind(ts.SyntaxKind.IndexedAccessType)
   }
 
-  handle(node: IndexedAccessTypeNode): ts.Expression {
+  handle(node: IndexedAccessTypeNode, context: TypeBoxContext): ts.Expression {
     const objectType = node.getObjectTypeNode()
     const indexType = node.getIndexTypeNode()
 
@@ -17,18 +18,19 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
       objectType.isKind(ts.SyntaxKind.TypeQuery) &&
       indexType.isKind(ts.SyntaxKind.NumberKeyword)
     ) {
-      return this.handleTypeofArrayAccess(objectType, node)
+      return this.handleTypeofArrayAccess(objectType, node, context)
     }
 
-    const typeboxObjectType = getTypeBoxType(objectType)
-    const typeboxIndexType = getTypeBoxType(indexType)
+    const typeboxObjectType = getTypeBoxType(objectType, context)
+    const typeboxIndexType = getTypeBoxType(indexType, context)
 
-    return makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
+    return GenericTypeUtils.makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
   }
 
   private handleTypeofArrayAccess(
     typeQuery: Node,
     indexedAccessType: IndexedAccessTypeNode,
+    context: TypeBoxContext,
   ): ts.Expression {
     const typeQueryNode = typeQuery.asKindOrThrow(ts.SyntaxKind.TypeQuery)
     const exprName = typeQueryNode.getExprName()
@@ -54,10 +56,10 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
     }
 
     // Fallback to default Index behavior
-    const typeboxObjectType = getTypeBoxType(typeQuery)
-    const typeboxIndexType = getTypeBoxType(indexedAccessType.getIndexTypeNode())
+    const typeboxObjectType = getTypeBoxType(typeQuery, context)
+    const typeboxIndexType = getTypeBoxType(indexedAccessType.getIndexTypeNode(), context)
 
-    return makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
+    return GenericTypeUtils.makeTypeCall('Index', [typeboxObjectType, typeboxIndexType])
   }
 
   private extractTupleUnion(typeNode: TypeNode | undefined): ts.Expression | null {
@@ -86,14 +88,18 @@ export class IndexedAccessTypeHandler extends BaseTypeHandler {
           if (literal.isKind(ts.SyntaxKind.StringLiteral)) {
             const stringLiteral = literal.asKindOrThrow(ts.SyntaxKind.StringLiteral)
             const value = stringLiteral.getLiteralValue()
-            literalTypes.push(makeTypeCall('Literal', [ts.factory.createStringLiteral(value)]))
+            literalTypes.push(
+              GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createStringLiteral(value)]),
+            )
           }
         }
       }
 
       // Return union of literal types if we found any
       if (literalTypes.length > 0) {
-        return makeTypeCall('Union', [ts.factory.createArrayLiteralExpression(literalTypes)])
+        return GenericTypeUtils.makeTypeCall('Union', [
+          ts.factory.createArrayLiteralExpression(literalTypes),
+        ])
       }
     }
 

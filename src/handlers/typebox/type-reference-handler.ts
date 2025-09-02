@@ -1,7 +1,8 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { Node, ts, TypeReferenceNode } from 'ts-morph'
 
 export class TypeReferenceHandler extends BaseTypeHandler {
@@ -9,7 +10,7 @@ export class TypeReferenceHandler extends BaseTypeHandler {
     return Node.isTypeReference(node)
   }
 
-  handle(node: TypeReferenceNode): ts.Expression {
+  handle(node: TypeReferenceNode, context: TypeBoxContext): ts.Expression {
     const referencedType = node.getTypeName()
     const typeArguments = node.getTypeArguments()
 
@@ -21,7 +22,7 @@ export class TypeReferenceHandler extends BaseTypeHandler {
 
       // If there are type arguments, create a function call
       if (typeArguments.length > 0) {
-        const typeBoxArgs = typeArguments.map((arg) => getTypeBoxType(arg))
+        const typeBoxArgs = typeArguments.map((arg) => getTypeBoxType(arg, context))
 
         return ts.factory.createCallExpression(
           ts.factory.createIdentifier(typeName),
@@ -34,6 +35,6 @@ export class TypeReferenceHandler extends BaseTypeHandler {
       return ts.factory.createIdentifier(typeName)
     }
 
-    return makeTypeCall('Any')
+    return GenericTypeUtils.makeTypeCall('Any')
   }
 }

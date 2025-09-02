@@ -11,9 +11,10 @@ export class GenericTypeUtils {
     newSourceFile: SourceFile,
     name: string,
     initializer: string,
+    isExported: boolean = true,
   ): void {
     newSourceFile.addVariableStatement({
-      isExported: true,
+      isExported,
       declarationKind: VariableDeclarationKind.Const,
       declarations: [
         {
@@ -145,5 +146,36 @@ export class GenericTypeUtils {
       ),
       type: staticType,
     })
+  }
+
+  static addStaticTypeAlias = (
+    newSourceFile: SourceFile,
+    name: string,
+    compilerNode: ts.SourceFile,
+    printer: ts.Printer,
+  ) => {
+    const staticTypeNode = ts.factory.createTypeReferenceNode(
+      ts.factory.createIdentifier('Static'),
+      [ts.factory.createTypeQueryNode(ts.factory.createIdentifier(name))],
+    )
+
+    const staticType = printer.printNode(ts.EmitHint.Unspecified, staticTypeNode, compilerNode)
+
+    newSourceFile.addTypeAlias({
+      isExported: true,
+      name,
+      type: staticType,
+    })
+  }
+
+  static makeTypeCall(method: string, args: ts.Expression[] = []) {
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier('Type'),
+        ts.factory.createIdentifier(method),
+      ),
+      undefined,
+      args,
+    )
   }
 }

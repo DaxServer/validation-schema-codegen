@@ -1,6 +1,6 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
 import { TemplateLiteralTypeProcessor } from '@daxserver/validation-schema-codegen/handlers/typebox/template-literal-type-processor'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { Node, TemplateLiteralTypeNode, ts } from 'ts-morph'
 
 export class TemplateLiteralTypeHandler extends BaseTypeHandler {
@@ -16,7 +16,9 @@ export class TemplateLiteralTypeHandler extends BaseTypeHandler {
     const headCompilerNode = head.compilerNode as ts.TemplateHead
     const headText = headCompilerNode.text
     if (headText) {
-      parts.push(makeTypeCall('Literal', [ts.factory.createStringLiteral(headText)]))
+      parts.push(
+        GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createStringLiteral(headText)]),
+      )
     }
 
     // Process template spans (substitutions + following literal parts)
@@ -32,16 +34,20 @@ export class TemplateLiteralTypeHandler extends BaseTypeHandler {
       // Add the literal part after the substitution
       const literalText = compilerNode.literal.text
       if (literalText) {
-        parts.push(makeTypeCall('Literal', [ts.factory.createStringLiteral(literalText)]))
+        parts.push(
+          GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createStringLiteral(literalText)]),
+        )
       }
     }
 
     // If no parts were found, fallback to a simple string
     if (parts.length === 0) {
-      return makeTypeCall('String')
+      return GenericTypeUtils.makeTypeCall('String')
     }
 
     // Return TemplateLiteral with array of parts
-    return makeTypeCall('TemplateLiteral', [ts.factory.createArrayLiteralExpression(parts)])
+    return GenericTypeUtils.makeTypeCall('TemplateLiteral', [
+      ts.factory.createArrayLiteralExpression(parts),
+    ])
   }
 }

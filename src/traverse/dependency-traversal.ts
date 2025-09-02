@@ -68,4 +68,8 @@ export class DependencyTraversal {
   async visualizeGraph(options: VisualizationOptions = {}): Promise<string> {
     return GraphVisualizer.generateVisualization(this.nodeGraph, options)
   }
+
+  getNodeGraph(): NodeGraph {
+    return this.nodeGraph
+  }
 }

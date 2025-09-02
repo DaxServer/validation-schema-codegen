@@ -1,4 +1,4 @@
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { ts } from 'ts-morph'
 
 /**
@@ -11,15 +11,15 @@ export class TemplateLiteralTypeProcessor {
   static processType(node: ts.TypeNode): ts.Expression {
     switch (node.kind) {
       case ts.SyntaxKind.StringKeyword:
-        return makeTypeCall('String')
+        return GenericTypeUtils.makeTypeCall('String')
       case ts.SyntaxKind.NumberKeyword:
-        return makeTypeCall('Number')
+        return GenericTypeUtils.makeTypeCall('Number')
       case ts.SyntaxKind.LiteralType:
         return this.processLiteralType(node as ts.LiteralTypeNode)
       case ts.SyntaxKind.UnionType:
         return this.processUnionType(node as ts.UnionTypeNode)
       default:
-        return makeTypeCall('String')
+        return GenericTypeUtils.makeTypeCall('String')
     }
   }
 
@@ -28,15 +28,19 @@ export class TemplateLiteralTypeProcessor {
    */
   private static processLiteralType(literalType: ts.LiteralTypeNode): ts.Expression {
     if (ts.isStringLiteral(literalType.literal)) {
-      return makeTypeCall('Literal', [ts.factory.createStringLiteral(literalType.literal.text)])
+      return GenericTypeUtils.makeTypeCall('Literal', [
+        ts.factory.createStringLiteral(literalType.literal.text),
+      ])
     }
 
     if (ts.isNumericLiteral(literalType.literal)) {
-      return makeTypeCall('Literal', [ts.factory.createNumericLiteral(literalType.literal.text)])
+      return GenericTypeUtils.makeTypeCall('Literal', [
+        ts.factory.createNumericLiteral(literalType.literal.text),
+      ])
     }
 
     // Fallback for other literals (boolean, etc.)
-    return makeTypeCall('String')
+    return GenericTypeUtils.makeTypeCall('String')
   }
 
   /**
@@ -47,12 +51,16 @@ export class TemplateLiteralTypeProcessor {
       if (t.kind === ts.SyntaxKind.LiteralType) {
         const literalType = t as ts.LiteralTypeNode
         if (ts.isStringLiteral(literalType.literal)) {
-          return makeTypeCall('Literal', [ts.factory.createStringLiteral(literalType.literal.text)])
+          return GenericTypeUtils.makeTypeCall('Literal', [
+            ts.factory.createStringLiteral(literalType.literal.text),
+          ])
         }
       }
-      return makeTypeCall('String') // fallback
+      return GenericTypeUtils.makeTypeCall('String') // fallback
     })
 
-    return makeTypeCall('Union', [ts.factory.createArrayLiteralExpression(unionParts)])
+    return GenericTypeUtils.makeTypeCall('Union', [
+      ts.factory.createArrayLiteralExpression(unionParts),
+    ])
   }
 }
