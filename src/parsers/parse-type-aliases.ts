@@ -1,8 +1,7 @@
 import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
-import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
 import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+
 import { ts, TypeAliasDeclaration } from 'ts-morph'
 
 export class TypeAliasParser extends BaseParser {
@@ -24,7 +23,9 @@ export class TypeAliasParser extends BaseParser {
 
   private parseRegularTypeAlias(typeAlias: TypeAliasDeclaration, typeName: string): void {
     const typeNode = typeAlias.getTypeNode()
-    const typeboxTypeNode = typeNode ? getTypeBoxType(typeNode) : makeTypeCall('Any')
+    const typeboxTypeNode = typeNode
+      ? getTypeBoxType(typeNode, { nodeGraph: this.nodeGraph })
+      : GenericTypeUtils.makeTypeCall('Any')
     const typeboxType = this.printer.printNode(
       ts.EmitHint.Expression,
       typeboxTypeNode,
@@ -32,8 +33,12 @@ export class TypeAliasParser extends BaseParser {
     )
 
     GenericTypeUtils.addTypeBoxVariableStatement(this.newSourceFile, typeName, typeboxType)
-
-    addStaticTypeAlias(this.newSourceFile, typeName, this.newSourceFile.compilerNode, this.printer)
+    GenericTypeUtils.addStaticTypeAlias(
+      this.newSourceFile,
+      typeName,
+      this.newSourceFile.compilerNode,
+      this.printer,
+    )
   }
 
   private parseGenericTypeAlias(typeAlias: TypeAliasDeclaration, typeName: string): void {
@@ -41,7 +46,9 @@ export class TypeAliasParser extends BaseParser {
 
     // Generate TypeBox function definition
     const typeNode = typeAlias.getTypeNode()
-    const typeboxTypeNode = typeNode ? getTypeBoxType(typeNode) : makeTypeCall('Any')
+    const typeboxTypeNode = typeNode
+      ? getTypeBoxType(typeNode, { nodeGraph: this.nodeGraph })
+      : GenericTypeUtils.makeTypeCall('Any')
 
     // Create the function expression using shared utilities
     const functionExpression = GenericTypeUtils.createGenericArrowFunction(

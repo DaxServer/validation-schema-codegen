@@ -1,4 +1,5 @@
 import { ObjectLikeBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-like-base-handler'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { Node, ts, TypeLiteralNode } from 'ts-morph'
 
 export class ObjectTypeHandler extends ObjectLikeBaseHandler {
@@ -6,7 +7,8 @@ export class ObjectTypeHandler extends ObjectLikeBaseHandler {
     return Node.isTypeLiteral(node)
   }
 
-  handle(node: TypeLiteralNode): ts.Expression {
-    return this.createObjectType(this.processProperties(node.getProperties()))
+  handle(node: TypeLiteralNode, context: TypeBoxContext): ts.Expression {
+    const properties = node.getProperties()
+    return this.createObjectType(this.processProperties(properties, context))
   }
 }

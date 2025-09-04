@@ -1,4 +1,5 @@
 import { CollectionBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/collection/collection-base-handler'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { Node, ts, TupleTypeNode } from 'ts-morph'
 
 export class TupleTypeHandler extends CollectionBaseHandler {
@@ -6,7 +7,8 @@ export class TupleTypeHandler extends CollectionBaseHandler {
     return Node.isTupleTypeNode(node)
   }
 
-  handle(node: TupleTypeNode): ts.Expression {
-    return this.processTypeCollection(node.getElements(), 'Tuple')
+  handle(node: TupleTypeNode, context: TypeBoxContext): ts.Expression {
+    const elements = node.getElements()
+    return this.processTypeCollection(elements, 'Tuple', context)
   }
 }

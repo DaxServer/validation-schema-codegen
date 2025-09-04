@@ -1,5 +1,5 @@
 import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
-import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { EnumDeclaration, VariableDeclarationKind } from 'ts-morph'
 
 export class EnumParser extends BaseParser {
@@ -30,7 +30,7 @@ export class EnumParser extends BaseParser {
       ],
     })
 
-    addStaticTypeAlias(
+    GenericTypeUtils.addStaticTypeAlias(
       this.newSourceFile,
       schemaName,
       this.newSourceFile.compilerNode,

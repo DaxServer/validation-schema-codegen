@@ -1,5 +1,6 @@
 import { ObjectLikeBaseHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/object/object-like-base-handler'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
+import type { TypeBoxContext } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { HeritageClause, InterfaceDeclaration, Node, ts } from 'ts-morph'
 
 export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
@@ -7,9 +8,11 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     return Node.isInterfaceDeclaration(node)
   }
 
-  handle(node: InterfaceDeclaration): ts.Expression {
+  handle(node: InterfaceDeclaration, context: TypeBoxContext): ts.Expression {
     const heritageClauses = node.getHeritageClauses()
-    const baseObjectType = this.createObjectType(this.processProperties(node.getProperties()))
+    const baseObjectType = this.createObjectType(
+      this.processProperties(node.getProperties(), context),
+    )
 
     if (heritageClauses.length === 0) return baseObjectType
 
@@ -20,7 +23,7 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     const allTypes = [...extendedTypes, baseObjectType]
     const expression = ts.factory.createArrayLiteralExpression(allTypes, true)
 
-    return makeTypeCall('Composite', [expression])
+    return GenericTypeUtils.makeTypeCall('Composite', [expression])
   }
 
   private parseGenericTypeCall(typeText: string): ts.Expression | null {
@@ -42,11 +45,11 @@ export class InterfaceTypeHandler extends ObjectLikeBaseHandler {
     // Convert common TypeScript types to TypeBox calls
     switch (typeArg) {
       case 'number':
-        return makeTypeCall('Number')
+        return GenericTypeUtils.makeTypeCall('Number')
       case 'string':
-        return makeTypeCall('String')
+        return GenericTypeUtils.makeTypeCall('String')
       case 'boolean':
-        return makeTypeCall('Boolean')
+        return GenericTypeUtils.makeTypeCall('Boolean')
       default:
         // For other types, assume it's a reference
         return ts.factory.createIdentifier(typeArg)

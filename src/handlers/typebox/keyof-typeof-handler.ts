@@ -1,5 +1,5 @@
 import { BaseTypeHandler } from '@daxserver/validation-schema-codegen/handlers/typebox/base-type-handler'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { Node, ts, TypeOperatorTypeNode, VariableDeclaration } from 'ts-morph'
 
 export class KeyOfTypeofHandler extends BaseTypeHandler {
@@ -13,13 +13,13 @@ export class KeyOfTypeofHandler extends BaseTypeHandler {
 
   handle(node: TypeOperatorTypeNode): ts.Expression {
     const typeQuery = node.getTypeNode()
-    if (!Node.isTypeQuery(typeQuery)) return makeTypeCall('Any')
+    if (!Node.isTypeQuery(typeQuery)) return GenericTypeUtils.makeTypeCall('Any')
 
     const exprName = typeQuery.getExprName()
-    if (!Node.isIdentifier(exprName)) return makeTypeCall('Any')
+    if (!Node.isIdentifier(exprName)) return GenericTypeUtils.makeTypeCall('Any')
 
     const keys = this.getObjectKeys(exprName)
-    return keys.length > 0 ? this.createUnion(keys) : makeTypeCall('Any')
+    return keys.length > 0 ? this.createUnion(keys) : GenericTypeUtils.makeTypeCall('Any')
   }
 
   private getObjectKeys(node: Node): string[] {
@@ -80,11 +80,11 @@ export class KeyOfTypeofHandler extends BaseTypeHandler {
           ? ts.factory.createNumericLiteral(num)
           : ts.factory.createStringLiteral(key)
 
-      return makeTypeCall('Literal', [literal])
+      return GenericTypeUtils.makeTypeCall('Literal', [literal])
     })
 
     return literals.length === 1
       ? literals[0]!
-      : makeTypeCall('Union', [ts.factory.createArrayLiteralExpression(literals)])
+      : GenericTypeUtils.makeTypeCall('Union', [ts.factory.createArrayLiteralExpression(literals)])
   }
 }

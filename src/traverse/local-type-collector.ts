@@ -1,6 +1,82 @@
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
+import type { TraversedNode } from '@daxserver/validation-schema-codegen/traverse/types'
 import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
-import { SourceFile } from 'ts-morph'
+import { Node, SourceFile } from 'ts-morph'
+
+const CHUNK_SIZE = 20
+
+const shouldChunkUnion = (typeNode: Node): boolean => {
+  if (!Node.isUnionTypeNode(typeNode)) {
+    return false
+  }
+  return typeNode.getTypeNodes().length >= CHUNK_SIZE
+}
+
+const createChunkNodes = (
+  node: Node,
+  parentTypeName: string,
+  nodeGraph: NodeGraph,
+  maincodeNodeIds: Set<string>,
+  requiredNodeIds: Set<string>,
+  sourceFile: SourceFile,
+): string[] => {
+  if (!Node.isUnionTypeNode(node)) {
+    return []
+  }
+
+  const typeNodes = node.getTypeNodes()
+  const chunks: Node[][] = []
+
+  // Create chunks of 20 items each
+  for (let i = 0; i < typeNodes.length; i += CHUNK_SIZE) {
+    chunks.push(typeNodes.slice(i, i + CHUNK_SIZE))
+  }
+
+  const chunkReferences: string[] = []
+
+  // Create chunk nodes
+  for (let i = 0; i < chunks.length; i++) {
+    const chunkName = `${parentTypeName}_Chunk${i + 1}`
+    const chunkQualifiedName = resolverStore.generateQualifiedName(chunkName, sourceFile)
+
+    chunkReferences.push(chunkQualifiedName)
+    maincodeNodeIds.add(chunkQualifiedName)
+    requiredNodeIds.add(chunkQualifiedName)
+
+    // Create a new union node with only the chunk's type nodes
+    const chunkTypeNodes = chunks[i]!
+
+    // Create a synthetic union node for this chunk
+    const project = node.getProject()
+    const tempSourceFile = project.createSourceFile(
+      `__temp_chunk_${i}.ts`,
+      `type TempChunk = ${chunkTypeNodes.map((node) => node.getText()).join(' | ')}`,
+    )
+    const tempTypeAlias = tempSourceFile.getTypeAliases()[0]!
+    const chunkTypeNode = tempTypeAlias.getTypeNode()!
+
+    const chunkTraversedNode: TraversedNode = {
+      node: chunkTypeNode, // Use the chunk-specific union node
+      type: 'chunk',
+      originalName: chunkName,
+      qualifiedName: chunkQualifiedName,
+      isImported: false,
+      isMainCode: true,
+      isChunk: true,
+      chunkReferences: [], // Chunk nodes don't need references to other chunks
+    }
+
+    nodeGraph.addTypeNode(chunkQualifiedName, chunkTraversedNode)
+
+    // Add to ResolverStore
+    resolverStore.addTypeMapping({
+      originalName: chunkName,
+      sourceFile,
+    })
+  }
+
+  return chunkReferences
+}
 
 export const addLocalTypes = (
   sourceFile: SourceFile,
@@ -42,14 +118,40 @@ export const addLocalTypes = (
     const qualifiedName = resolverStore.generateQualifiedName(typeName, typeAlias.getSourceFile())
     maincodeNodeIds.add(qualifiedName)
     requiredNodeIds.add(qualifiedName)
-    nodeGraph.addTypeNode(qualifiedName, {
-      node: typeAlias,
-      type: 'typeAlias',
-      originalName: typeName,
-      qualifiedName,
-      isImported: false,
-      isMainCode: true,
-    })
+
+    // Check if this type alias contains a large union that needs chunking
+    const typeNode = typeAlias.getTypeNode()
+    if (typeNode && shouldChunkUnion(typeNode)) {
+      // Create chunk nodes for large union
+      const chunkReferences = createChunkNodes(
+        typeNode,
+        typeName,
+        nodeGraph,
+        maincodeNodeIds,
+        requiredNodeIds,
+        sourceFile,
+      )
+
+      // Add the main type as a regular type alias that will be handled by chunk parser
+      nodeGraph.addTypeNode(qualifiedName, {
+        node: typeAlias,
+        type: 'typeAlias',
+        originalName: typeName,
+        qualifiedName,
+        isImported: false,
+        isMainCode: true,
+        chunkReferences: chunkReferences,
+      })
+    } else {
+      nodeGraph.addTypeNode(qualifiedName, {
+        node: typeAlias,
+        type: 'typeAlias',
+        originalName: typeName,
+        qualifiedName,
+        isImported: false,
+        isMainCode: true,
+      })
+    }
 
     // Add to ResolverStore during traversal
     resolverStore.addTypeMapping({

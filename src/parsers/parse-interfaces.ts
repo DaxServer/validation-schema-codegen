@@ -1,5 +1,4 @@
 import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
-import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
 import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
 import { InterfaceDeclaration, ts } from 'ts-morph'
@@ -23,7 +22,7 @@ export class InterfaceParser extends BaseParser {
 
   private parseRegularInterface(interfaceDecl: InterfaceDeclaration, interfaceName: string): void {
     // Generate TypeBox type definition
-    const typeboxTypeNode = getTypeBoxType(interfaceDecl)
+    const typeboxTypeNode = getTypeBoxType(interfaceDecl, { nodeGraph: this.nodeGraph })
     const typeboxType = this.printer.printNode(
       ts.EmitHint.Expression,
       typeboxTypeNode,
@@ -31,8 +30,7 @@ export class InterfaceParser extends BaseParser {
     )
 
     GenericTypeUtils.addTypeBoxVariableStatement(this.newSourceFile, interfaceName, typeboxType)
-
-    addStaticTypeAlias(
+    GenericTypeUtils.addStaticTypeAlias(
       this.newSourceFile,
       interfaceName,
       this.newSourceFile.compilerNode,
@@ -44,7 +42,7 @@ export class InterfaceParser extends BaseParser {
     const typeParameters = interfaceDecl.getTypeParameters()
 
     // Generate TypeBox function definition using the same flow as type aliases
-    const typeboxTypeNode = getTypeBoxType(interfaceDecl)
+    const typeboxTypeNode = getTypeBoxType(interfaceDecl, { nodeGraph: this.nodeGraph })
 
     // Create the function expression using shared utilities (mirrors type-alias flow)
     const functionExpression = GenericTypeUtils.createGenericArrowFunction(

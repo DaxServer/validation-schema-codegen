@@ -1,7 +1,6 @@
 import { BaseParser } from '@daxserver/validation-schema-codegen/parsers/base-parser'
-import { addStaticTypeAlias } from '@daxserver/validation-schema-codegen/utils/add-static-type-alias'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { getTypeBoxType } from '@daxserver/validation-schema-codegen/utils/typebox-call'
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
 import { FunctionDeclaration, ts, VariableDeclarationKind } from 'ts-morph'
 
 export class FunctionDeclarationParser extends BaseParser {
@@ -21,7 +20,9 @@ export class FunctionDeclarationParser extends BaseParser {
     // Convert parameters to TypeBox types
     const parameterTypes = parameters.map((param) => {
       const paramTypeNode = param.getTypeNode()
-      const paramType = paramTypeNode ? getTypeBoxType(paramTypeNode) : makeTypeCall('Any')
+      const paramType = paramTypeNode
+        ? getTypeBoxType(paramTypeNode, { nodeGraph: this.nodeGraph })
+        : GenericTypeUtils.makeTypeCall('Any')
 
       // Check if parameter is optional or required
       if (!param.hasQuestionToken()) {
@@ -40,7 +41,9 @@ export class FunctionDeclarationParser extends BaseParser {
     })
 
     // Convert return type to TypeBox type
-    const returnTypeBox = returnType ? getTypeBoxType(returnType) : makeTypeCall('Any')
+    const returnTypeBox = returnType
+      ? getTypeBoxType(returnType, { nodeGraph: this.nodeGraph })
+      : GenericTypeUtils.makeTypeCall('Any')
 
     // Create TypeBox Function call with parameters array and return type
     const typeboxExpression = ts.factory.createCallExpression(
@@ -69,7 +72,7 @@ export class FunctionDeclarationParser extends BaseParser {
       ],
     })
 
-    addStaticTypeAlias(
+    GenericTypeUtils.addStaticTypeAlias(
       this.newSourceFile,
       functionName,
       this.newSourceFile.compilerNode,

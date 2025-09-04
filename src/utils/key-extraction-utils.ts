@@ -1,4 +1,4 @@
-import { makeTypeCall } from '@daxserver/validation-schema-codegen/utils/typebox-codegen-utils'
+import { GenericTypeUtils } from '@daxserver/validation-schema-codegen/utils/generic-type-utils'
 import { Node, ts } from 'ts-morph'
 
 /**
@@ -33,12 +33,14 @@ export const extractStringKeys = (keysType: Node): string[] => {
  */
 export const createTypeBoxKeys = (keys: string[]): ts.Expression => {
   if (keys.length === 1) {
-    return makeTypeCall('Literal', [ts.factory.createStringLiteral(keys[0]!)])
+    return GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createStringLiteral(keys[0]!)])
   }
 
-  return makeTypeCall('Union', [
+  return GenericTypeUtils.makeTypeCall('Union', [
     ts.factory.createArrayLiteralExpression(
-      keys.map((k) => makeTypeCall('Literal', [ts.factory.createStringLiteral(k)])),
+      keys.map((k) =>
+        GenericTypeUtils.makeTypeCall('Literal', [ts.factory.createStringLiteral(k)]),
+      ),
     ),
   ])
 }
