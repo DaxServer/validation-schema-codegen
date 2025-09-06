@@ -1,3 +1,4 @@
+import { markChunksAsRequired } from '@daxserver/validation-schema-codegen/traverse/chunk-large-types'
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
 import { TypeReferenceExtractor } from '@daxserver/validation-schema-codegen/traverse/type-reference-extractor'
 import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
@@ -50,6 +51,8 @@ export const extractDependencies = (nodeGraph: NodeGraph, requiredNodeIds: Set<s
         if (!requiredNodeIds.has(referencedType)) {
           requiredNodeIds.add(referencedType)
           nodesToProcess.add(referencedType)
+          // Mark chunks as required if this type has chunks
+          markChunksAsRequired(referencedType, nodeGraph, requiredNodeIds)
         }
         nodeGraph.addDependency(referencedType, currentNodeId)
       }

@@ -1,3 +1,7 @@
+import {
+  createChunkNodes,
+  shouldChunkUnion,
+} from '@daxserver/validation-schema-codegen/traverse/chunk-large-types'
 import { FileGraph } from '@daxserver/validation-schema-codegen/traverse/file-graph'
 import { NodeGraph } from '@daxserver/validation-schema-codegen/traverse/node-graph'
 import { resolverStore } from '@daxserver/validation-schema-codegen/utils/resolver-store'
@@ -7,6 +11,8 @@ export class ImportCollector {
   constructor(
     private fileGraph: FileGraph,
     private nodeGraph: NodeGraph,
+    private maincodeNodeIds: Set<string>,
+    private requiredNodeIds: Set<string>,
   ) {}
 
   collectFromImports(importDeclarations: ImportDeclaration[]): void {
@@ -45,15 +51,48 @@ export class ImportCollector {
           typeAlias.getSourceFile(),
         )
         const aliasName = aliasMap.get(typeName)
-        this.nodeGraph.addTypeNode(qualifiedName, {
-          node: typeAlias,
-          type: 'typeAlias',
-          originalName: typeName,
-          qualifiedName,
-          isImported: true,
-          isMainCode: false,
-          aliasName,
-        })
+
+        // Check if this type alias needs chunking
+        const typeNode = typeAlias.getTypeNode()
+        if (typeNode && shouldChunkUnion(typeNode)) {
+          // Create chunk nodes for large union
+          const chunkReferences = createChunkNodes(
+            typeNode,
+            typeName,
+            this.nodeGraph,
+            this.maincodeNodeIds,
+            this.requiredNodeIds,
+            typeAlias.getSourceFile(),
+            false, // Don't add chunks to required set initially
+          )
+
+          // Add the main type as an imported type alias with chunk references
+          this.nodeGraph.addTypeNode(qualifiedName, {
+            node: typeAlias,
+            type: 'typeAlias',
+            originalName: typeName,
+            qualifiedName,
+            isImported: true,
+            isMainCode: false,
+            aliasName,
+            chunkReferences: chunkReferences,
+          })
+
+          // Add dependencies from chunks to parent type for topological sorting
+          for (const chunkRef of chunkReferences) {
+            this.nodeGraph.addDependency(chunkRef, qualifiedName)
+          }
+        } else {
+          this.nodeGraph.addTypeNode(qualifiedName, {
+            node: typeAlias,
+            type: 'typeAlias',
+            originalName: typeName,
+            qualifiedName,
+            isImported: true,
+            isMainCode: false,
+            aliasName,
+          })
+        }
 
         // Add to ResolverStore during traversal
         resolverStore.addTypeMapping({

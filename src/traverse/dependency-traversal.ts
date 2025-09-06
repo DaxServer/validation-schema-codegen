@@ -17,10 +17,12 @@ export class DependencyTraversal {
   private nodeGraph = new NodeGraph()
   private maincodeNodeIds = new Set<string>()
   private requiredNodeIds = new Set<string>()
-  private importCollector: ImportCollector
-  constructor() {
-    this.importCollector = new ImportCollector(this.fileGraph, this.nodeGraph)
-  }
+  private importCollector = new ImportCollector(
+    this.fileGraph,
+    this.nodeGraph,
+    this.maincodeNodeIds,
+    this.requiredNodeIds,
+  )
 
   startTraversal(sourceFile: SourceFile): TraversedNode[] {
     // Mark main source file nodes as main code
