@@ -56,6 +56,13 @@ export const createChunkNodes = (
 
   const chunkReferences: string[] = []
 
+  // scratch file for chunk nodes (once per parent)
+  const scratchSourceFile = node.getProject().createSourceFile(
+    `__chunks_${parentTypeName}_${Date.now()}.ts`,
+    '',
+    { overwrite: true },
+  )
+
   // Create chunk nodes
   for (let i = 0; i < chunks.length; i++) {
     const chunkName = `${parentTypeName}_Chunk${i + 1}`
@@ -71,14 +78,11 @@ export const createChunkNodes = (
     const chunkTypeTexts = chunks[i]!
 
     // Create a synthetic union node for this chunk
-    const project = node.getProject()
-    const tempFileName = `__temp_chunk_${parentTypeName}_${i}_${Date.now()}.ts`
-    const tempSourceFile = project.createSourceFile(
-      tempFileName,
-      `type TempChunk = ${chunkTypeTexts.join(' | ')}`,
-    )
-    const tempTypeAlias = tempSourceFile.getTypeAliases()[0]!
-    const chunkTypeNode = tempTypeAlias.getTypeNode()!
+    const chunkAlias = scratchSourceFile.addTypeAlias({
+      name: chunkName,
+      type: chunkTypeTexts.join(' | '),
+    })
+    const chunkTypeNode = chunkAlias.getTypeNode()!
 
     const chunkTraversedNode: TraversedNode = {
       node: chunkTypeNode, // Use the chunk-specific union node
